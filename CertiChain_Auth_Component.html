@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CertiChain AI — Authentication Component Class Diagram</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f7f5f0;
+    --paper: #ffffff;
+    --line: #e9e3d6;
+    --line-soft: #efe9da;
+    --ink: #14171e;
+    --muted: #7c7a72;
+    --muted-2: #3a4256;
+    --accent: #2f6f5e;
+    --accent-deep: #265449;
+    --accent-soft: rgba(47, 111, 94, 0.08);
+    --gold: #c97b3f;
+    --warn: #b06367;
+
+    /* UML class card colors */
+    --ctrl-bg: #f7f1ea;
+    --ctrl-border: #d8c4a2;
+    --ctrl-accent: #8a5a18;
+
+    --svc-bg: #eaf3ef;
+    --svc-border: #b9d4c7;
+    --svc-accent: #2f6f5e;
+
+    --repo-bg: #f3eee5;
+    --repo-border: #d6cab2;
+    --repo-accent: #8a6d2c;
+
+    --mw-bg: #eef0f7;
+    --mw-border: #c4cbe0;
+    --mw-accent: #3a4256;
+
+    --util-bg: #f4ecf7;
+    --util-border: #d6c1de;
+    --util-accent: #6c3a82;
+
+    --data-bg: #fff6e0;
+    --data-border: #e6c98a;
+    --data-accent: #8a5a18;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--cream); color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    line-height: 1.55;
+  }
+
+  body::before {
+    content: "";
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(60% 50% at 8% 6%, rgba(47, 111, 94, 0.06), transparent 70%),
+      radial-gradient(50% 40% at 92% 96%, rgba(201, 123, 63, 0.05), transparent 70%);
+  }
+
+  main { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 56px 32px 96px; }
+
+  /* Header */
+  header { display: flex; flex-direction: column; gap: 10px; padding-bottom: 28px; border-bottom: 1px solid var(--line); margin-bottom: 48px; }
+  .crumb { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); letter-spacing: 0.06em; }
+  h1 { font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 44px; line-height: 1.1; margin: 0; letter-spacing: -0.005em; }
+  .subtitle { color: var(--muted-2); font-size: 17px; max-width: 760px; margin: 4px 0 0; }
+
+  /* Legend */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 14px;
+    margin: 0 0 32px;
+    padding: 14px 18px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+  .legend-item { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted-2); }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 4px; border: 1px solid; }
+
+  /* Class cards */
+  .uml-class {
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .uml-class .head {
+    padding: 10px 14px;
+    font-size: 13px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .uml-class .body { padding: 10px 14px 14px; }
+
+  .ctrl { background: var(--ctrl-bg); border: 1px solid var(--ctrl-border); }
+  .ctrl .head { background: var(--ctrl-bg); border-bottom: 1px solid var(--ctrl-border); color: var(--ctrl-accent); }
+  .ctrl .body { color: var(--ink); }
+
+  .svc { background: var(--svc-bg); border: 1px solid var(--svc-border); }
+  .svc .head { background: var(--svc-bg); border-bottom: 1px solid var(--svc-border); color: var(--svc-accent); }
+  .svc .body { color: var(--ink); }
+
+  .repo { background: var(--repo-bg); border: 1px solid var(--repo-border); }
+  .repo .head { background: var(--repo-bg); border-bottom: 1px solid var(--repo-border); color: var(--repo-accent); }
+  .repo .body { color: var(--ink); }
+
+  .mw { background: var(--mw-bg); border: 1px solid var(--mw-border); }
+  .mw .head { background: var(--mw-bg); border-bottom: 1px solid var(--mw-border); color: var(--mw-accent); }
+  .mw .body { color: var(--ink); }
+
+  .util { background: var(--util-bg); border: 1px solid var(--util-border); }
+  .util .head { background: var(--util-bg); border-bottom: 1px solid var(--util-border); color: var(--util-accent); }
+  .util .body { color: var(--ink); }
+
+  .data { background: var(--data-bg); border: 1px solid var(--data-border); }
+  .data .head { background: var(--data-bg); border-bottom: 1px solid var(--data-border); color: var(--data-accent); }
+  .data .body { color: var(--ink); }
+
+  /* Class card columns */
+  .class-row + .class-row { margin-top: 16px; }
+
+  .class-name { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; }
+  .class-section {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 10px 0 4px;
+    border-bottom: 1px dashed rgba(0,0,0,0.1);
+    padding-bottom: 4px;
+  }
+  .field-row, .method-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 3px 0;
+  }
+  .field-name, .method-name { color: var(--ink); }
+  .field-type, .method-sig { color: var(--muted); }
+  .visibility { color: var(--warn); margin-right: 4px; font-weight: 600; }
+  .static { color: var(--gold); margin-right: 4px; font-style: italic; }
+  .method-row code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; }
+
+  /* Layer band */
+  .layer-band {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+  .layer-band .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .lb-controller { background: rgba(138, 90, 24, 0.1); color: var(--ctrl-accent); }
+  .lb-controller .dot { background: var(--ctrl-accent); }
+  .lb-service { background: rgba(47, 111, 94, 0.1); color: var(--svc-accent); }
+  .lb-service .dot { background: var(--svc-accent); }
+  .lb-repo { background: rgba(138, 109, 44, 0.1); color: var(--repo-accent); }
+  .lb-repo .dot { background: var(--repo-accent); }
+  .lb-mw { background: rgba(58, 66, 86, 0.1); color: var(--mw-accent); }
+  .lb-mw .dot { background: var(--mw-accent); }
+  .lb-util { background: rgba(108, 58, 130, 0.1); color: var(--util-accent); }
+  .lb-util .dot { background: var(--util-accent); }
+  .lb-data { background: rgba(138, 90, 24, 0.1); color: var(--data-accent); }
+  .lb-data .dot { background: var(--data-accent); }
+
+  /* Relationship diagram */
+  .reldiagram {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    margin-top: 40px;
+    overflow-x: auto;
+  }
+  .reldiagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+
+  /* Method/Param table */
+  .op-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  .op-table th { text-align: left; padding: 6px 8px; border-bottom: 1px solid rgba(0,0,0,0.1); font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-size: 10.5px; }
+  .op-table td { padding: 6px 8px; border-bottom: 1px dotted rgba(0,0,0,0.06); vertical-align: top; }
+  .op-table tr:last-child td { border-bottom: none; }
+  .op-table .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Section headings */
+  h2 { font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 30px; margin: 56px 0 16px; letter-spacing: -0.005em; }
+  h2 .num { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: 6px; margin-right: 12px; vertical-align: middle; font-weight: 500; }
+  .section-intro { color: var(--muted-2); font-size: 15px; margin: -4px 0 24px; max-width: 760px; }
+
+  /* Three-column grid for class cards */
+  .class-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .class-grid > .uml-class { height: 100%; }
+
+  /* Section refs */
+  section { scroll-margin-top: 32px; }
+
+  /* Sequence diagram */
+  .seq-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    overflow-x: auto;
+  }
+  .seq-card h3 { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 16px; }
+  .seq-card svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+
+  footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 900px) {
+    .class-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 32px; }
+    h2 { font-size: 24px; }
+    main { padding: 32px 18px 64px; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <header>
+    <span class="crumb">CertiChain AI · System Design Specification · 3.2 Authentication Component</span>
+    <h1>Authentication Component<br><span style="font-size: 24px; color: var(--accent); font-style: italic;">Class & Relationship Diagram</span></h1>
+    <p class="subtitle">How access tokens, refresh tokens, and role-protected middleware come together — five concrete classes, one utility, and one persistent store, wired through a single request-response cycle.</p>
+  </header>
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-swatch" style="background: var(--ctrl-bg); border-color: var(--ctrl-border);"></span>Controller — HTTP boundary</span>
+    <span class="legend-item"><span class="legend-swatch" style="background: var(--svc-bg); border-color: var(--svc-border);"></span>Service — business logic</span>
+    <span class="legend-item"><span class="legend-swatch" style="background: var(--repo-bg); border-color: var(--repo-border);"></span>Repository — SQL access</span>
+    <span class="legend-item"><span class="legend-swatch" style="background: var(--mw-bg); border-color: var(--mw-border);"></span>Middleware — request guard</span>
+    <span class="legend-item"><span class="legend-swatch" style="background: var(--util-bg); border-color: var(--util-border);"></span>Utility — stateless helper</span>
+    <span class="legend-item"><span class="legend-swatch" style="background: var(--data-bg); border-color: var(--data-border);"></span>Data — persistent store</span>
+    <span class="legend-item" style="color: var(--warn); font-family: 'JetBrains Mono', monospace;">± &nbsp;public &nbsp; − &nbsp;private &nbsp; ~ &nbsp;package</span>
+  </div>
+
+  <!-- ───────────  CONTROLLER LAYER  ─────────── -->
+  <section>
+    <h2><span class="num">L1</span>Controller layer — HTTP boundary</h2>
+    <p class="section-intro">Each controller method validates the request shape, delegates to the auth service, and shapes the HTTP response (JSON body + httpOnly cookie where required).</p>
+
+    <span class="layer-band lb-controller"><span class="dot"></span>Express RequestHandlers</span>
+
+    <div class="uml-class ctrl class-row">
+      <div class="head"><span class="class-name">AuthController</span><span>auth.controller.ts</span></div>
+      <div class="body">
+        <div class="class-section">Properties</div>
+        <div class="field-row"><span class="field-name">─ &nbsp;<i>(none — stateless module)</i></span><span class="field-type"></span></div>
+
+        <div class="class-section">Operations</div>
+        <div class="method-row"><span class="method-name">+ &nbsp;signInController(req, res)</span><span class="method-sig">Promise&lt;void&gt;</span></div>
+        <div style="font-size: 12.5px; color: var(--muted-2); margin-left: 14px; padding: 2px 0;">
+          Reads <code>{ email, password }</code> → calls signInService → sets <code>refreshToken</code> httpOnly cookie → returns <code>{ accessToken, user }</code>
+        </div>
+
+        <div class="method-row"><span class="method-name">+ &nbsp;signUpController(req, res)</span><span class="method-sig">Promise&lt;void&gt;</span></div>
+        <div style="font-size: 12.5px; color: var(--muted-2); margin-left: 14px; padding: 2px 0;">
+          Validates <code>{ username, email, password, role, institutionName }</code>, role-based email regex (student/admin/employer) → calls signUpService → sets <code>refreshToken</code> cookie → returns <code>{ accessToken, user }</code>
+        </div>
+
+        <div class="method-row"><span class="method-name">+ &nbsp;verifyController(req, res)</span><span class="method-sig">void</span></div>
+        <div style="font-size: 12.5px; color: var(--muted-2); margin-left: 14px; padding: 2px 0;">
+          Returns the authenticated user (populated by authMiddleware) — used by frontend to restore session
+        </div>
+
+        <div class="method-row"><span class="method-name">+ &nbsp;signOutController(req, res)</span><span class="method-sig">void</span></div>
+        <div style="font-size: 12.5px; color: var(--muted-2); margin-left: 14px; padding: 2px 0;">
+          Clears the <code>refreshToken</code> httpOnly cookie (sameSite lax, path /)
+        </div>
+
+        <div class="method-row"><span class="method-name">+ &nbsp;refreshController(req, res)</span><span class="method-sig">void</span></div>
+        <div style="font-size: 12.5px; color: var(--muted-2); margin-left: 14px; padding: 2px 0;">
+          Reads <code>refreshToken</code> cookie → verifies with REFRESH_TOKEN_SECRET → issues new <code>accessToken</code>
+        </div>
+
+        <div class="method-row"><span class="method-name">+ &nbsp;updateWalletAddressController(req, res)</span><span class="method-sig">Promise&lt;void&gt;</span></div>
+        <div style="font-size: 12.5px; color: var(--muted-2); margin-left: 14px; padding: 2px 0;">
+          PUT handler for storing a personal wallet address on the user row
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────  SERVICE LAYER  ─────────── -->
+  <section>
+    <h2><span class="num">L2</span>Service layer — business rules</h2>
+    <p class="section-intro">The place where passwords meet bcrypt, where role enforcement meets MySQL, and where tokens get issued. Services know repositories, not HTTP.</p>
+
+    <span class="layer-band lb-service"><span class="dot"></span>Domain logic</span>
+
+    <div class="class-grid">
+      <div class="uml-class svc">
+        <div class="head"><span class="class-name">AuthService</span><span>auth.service.ts</span></div>
+        <div class="body">
+          <div class="class-section">Operations</div>
+          <div class="method-row"><span class="method-name">+ &nbsp;signInService(email, password)</span><span class="method-sig">Promise&lt;SignInResult&gt;</span></div>
+          <div style="font-size: 12px; color: var(--muted-2); padding: 2px 0;">
+            1. Lookup user · 2. <code>users.updateUser(id, is_verified=true)</code> · 3. <code>bcrypt.compare</code> · 4. <code>generateAccessToken</code> + <code>generateRefreshToken</code>
+          </div>
+
+          <div class="method-row"><span class="method-name">+ &nbsp;signUpService(username, email, password, institutionName)</span><span class="method-sig">Promise&lt;SignInResult&gt;</span></div>
+          <div style="font-size: 12px; color: var(--muted-2); padding: 2px 0;">
+            1. Uniqueness check · 2. <code>bcrypt.hash</code> with salt 10 · 3. <code>UsersRepository.createUser</code> · 4. Issue tokens
+          </div>
+
+          <div class="method-row"><span class="method-name">+ &nbsp;updateWalletAddressService(id, wallet_address)</span><span class="method-sig">Promise&lt;void&gt;</span></div>
+          <div style="font-size: 12px; color: var(--muted-2); padding: 2px 0;">
+            Delegates to <code>AuthRepository.updateWalletAddress</code>; throws 404 if not updated
+          </div>
+
+          <div class="class-section">Returns</div>
+          <div class="field-row"><span class="field-name">user</span><span class="field-type">: UserResponseService</span></div>
+          <div class="field-row"><span class="field-name">accessToken</span><span class="field-type">: string (JWT, 15m)</span></div>
+          <div class="field-row"><span class="field-name">refreshToken</span><span class="field-type">: string (JWT, 7d)</span></div>
+        </div>
+      </div>
+
+      <div class="uml-class svc">
+        <div class="head"><span class="class-name">RoleMiddleware</span><span>auth.middleware.ts (role)</span></div>
+        <div class="body">
+          <div class="class-section">Operations</div>
+          <div class="method-row"><span class="method-name">+ &nbsp;roleMiddleware(allowedRoles: string[])</span><span class="method-sig">RequestHandler</span></div>
+          <div style="font-size: 12px; color: var(--muted-2); padding: 2px 0;">
+            Reads <code>req.user.role</code> (set by authMiddleware) → compares to allowedRoles → calls next() or returns 403
+          </div>
+          <div class="class-section">Notes</div>
+          <div style="font-size: 12px; color: var(--muted-2); padding: 2px 0;">
+            Factored as a higher-order function so the same logic gates any protected route
+          </div>
+        </div>
+      </div>
+
+      <div class="uml-class svc">
+        <div class="head"><span class="class-name">AuthenticatedRequest</span><span>auth.types.ts</span></div>
+        <div class="body">
+          <div class="class-section">Type (interface)</div>
+          <div class="field-row"><span class="field-name">user</span><span class="field-type">? : { ... }</span></div>
+          <div class="field-row" style="padding-left: 12px;"><span class="field-name">id</span><span class="field-type">: number</span></div>
+          <div class="field-row" style="padding-left: 12px;"><span class="field-name">username</span><span class="field-type">: string</span></div>
+          <div class="field-row" style="padding-left: 12px;"><span class="field-name">role</span><span class="field-type">: string</span></div>
+          <div style="font-size: 12px; color: var(--muted-2); padding: 4px 0 0;">
+            Augments Express <code>Request</code>. Cast inline (<code>req as AuthenticatedRequest</code>) inside middleware.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────  MIDDLEWARE  ─────────── -->
+  <section>
+    <h2><span class="num">L3</span>Middleware — request guard</h2>
+    <p class="section-intro">The wall between anonymous and authenticated. Pulls the Bearer token, verifies it, hydrates <code>req.user</code>.</p>
+
+    <span class="layer-band lb-mw"><span class="dot"></span>Express middleware</span>
+
+    <div class="uml-class mw class-row">
+      <div class="head"><span class="class-name">authMiddleware</span><span>auth.middleware.ts</span></div>
+      <div class="body">
+        <div class="class-section">Signature</div>
+        <div class="method-row"><span class="method-name">+ &nbsp;authMiddleware(req, res, next)</span><span class="method-sig">RequestHandler</span></div>
+
+        <div class="class-section">Behavior table</div>
+        <table class="op-table">
+          <thead><tr><th>Step</th><th>Logic</th><th>On failure</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">1</td><td>Read <code>Authorization</code> header</td><td rowspan="2" style="vertical-align: middle;">401 — "No token provided"</td></tr>
+            <tr><td class="mono">2</td><td>Split <code>"Bearer {token}"</code> → take token</td></tr>
+            <tr><td class="mono">3</td><td><code>jwt.verify(token, ACCESS_TOKEN_SECRET)</code> → cast to <code>DecodedToken</code></td><td>401 — "Invalid or expired token"</td></tr>
+            <tr><td class="mono">4</td><td>Hydrate <code>(req as AuthenticatedRequest).user = { id, username, role }</code></td><td></td></tr>
+            <tr><td class="mono">5</td><td>Call <code>next()</code></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────  REPOSITORY LAYER  ─────────── -->
+  <section>
+    <h2><span class="num">L4</span>Repository layer — MySQL access</h2>
+    <p class="section-intro">All persistence goes through raw SQL with parameterized placeholders via mysql2. No ORM. Each method returns a typed shape or null.</p>
+
+    <span class="layer-band lb-repo"><span class="dot"></span>mysql2 / pool.execute</span>
+
+    <div class="class-grid">
+      <div class="uml-class repo">
+        <div class="head"><span class="class-name">AuthRepository</span><span>auth.repository.ts</span></div>
+        <div class="body">
+          <div class="method-row"><span class="method-name">+ &nbsp;signIn(email)</span><span class="method-sig">: Promise&lt;User | null&gt;</span></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 2px 0; color: var(--muted-2);">
+            <code>SELECT * FROM users WHERE email = ?</code>
+          </div>
+
+          <div class="method-row"><span class="method-name">+ &nbsp;findByEmailOrUsername(email, username)</span><span class="method-sig">: Promise&lt;User | null&gt;</span></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 2px 0; color: var(--muted-2);">
+            <code>SELECT * FROM users WHERE email = ? OR username = ?</code>
+          </div>
+
+          <div class="method-row"><span class="method-name">+ &nbsp;updateWalletAddress(id, wallet_address)</span><span class="method-sig">: Promise&lt;boolean&gt;</span></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 2px 0; color: var(--muted-2);">
+            <code>UPDATE users SET wallet_address = ? WHERE id = ?</code>
+          </div>
+
+          <div class="method-row"><span class="method-name">− &nbsp;sigUp() / signOut()</span><span class="method-sig">: void (stubs)</span></div>
+        </div>
+      </div>
+
+      <div class="uml-class repo">
+        <div class="head"><span class="class-name">UsersRepository</span><span>users.repository.ts</span></div>
+        <div class="body">
+          <div class="method-row"><span class="method-name">+ &nbsp;createUser(data: UserCreateInput)</span><span class="method-sig">: Promise&lt;OmitPasswordUser&gt;</span></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 2px 0; color: var(--muted-2);">
+            <code>INSERT INTO users(...) VALUES (...) → uses result.insertId</code>
+          </div>
+
+          <div class="method-row"><span class="method-name">+ &nbsp;updateUser(id, data: Partial&lt;...&gt;)</span><span class="method-sig">: Promise&lt;boolean&gt;</span></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 2px 0; color: var(--muted-2);">
+            Dynamic <code>UPDATE users SET ... WHERE id = ?</code> — used by signIn to flip <code>is_verified</code>
+          </div>
+
+          <div class="method-row"><span class="method-name">+ &nbsp;findByEmail / findUserById / findAllUsers / ...</span><span class="method-sig">: ...</span></div>
+          <div style="font-size: 12px; color: var(--muted-2); padding: 2px 0;">
+            Other lookup / CRUD ops used by user-management routes
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────  UTILITY  ─────────── -->
+  <section>
+    <h2><span class="num">L5</span>Utility — JWT helpers</h2>
+    <p class="section-intro">Stateless functions wrapping <code>jsonwebtoken</code>. Each uses a different secret and expiry.</p>
+
+    <span class="layer-band lb-util"><span class="dot"></span>Plain functions</span>
+
+    <div class="uml-class util class-row">
+      <div class="head"><span class="class-name">«utility» &nbsp; JwtUtility</span><span>utility/jwt.ts</span></div>
+      <div class="body">
+        <div class="field-row"><span class="field-name">~ &nbsp;ACCESS_TOKEN_SECRET</span><span class="field-type">: string (env)</span></div>
+        <div class="field-row"><span class="field-name">~ &nbsp;REFRESH_TOKEN_SECRET</span><span class="field-type">: string (env)</span></div>
+
+        <div class="class-section" style="margin-top: 14px;">Helpers</div>
+        <div class="method-row"><span class="method-name">+ &nbsp;generateAccessToken(payload: JwtPayload)</span><span class="method-sig">→ Promise&lt;string&gt;</span></div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 2px 0; color: var(--muted-2);">
+          <code>jwt.sign({ id, username, role }, ACCESS_TOKEN_SECRET, { expiresIn: "15m" })</code>
+        </div>
+
+        <div class="method-row"><span class="method-name">+ &nbsp;generateRefreshToken(userId: number)</span><span class="method-sig">→ Promise&lt;string&gt;</span></div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 2px 0; color: var(--muted-2);">
+          <code>jwt.sign({ id }, REFRESH_TOKEN_SECRET, { expiresIn: "7d" })</code>
+        </div>
+
+        <div class="class-section" style="margin-top: 14px;">Internal interface</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted-2); padding-left: 10px;">
+          JwtPayload { id: number; username: string; role: string }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────  DATA STORE  ─────────── -->
+  <section>
+    <h2><span class="num">L6</span>Persistent store</h2>
+    <p class="section-intro">The single source of truth for user identities. The MySQL <code>users</code> table is what every login and refresh ultimately consults.</p>
+
+    <span class="layer-band lb-data"><span class="dot"></span>MySQL InnoDB · utf8mb4</span>
+
+    <div class="uml-class data class-row">
+      <div class="head"><span class="class-name">«table» &nbsp; users</span><span>certichain_db</span></div>
+      <div class="body">
+        <table class="op-table">
+          <thead><tr><th>Column</th><th>Type</th><th>Constraint</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">id</td><td>INT</td><td>PK, AUTO_INCREMENT</td></tr>
+            <tr><td class="mono">username</td><td>VARCHAR(80)</td><td>NOT NULL</td></tr>
+            <tr><td class="mono">email</td><td>VARCHAR(255)</td><td>UNIQUE, NOT NULL</td></tr>
+            <tr><td class="mono">password</td><td>VARCHAR(255)</td><td>NOT NULL (bcrypt hash)</td></tr>
+            <tr><td class="mono">role</td><td>ENUM</td><td>admin | student | employer | systemAdmin</td></tr>
+            <tr><td class="mono">wallet_address</td><td>VARCHAR(42)</td><td>NULL</td></tr>
+            <tr><td class="mono">institution_id</td><td>INT</td><td>FK → institutions(id), NULLABLE</td></tr>
+            <tr><td class="mono">institution_name</td><td>VARCHAR(120)</td><td>denormalized display</td></tr>
+            <tr><td class="mono">is_verified</td><td>BOOLEAN</td><td>DEFAULT FALSE</td></tr>
+            <tr><td class="mono">created_at / updated_at</td><td>TIMESTAMP</td><td>auto-managed</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────  RELATIONSHIP DIAGRAM  ─────────── -->
+  <section>
+    <h2><span class="num">R</span>Relationship diagram</h2>
+    <p class="section-intro">How the seven classes relate during a typical request — including a second activation path for token refresh.</p>
+
+    <div class="reldiagram">
+      <svg viewBox="0 0 980 540" xmlns="http://www.w3.org/2000/svg" width="980">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#2f6f5e" />
+          </marker>
+          <marker id="arr-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#6c3a82" />
+          </marker>
+        </defs>
+
+        <!-- Controller -->
+        <g transform="translate(60,40)">
+          <rect width="170" height="56" rx="10" fill="#f7f1ea" stroke="#d8c4a2"/>
+          <text x="85" y="22" text-anchor="middle" fill="#8a5a18" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13">AuthController</text>
+          <text x="85" y="40" text-anchor="middle" fill="#7c7a72" font-family="Outfit, sans-serif" font-size="12">auth.controller.ts</text>
+        </g>
+
+        <!-- Middleware -->
+        <g transform="translate(300,40)">
+          <rect width="170" height="56" rx="10" fill="#eef0f7" stroke="#c4cbe0"/>
+          <text x="85" y="22" text-anchor="middle" fill="#3a4256" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13">authMiddleware</text>
+          <text x="85" y="40" text-anchor="middle" fill="#7c7a72" font-family="Outfit, sans-serif" font-size="12">Bearer token gate</text>
+        </g>
+
+        <!-- Service -->
+        <g transform="translate(60,170)">
+          <rect width="170" height="56" rx="10" fill="#eaf3ef" stroke="#b9d4c7"/>
+          <text x="85" y="22" text-anchor="middle" fill="#2f6f5e" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13">AuthService</text>
+          <text x="85" y="40" text-anchor="middle" fill="#7c7a72" font-family="Outfit, sans-serif" font-size="12">bcrypt + jwt logic</text>
+        </g>
+
+        <!-- Utility -->
+        <g transform="translate(540,170)">
+          <rect width="170" height="56" rx="10" fill="#f4ecf7" stroke="#d6c1de"/>
+          <text x="85" y="22" text-anchor="middle" fill="#6c3a82" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13">JwtUtility</text>
+          <text x="85" y="40" text-anchor="middle" fill="#7c7a72" font-family="Outfit, sans-serif" font-size="12">access + refresh signers</text>
+        </g>
+
+        <!-- AuthRepository -->
+        <g transform="translate(300,300)">
+          <rect width="170" height="56" rx="10" fill="#f3eee5" stroke="#d6cab2"/>
+          <text x="85" y="22" text-anchor="middle" fill="#8a6d2c" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13">AuthRepository</text>
+          <text x="85" y="40" text-anchor="middle" fill="#7c7a72" font-family="Outfit, sans-serif" font-size="12">SELECT / UPDATE users</text>
+        </g>
+
+        <!-- UsersRepository -->
+        <g transform="translate(60,300)">
+          <rect width="170" height="56" rx="10" fill="#f3eee5" stroke="#d6cab2"/>
+          <text x="85" y="22" text-anchor="middle" fill="#8a6d2c" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13">UsersRepository</text>
+          <text x="85" y="40" text-anchor="middle" fill="#7c7a72" font-family="Outfit, sans-serif" font-size="12">INSERT / UPDATE users</text>
+        </g>
+
+        <!-- users table -->
+        <g transform="translate(540,300)">
+          <rect width="170" height="56" rx="10" fill="#fff6e0" stroke="#e6c98a"/>
+          <text x="85" y="22" text-anchor="middle" fill="#8a5a18" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13">«table» users</text>
+          <text x="85" y="40" text-anchor="middle" fill="#7c7a72" font-family="Outfit, sans-serif" font-size="12">MySQL InnoDB</text>
+        </g>
+
+        <!-- RoleMiddleware -->
+        <g transform="translate(770,170)">
+          <rect width="170" height="56" rx="10" fill="#eef0f7" stroke="#c4cbe0"/>
+          <text x="85" y="22" text-anchor="middle" fill="#3a4256" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13">roleMiddleware</text>
+          <text x="85" y="40" text-anchor="middle" fill="#7c7a72" font-family="Outfit, sans-serif" font-size="12">allowedRoles[]</text>
+        </g>
+
+        <!-- Arrows -->
+        <!-- Controller → Middleware (uses, on /verify, /logout) -->
+        <line x1="230" y1="68" x2="300" y2="68" stroke="#2f6f5e" stroke-width="1.5" marker-end="url(#arr)" stroke-dasharray="4 3"/>
+        <text x="265" y="60" text-anchor="middle" fill="#3a4256" font-family="Outfit, sans-serif" font-size="11">calls before</text>
+
+        <!-- Controller → Service -->
+        <line x1="145" y1="96" x2="145" y2="170" stroke="#2f6f5e" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="160" y="138" fill="#2f6f5e" font-family="Outfit, sans-serif" font-size="11">delegates signIn / signUp</text>
+
+        <!-- Service → AuthRepository -->
+        <line x1="230" y1="200" x2="300" y2="328" stroke="#2f6f5e" stroke-width="1.5" marker-end="url(#arr)" stroke-dasharray="4 3"/>
+        <text x="240" y="270" fill="#3a4256" font-family="Outfit, sans-serif" font-size="11">lookups</text>
+
+        <!-- Service → UsersRepository -->
+        <line x1="145" y1="226" x2="145" y2="300" stroke="#2f6f5e" stroke-width="1.5" marker-end="url(#arr)" stroke-dasharray="4 3"/>
+
+        <!-- AuthRepository → users table -->
+        <line x1="470" y1="328" x2="540" y2="328" stroke="#2f6f5e" stroke-width="1.5" marker-end="url(#arr)" stroke-dasharray="4 3"/>
+
+        <!-- UsersRepository → users table -->
+        <line x1="230" y1="328" x2="540" y2="328" stroke="#2f6f5e" stroke-width="1.5" marker-end="url(#arr)" stroke-dasharray="4 3"/>
+
+        <!-- Service → JwtUtility -->
+        <line x1="230" y1="198" x2="540" y2="198" stroke="#6c3a82" stroke-width="1.5" marker-end="url(#arr-d)" stroke-dasharray="4 3"/>
+        <text x="385" y="190" text-anchor="middle" fill="#6c3a82" font-family="Outfit, sans-serif" font-size="11">uses access + refresh signers</text>
+
+        <!-- Middleware → JwtUtility (verifies) -->
+        <line x1="470" y1="68" x2="540" y2="170" stroke="#6c3a82" stroke-width="1.5" marker-end="url(#arr-d)" stroke-dasharray="4 3"/>
+        <text x="510" y="120" fill="#6c3a82" font-family="Outfit, sans-serif" font-size="11">verify</text>
+
+        <!-- Middleware → roleMiddleware -->
+        <line x1="470" y1="80" x2="770" y2="180" stroke="#3a4256" stroke-width="1.5" marker-end="url(#arr)" stroke-dasharray="4 3"/>
+        <text x="600" y="118" fill="#3a4256" font-family="Outfit, sans-serif" font-size="11">next() chains to role check</text>
+
+        <!-- Legend -->
+        <g transform="translate(60, 420)">
+          <rect width="800" height="100" rx="10" fill="#fafaf6" stroke="#e9e3d6"/>
+          <text x="20" y="26" font-family="Outfit, sans-serif" font-size="13" font-weight="600" fill="#3a4256">Edge legend</text>
+
+          <g transform="translate(20, 44)">
+            <line x1="0" y1="0" x2="40" y2="0" stroke="#2f6f5e" stroke-width="2" marker-end="url(#arr)"/>
+            <text x="50" y="4" font-family="Outfit, sans-serif" font-size="12" fill="#3a4256">direct call (sync control flow)</text>
+          </g>
+
+          <g transform="translate(20, 64)">
+            <line x1="0" y1="0" x2="40" y2="0" stroke="#2f6f5e" stroke-width="1.5" marker-end="url(#arr)" stroke-dasharray="4 3"/>
+            <text x="50" y="4" font-family="Outfit, sans-serif" font-size="12" fill="#3a4256">async/await call (returns a Promise)</text>
+          </g>
+
+          <g transform="translate(20, 84)">
+            <line x1="0" y1="0" x2="40" y2="0" stroke="#6c3a82" stroke-width="1.5" marker-end="url(#arr-d)" stroke-dasharray="4 3"/>
+            <text x="50" y="4" font-family="Outfit, sans-serif" font-size="12" fill="#3a4256">token crypto boundary (sign / verify)</text>
+          </g>
+
+          <text x="430" y="52" font-family="Outfit, sans-serif" font-size="12" fill="#3a4256">Solid arrows are runtime flows; dashed arrows cross layer boundaries;</text>
+          <text x="430" y="72" font-family="Outfit, sans-serif" font-size="12" fill="#3a4256">purple edges are the only paths that talk to the JWT library.</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ───────────  SEQUENCE: SIGN IN  ─────────── -->
+  <section>
+    <h2><span class="num">S1</span>Sequence — <code>POST /auth/login</code> → access + refresh</h2>
+    <p class="section-intro">Step-by-step runtime flow that ties every class together.</p>
+
+    <div class="seq-card">
+      <h3>Actors → Controller → Service → Repository → Utility → MySQL → response</h3>
+
+      <svg viewBox="0 0 940 520" xmlns="http://www.w3.org/2000/svg" width="940">
+        <defs>
+          <marker id="seq-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#3a4256"/>
+          </marker>
+        </defs>
+
+        <style>
+          .lifeline { stroke: #cfcfcf; stroke-width: 1; stroke-dasharray: 4 4; }
+          .actor-box { fill: #ffffff; stroke: #2f6f5e; stroke-width: 1.4; }
+          .actor-text { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; fill: #14171e; }
+          .msg { font-family: 'Outfit', sans-serif; font-size: 12px; fill: #14171e; }
+          .msg-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #2f6f5e; }
+          .return-arrow { stroke: #7c7a72; stroke-width: 1.2; }
+          .call-arrow { stroke: #2f6f5e; stroke-width: 1.4; }
+        </style>
+
+        <!-- Heads -->
+        <g>
+          <rect class="actor-box" x="20" y="20" width="100" height="36" rx="8"/>
+          <text class="actor-text" x="70" y="42" text-anchor="middle">Client</text>
+
+          <rect class="actor-box" x="180" y="20" width="120" height="36" rx="8"/>
+          <text class="actor-text" x="240" y="42" text-anchor="middle">AuthController</text>
+
+          <rect class="actor-box" x="360" y="20" width="120" height="36" rx="8"/>
+          <text class="actor-text" x="420" y="42" text-anchor="middle">AuthService</text>
+
+          <rect class="actor-box" x="540" y="20" width="120" height="36" rx="8"/>
+          <text class="actor-text" x="600" y="42" text-anchor="middle">AuthRepository</text>
+
+          <rect class="actor-box" x="720" y="20" width="100" height="36" rx="8"/>
+          <text class="actor-text" x="770" y="42" text-anchor="middle">MySQL</text>
+        </g>
+
+        <!-- Lifelines -->
+        <line class="lifeline" x1="70" y1="56" x2="70" y2="500"/>
+        <line class="lifeline" x1="240" y1="56" x2="240" y2="500"/>
+        <line class="lifeline" x1="420" y1="56" x2="420" y2="500"/>
+        <line class="lifeline" x1="600" y1="56" x2="600" y2="500"/>
+        <line class="lifeline" x1="770" y1="56" x2="770" y2="500"/>
+
+        <!-- 1: POST /auth/login -->
+        <line x1="72" y1="90" x2="238" y2="90" class="call-arrow" marker-end="url(#seq-arr)"/>
+        <text class="msg" x="100" y="84">1. POST { email, password }</text>
+
+        <!-- 2: signInService -->
+        <line x1="242" y1="120" x2="418" y2="120" class="call-arrow" marker-end="url(#seq-arr)"/>
+        <text class="msg" x="270" y="114">2. signInService(email, password)</text>
+
+        <!-- 3: SELECT user -->
+        <line x1="422" y1="150" x2="598" y2="150" class="call-arrow" marker-end="url(#seq-arr)"/>
+        <text class="msg" x="450" y="144">3. SELECT * FROM users WHERE email=?</text>
+
+        <!-- 4: user row -->
+        <line x1="598" y1="180" x2="422" y2="180" class="return-arrow" marker-end="url(#seq-arr)"/>
+        <text class="msg" x="450" y="174" fill="#7c7a72">4. user row or null</text>
+
+        <!-- 5: bcrypt.compare -->
+        <line x1="422" y1="210" x2="422" y2="210"/>
+        <text class="msg" x="430" y="214">5. bcrypt.compare(password, hash)</text>
+
+        <!-- 6: updateUser is_verified=true -->
+        <line x1="422" y1="240" x2="598" y2="240" class="call-arrow" marker-end="url(#seq-arr)"/>
+        <text class="msg" x="450" y="234">6. UPDATE users SET is_verified=true</text>
+
+        <!-- 7: ok -->
+        <line x1="598" y1="270" x2="422" y2="270" class="return-arrow" marker-end="url(#seq-arr)"/>
+        <text class="msg" x="450" y="264" fill="#7c7a72">7. affectedRows=1</text>
+
+        <!-- 8: generateAccessToken + generateRefreshToken -->
+        <line x1="422" y1="300" x2="600" y2="300" class="call-arrow" marker-end="url(#seq-arr)" stroke="#6c3a82"/>
+        <text class="msg" x="450" y="294" fill="#6c3a82">8. generateAccessToken / generateRefreshToken</text>
+
+        <!-- 9: signed tokens returned -->
+        <line x1="600" y1="330" x2="422" y2="330" class="return-arrow" stroke="#6c3a82" marker-end="url(#seq-arr)"/>
+        <text class="msg" x="450" y="324" fill="#7c7a72">9. { accessToken (15m), refreshToken (7d) }</text>
+
+        <!-- 10: service → controller -->
+        <line x1="418" y1="360" x2="242" y2="360" class="return-arrow" marker-end="url(#seq-arr)"/>
+        <text class="msg" x="280" y="354" fill="#7c7a72">10. { user, accessToken, refreshToken }</text>
+
+        <!-- 11: controller sets cookie + JSON -->
+        <line x1="238" y1="390" x2="72" y2="390" class="return-arrow" marker-end="url(#seq-arr)"/>
+        <text class="msg" x="100" y="384" fill="#7c7a72">11. 200 OK · Set-Cookie refreshToken (httpOnly) · JSON { accessToken, user }</text>
+
+        <text x="20" y="475" font-family="Outfit, sans-serif" font-size="11" fill="#7c7a72">Middleware never participates in /login — it only fires on protected routes. Token signing happens inside the service through the JwtUtility.</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ───────────  SEQUENCE: REFRESH  ─────────── -->
+  <section>
+    <h2><span class="num">S2</span>Sequence — <code>POST /auth/refresh</code></h2>
+    <p class="section-intro">The reverse-crypto flow: the access token is rebuilt from the verified refresh token without touching the database.</p>
+
+    <div class="seq-card">
+      <h3>Cookie arrives → middleware skipped → controller verifies + signs → JSON</h3>
+
+      <svg viewBox="0 0 940 380" xmlns="http://www.w3.org/2000/svg" width="940">
+        <defs>
+          <marker id="seq-arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#3a4256"/>
+          </marker>
+        </defs>
+
+        <rect class="actor-box" x="20" y="20" width="100" height="36" rx="8"/>
+        <text class="actor-text" x="70" y="42" text-anchor="middle">Client</text>
+
+        <rect class="actor-box" x="220" y="20" width="160" height="36" rx="8"/>
+        <text class="actor-text" x="300" y="42" text-anchor="middle">refreshController</text>
+
+        <rect class="actor-box" x="500" y="20" width="200" height="36" rx="8"/>
+        <text class="actor-text" x="600" y="42" text-anchor="middle">«utility» JwtUtility</text>
+
+        <line class="lifeline" x1="70" y1="56" x2="70" y2="360"/>
+        <line class="lifeline" x1="300" y1="56" x2="300" y2="360"/>
+        <line class="lifeline" x1="600" y1="56" x2="600" y2="360"/>
+
+        <line x1="72" y1="100" x2="298" y2="100" class="call-arrow" marker-end="url(#seq-arr2)"/>
+        <text class="msg" x="100" y="94">1. POST /auth/refresh (Cookie: refreshToken=…)</text>
+
+        <line x1="302" y1="140" x2="598" y2="140" class="call-arrow" marker-end="url(#seq-arr2)" stroke="#6c3a82"/>
+        <text class="msg" x="320" y="134" fill="#6c3a82">2. jwt.verify(token, REFRESH_TOKEN_SECRET)</text>
+
+        <line x1="598" y1="180" x2="302" y2="180" class="return-arrow" marker-end="url(#seq-arr2)" stroke="#6c3a82"/>
+        <text class="msg" x="320" y="174" fill="#7c7a72">3. { id } · or throws → 403</text>
+
+        <line x1="302" y1="220" x2="598" y2="220" class="call-arrow" marker-end="url(#seq-arr2)" stroke="#6c3a82"/>
+        <text class="msg" x="320" y="214" fill="#6c3a82">4. jwt.sign({ id }, ACCESS_TOKEN_SECRET, "15m")</text>
+
+        <line x1="598" y1="260" x2="302" y2="260" class="return-arrow" marker-end="url(#seq-arr2)" stroke="#6c3a82"/>
+        <text class="msg" x="320" y="254" fill="#7c7a72">5. new accessToken</text>
+
+        <line x1="298" y1="300" x2="72" y2="300" class="return-arrow" marker-end="url(#seq-arr2)"/>
+        <text class="msg" x="100" y="294" fill="#7c7a72">6. 200 OK · JSON { accessToken }</text>
+
+        <text x="20" y="350" font-family="Outfit, sans-serif" font-size="11" fill="#7c7a72">No DB touch. No repository call. The whole refresh cycle is pure crypto through the JwtUtility.</text>
+      </svg>
+    </div>
+  </section>
+
+  <footer>
+    CertiChain AI · Authentication Component · UML Class & Sequence Diagrams · <span style="font-family: 'JetBrains Mono', monospace;">v1.0 · 2026</span>
+  </footer>
+
+</main>
+</body>
+</html>

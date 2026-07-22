@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CertiChain AI — System Diagrams</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --cream: #f7f5f0;
+    --paper: #ffffff;
+    --line: #e9e3d6;
+    --line-soft: #efe9da;
+    --ink: #14171e;
+    --muted: #7c7a72;
+    --muted-2: #3a4256;
+    --accent: #2f6f5e;
+    --accent-soft: rgba(47, 111, 94, 0.08);
+    --warn: #b06367;
+    --gold: #c97b3f;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--cream); color: var(--ink); font-family: 'Outfit', system-ui, sans-serif; line-height: 1.55; }
+
+  /* Two corner radial washes */
+  body::before {
+    content: "";
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(60% 50% at 8% 6%, rgba(47, 111, 94, 0.06), transparent 70%),
+      radial-gradient(50% 40% at 92% 96%, rgba(201, 123, 63, 0.05), transparent 70%);
+  }
+
+  main { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 56px 28px 96px; }
+
+  /* Header */
+  header { display: flex; flex-direction: column; gap: 8px; padding-bottom: 28px; border-bottom: 1px solid var(--line); margin-bottom: 56px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; }
+  .eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  h1 { font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 44px; line-height: 1.1; margin: 0; letter-spacing: -0.005em; }
+  .subtitle { color: var(--muted-2); font-size: 17px; max-width: 720px; margin: 4px 0 0; }
+
+  /* Sections */
+  section { margin-top: 72px; }
+  .section-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 24px; }
+  .section-num { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: 6px; }
+  h2 { font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 30px; margin: 0; letter-spacing: -0.005em; }
+  .section-desc { color: var(--muted-2); margin: 4px 0 28px; max-width: 760px; font-size: 15px; }
+
+  /* Diagram card */
+  .diagram-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 36px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    overflow-x: auto;
+  }
+
+  .mermaid { background: var(--paper); }
+
+  /* Legend */
+  .legend { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 22px; padding-top: 22px; border-top: 1px dashed var(--line); font-size: 13px; color: var(--muted-2); }
+  .legend-item { display: inline-flex; align-items: center; gap: 8px; }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--line); }
+  .sw-ext { background: #fff; }
+  .sw-sys { background: #eaf3ef; border-color: #cfded6; }
+  .sw-store { background: #f3eee5; border-color: #d6cab2; }
+
+  /* UML */
+  .uml-wrap { display: flex; flex-direction: column; gap: 28px; }
+  .uml-block { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+  .uml-block h3 { margin: 0 0 4px; font-size: 15px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; font-family: 'JetBrains Mono', monospace; }
+  .uml-block p { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+  .uml-svg { width: 100%; height: auto; display: block; }
+
+  /* Two-column layer */
+  .layer-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 22px; }
+  .layer-card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
+  .layer-title { font-weight: 600; margin-bottom: 4px; }
+  .layer-body { color: var(--muted-2); font-size: 14px; }
+
+  /* Notes grid */
+  .notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 22px; }
+  .note { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .note-title { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .note-body { font-size: 14px; color: var(--muted-2); margin: 0; }
+
+  footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+
+  /* Mermaid theming overrides for the cream vibe */
+  .mermaid .nodeLabel { font-family: 'Outfit', sans-serif !important; font-size: 13px !important; }
+  .mermaid .edgeLabel { font-family: 'Outfit', sans-serif !important; font-size: 12px !important; background: var(--paper) !important; }
+
+  @media (max-width: 720px) {
+    main { padding: 32px 18px 64px; }
+    h1 { font-size: 32px; }
+    h2 { font-size: 24px; }
+    .layer-grid, .notes { grid-template-columns: 1fr; }
+    .diagram-card { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <header>
+    <span class="eyebrow"><span class="eyebrow-dot"></span>System Design — Diagrams</span>
+    <h1>CertiChain AI</h1>
+    <p class="subtitle">A blockchain-based multi-tenant platform for academic certificate issuance, verification, and AI career recommendations.</p>
+  </header>
+
+  <!-- ────────────────────────────────────────────────────────────── -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2>Context Diagram</h2>
+    </div>
+    <p class="section-desc">The CertiChain AI system boundary and its external interactions. Actors exchange data with the platform; the platform reads/writes to MySQL and commits certificates to the Ethereum contract.</p>
+
+    <div class="diagram-card">
+      <div class="mermaid">
+flowchart LR
+    %% Actors
+    SA(["<b>System Admin</b><br/>systemAdmin"])
+    AD(["<b>Institution Admin</b><br/>admin"])
+    ST(["<b>Student</b><br/>student"])
+    EM(["<b>Employer</b><br/>employer"])
+    PB(["<b>Public / 3rd Party</b><br/>unauthenticated"])
+
+    %% System boundary
+    subgraph SYS["<b>CertiChain AI System</b>"]
+      direction TB
+      API["<b>REST API</b><br/>Node.js + Express"]
+      AUTH["<b>Auth Module</b><br/>JWT access + refresh"]
+      CERT["<b>Certificate Service</b><br/>Issuance & verification"]
+      INST["<b>Institution Service</b><br/>Tenant registry"]
+      USR["<b>User Service</b><br/>Role management"]
+      REC["<b>AI Recommendation</b><br/>Career engine"]
+      BC["<b>Blockchain Gateway</b><br/>On-chain signing"]
+    end
+
+    %% External stores
+    DB[("MySQL<br/>institutions, users,<br/>certificates, logs")]
+    ETH[("Ethereum<br/>CertificateRegistry<br/>smart contract")]
+
+    %% Actor → system
+    SA -->|"registers institution<br/>+ uploads wallet"| INST
+    SA -->|"manages platform<br/>users"| USR
+    AD -->|"issues / revokes<br/>certificates"| CERT
+    AD -->|"manages students"| USR
+    ST -->|"logs in, views<br/>recommendations"| AUTH
+    ST -->|"verifies own<br/>certificates"| CERT
+    ST -->|"requests career<br/>recommendation"| REC
+    EM -->|"verifies presented<br/>credentials"| CERT
+    PB -->|"anonymous verify<br/>by hash"| CERT
+
+    %% System → external stores
+    INST -->|"institutions, users"| DB
+    USR -->|"users, profiles"| DB
+    CERT -->|"cert metadata,<br/>verification logs"| DB
+    REC -->|"structured rec JSON"| DB
+    BC -->|"issue / revoke<br/>(certificateHash,<br/>institutionId)"| ETH
+    CERT -.->|"verify read"| ETH
+
+    %% Sys internal connections
+    AUTH -.-> API
+    INST -.-> API
+    USR -.-> API
+    CERT -.-> API
+    REC -.-> API
+    BC -.-> API
+
+    classDef ext fill:#ffffff,stroke:#cfcfcf,color:#14171e;
+    classDef sys fill:#eaf3ef,stroke:#2f6f5e,color:#14171e;
+    classDef store fill:#f3eee5,stroke:#c97b3f,color:#14171e;
+
+    class SA,AD,ST,EM,PB ext;
+    class API,AUTH,CERT,INST,USR,REC,BC sys;
+    class DB,ETH store;
+      </div>
+
+      <div class="legend">
+        <span class="legend-item"><span class="legend-swatch sw-ext"></span>External actor</span>
+        <span class="legend-item"><span class="legend-swatch sw-sys"></span>System component</span>
+        <span class="legend-item"><span class="legend-swatch sw-store"></span>External data store</span>
+      </div>
+    </div>
+
+    <div class="layer-grid">
+      <div class="layer-card">
+        <div class="layer-title">Inbound flows</div>
+        <div class="layer-body">Admins push certificates and student profiles; students request verifications and recommendations; employers and public callers anchor verifications to a (hash, institutionId) pair.</div>
+      </div>
+      <div class="layer-card">
+        <div class="layer-title">Outbound flows</div>
+        <div class="layer-body">Structured records land in MySQL; certificate fingerprints and revocation events are written to the Ethereum contract via the institution's registered wallet.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────────────────────────────────────────────────────── -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2>Component-Level Design</h2>
+    </div>
+    <p class="section-desc">Eight backend modules organized into three layers — auth, business logic, and external gateways. Each controller is paired with a service and a repository.</p>
+
+    <div class="diagram-card">
+      <div class="mermaid">
+flowchart TB
+    subgraph ROUTE["Route Layer"]
+      R1[/"auth.routes.ts"/]
+      R2[/"institution.routes.ts"/]
+      R3[/"certificate.routes.ts"/]
+      R4[/"user.routes.ts"/]
+      R5[/"recommendation.routes.ts"/]
+    end
+
+    subgraph CTRL["Controller Layer"]
+      C1["AuthController"]
+      C2["InstitutionController"]
+      C3["CertificateController"]
+      C4["UserController"]
+      C5["RecommendationController"]
+    end
+
+    subgraph SVC["Service Layer"]
+      S1["AuthService"]
+      S2["InstitutionService"]
+      S3["CertificateService"]
+      S4["UserService"]
+      S5["RecommendationService"]
+    end
+
+    subgraph REPO["Repository Layer"]
+      RP1["AuthRepository"]
+      RP2["InstitutionRepository"]
+      RP3["CertificateRepository"]
+      RP4["UserRepository"]
+      RP5["RecommendationRepository"]
+    end
+
+    subgraph MID["Middleware"]
+      M1["authMiddleware<br/>(Bearer token)"]
+      M2["roleMiddleware<br/>(allowedRoles[])"]
+    end
+
+    subgraph EXT["External Gateways"]
+      DB[("MySQL Pool")]
+      JWT["JWT Utility<br/>(access + refresh)"]
+      CHAIN["Blockchain Gateway<br/>(ethers/viem)"]
+      AI["AI Engine<br/>(recommendation)"]
+    end
+
+    R1 --> M1 --> C1
+    R2 --> M1 --> M2 --> C2
+    R3 --> M1 --> M2 --> C3
+    R4 --> M1 --> M2 --> C4
+    R5 --> M1 --> M2 --> C5
+
+    C1 --> S1 --> RP1 --> DB
+    C1 -.uses.-> JWT
+    C2 --> S2 --> RP2 --> DB
+    C3 --> S3 --> RP3 --> DB
+    C3 --> S3 -. signs tx .-> CHAIN
+    S3 -. reads .-> CHAIN
+    C4 --> S4 --> RP4 --> DB
+    C5 --> S5 --> RP5 --> DB
+    C5 --> S5 -. generates .-> AI
+
+    classDef r fill:#f7f5f0,stroke:#e9e3d6,color:#14171e;
+    classDef c fill:#eaf3ef,stroke:#cfded6,color:#14171e;
+    classDef s fill:#f3eee5,stroke:#d6cab2,color:#14171e;
+    classDef p fill:#ffffff,stroke:#cfcfcf,color:#14171e;
+    classDef m fill:#eef2f7,stroke:#cdd5e0,color:#14171e;
+    classDef e fill:#fff4d9,stroke:#c97b3f,color:#14171e;
+
+    class R1,R2,R3,R4,R5 r;
+    class C1,C2,C3,C4,C5 c;
+    class S1,S2,S3,S4,S5 s;
+    class RP1,RP2,RP3,RP4,RP5 p;
+    class M1,M2 m;
+    class DB,JWT,CHAIN,AI e;
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────────────────────────────────────────────────────── -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2>Class Diagram (UML)</h2>
+    </div>
+    <p class="section-desc">The platform's core entity model with concrete fields and cardinal relationships. Mirrors the MySQL schema and on-chain data structures.</p>
+
+    <div class="diagram-card">
+      <div class="uml-wrap">
+
+        <!-- Class: Institution -->
+        <div class="uml-block">
+          <h3>Institution</h3>
+          <p>Tenant root. Each institution owns one authorized issuer wallet on-chain.</p>
+          <svg class="uml-svg" viewBox="0 0 520 240" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <style>
+                .cls-name { font: 600 16px 'Outfit', sans-serif; fill: var(--accent); }
+                .cls-title { font: 500 13px 'Outfit', sans-serif; fill: var(--muted-2); }
+                .cls-field { font: 13px 'JetBrains Mono', monospace; fill: var(--ink); }
+                .cls-type { font: 12px 'JetBrains Mono', monospace; fill: var(--muted); }
+                .card { fill: var(--paper); stroke: var(--line); stroke-width: 1; }
+                .divider { stroke: var(--line); stroke-width: 1; }
+              </style>
+            </defs>
+            <rect class="card" x="0" y="0" width="520" height="240" rx="10"/>
+            <line class="divider" x1="0" y1="44" x2="520" y2="44"/>
+            <line class="divider" x1="0" y1="72" x2="520" y2="72"/>
+            <text class="cls-name" x="16" y="28">Institution</text>
+            <text class="cls-title" x="16" y="62">Properties</text>
+            <text class="cls-field" x="16" y="96">id</text><text class="cls-type" x="220" y="96">: INT (PK)</text>
+            <text class="cls-field" x="16" y="120">name</text><text class="cls-type" x="220" y="120">: VARCHAR(200)</text>
+            <text class="cls-field" x="16" y="144">short_code</text><text class="cls-type" x="220" y="144">: VARCHAR(10) UNIQUE</text>
+            <text class="cls-field" x="16" y="168">domain</text><text class="cls-type" x="220" y="168">: VARCHAR(100) UNIQUE</text>
+            <text class="cls-field" x="16" y="192">wallet_address</text><text class="cls-type" x="220" y="192">: VARCHAR(42) UNIQUE</text>
+            <text class="cls-field" x="16" y="216">is_active</text><text class="cls-type" x="220" y="216">: BOOLEAN</text>
+          </svg>
+        </div>
+
+        <!-- Class: User -->
+        <div class="uml-block">
+          <h3>User</h3>
+          <p>Any authenticated platform account. Roles: systemAdmin, admin, student, employer.</p>
+          <svg class="uml-svg" viewBox="0 0 520 320" xmlns="http://www.w3.org/2000/svg">
+            <rect class="card" x="0" y="0" width="520" height="320" rx="10"/>
+            <line class="divider" x1="0" y1="44" x2="520" y2="44"/>
+            <line class="divider" x1="0" y1="72" x2="520" y2="72"/>
+            <text class="cls-name" x="16" y="28">User</text>
+            <text class="cls-title" x="16" y="62">Properties</text>
+            <text class="cls-field" x="16" y="96">id</text><text class="cls-type" x="180" y="96">: INT (PK)</text>
+            <text class="cls-field" x="16" y="120">username</text><text class="cls-type" x="180" y="120">: VARCHAR(80)</text>
+            <text class="cls-field" x="16" y="144">email</text><text class="cls-type" x="180" y="144">: VARCHAR(255) UNIQUE</text>
+            <text class="cls-field" x="16" y="168">password</text><text class="cls-type" x="180" y="168">: VARCHAR(255) (bcrypt)</text>
+            <text class="cls-field" x="16" y="192">role</text><text class="cls-type" x="180" y="192">: ENUM</text>
+            <text class="cls-field" x="16" y="216">wallet_address?</text><text class="cls-type" x="180" y="216">: VARCHAR(42)</text>
+            <text class="cls-field" x="16" y="240">institution_id?</text><text class="cls-type" x="180" y="240">: INT (FK)</text>
+            <text class="cls-field" x="16" y="264">is_verified</text><text class="cls-type" x="180" y="264">: BOOLEAN</text>
+            <text class="cls-field" x="16" y="288">created_at / updated_at</text><text class="cls-type" x="180" y="288">: TIMESTAMP</text>
+          </svg>
+        </div>
+
+        <!-- Class: Certificate -->
+        <div class="uml-block">
+          <h3>Certificate</h3>
+          <p>An issued academic credential. The certificate_hash anchors on-chain.</p>
+          <svg class="uml-svg" viewBox="0 0 620 380" xmlns="http://www.w3.org/2000/svg">
+            <rect class="card" x="0" y="0" width="620" height="380" rx="10"/>
+            <line class="divider" x1="0" y1="44" x2="620" y2="44"/>
+            <line class="divider" x1="0" y1="72" x2="620" y2="72"/>
+            <text class="cls-name" x="16" y="28">Certificate</text>
+            <text class="cls-title" x="16" y="62">Properties</text>
+            <text class="cls-field" x="16" y="96">id</text><text class="cls-type" x="240" y="96">: INT (PK)</text>
+            <text class="cls-field" x="16" y="120">student_name</text><text class="cls-type" x="240" y="120">: VARCHAR(80)</text>
+            <text class="cls-field" x="16" y="144">registration_number</text><text class="cls-type" x="240" y="144">: VARCHAR(50)</text>
+            <text class="cls-field" x="16" y="168">course</text><text class="cls-type" x="240" y="168">: VARCHAR(120)</text>
+            <text class="cls-field" x="16" y="192">degree</text><text class="cls-type" x="240" y="192">: VARCHAR(120)</text>
+            <text class="cls-field" x="16" y="216">classification?</text><text class="cls-type" x="240" y="216">: VARCHAR(60)</text>
+            <text class="cls-field" x="16" y="240">graduation_date</text><text class="cls-type" x="240" y="240">: DATE</text>
+            <text class="cls-field" x="16" y="264">certificate_number</text><text class="cls-type" x="240" y="264">: VARCHAR(50) UNIQUE</text>
+            <text class="cls-field" x="16" y="288">certificate_hash</text><text class="cls-type" x="240" y="288">: VARCHAR(66) UNIQUE</text>
+            <text class="cls-field" x="16" y="312">blockchain_tx_hash?</text><text class="cls-type" x="240" y="312">: VARCHAR(66)</text>
+            <text class="cls-field" x="16" y="336">status</text><text class="cls-type" x="240" y="336">: ENUM(issued, revoked)</text>
+            <text class="cls-field" x="16" y="360">issued_by</text><text class="cls-type" x="240" y="360">: INT (FK → User)</text>
+          </svg>
+        </div>
+
+        <!-- Class: VerificationLog -->
+        <div class="uml-block">
+          <h3>VerificationLog</h3>
+          <p>One row per verification attempt — anchors analytics and audit trails.</p>
+          <svg class="uml-svg" viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg">
+            <rect class="card" x="0" y="0" width="600" height="280" rx="10"/>
+            <line class="divider" x1="0" y1="44" x2="600" y2="44"/>
+            <line class="divider" x1="0" y1="72" x2="600" y2="72"/>
+            <text class="cls-name" x="16" y="28">VerificationLog</text>
+            <text class="cls-title" x="16" y="62">Properties</text>
+            <text class="cls-field" x="16" y="96">id</text><text class="cls-type" x="220" y="96">: INT (PK)</text>
+            <text class="cls-field" x="16" y="120">certificate_id?</text><text class="cls-type" x="220" y="120">: INT (FK)</text>
+            <text class="cls-field" x="16" y="144">verifier_id?</text><text class="cls-type" x="220" y="144">: INT (FK)</text>
+            <text class="cls-field" x="16" y="168">verifier_type</text><text class="cls-type" x="220" y="168">: ENUM(student, employer, public)</text>
+            <text class="cls-field" x="16" y="192">submitted_hash</text><text class="cls-type" x="220" y="192">: VARCHAR(66)</text>
+            <text class="cls-field" x="16" y="216">blockchain_hash?</text><text class="cls-type" x="220" y="216">: VARCHAR(66)</text>
+            <text class="cls-field" x="16" y="240">result</text><text class="cls-type" x="220" y="240">: ENUM(verified, invalid, revoked)</text>
+            <text class="cls-field" x="16" y="264">verified_at</text><text class="cls-type" x="220" y="264">: TIMESTAMP</text>
+          </svg>
+        </div>
+
+        <!-- Class: Recommendation -->
+        <div class="uml-block">
+          <h3>Recommendation</h3>
+          <p>AI-generated structured career suggestion stored alongside its certificate source.</p>
+          <svg class="uml-svg" viewBox="0 0 620 260" xmlns="http://www.w3.org/2000/svg">
+            <rect class="card" x="0" y="0" width="620" height="260" rx="10"/>
+            <line class="divider" x1="0" y1="44" x2="620" y2="44"/>
+            <line class="divider" x1="0" y1="72" x2="620" y2="72"/>
+            <text class="cls-name" x="16" y="28">Recommendation</text>
+            <text class="cls-title" x="16" y="62">Properties</text>
+            <text class="cls-field" x="16" y="96">id</text><text class="cls-type" x="240" y="96">: INT (PK)</text>
+            <text class="cls-field" x="16" y="120">certificate_id</text><text class="cls-type" x="240" y="120">: INT (FK, cascade)</text>
+            <text class="cls-field" x="16" y="144">user_id?</text><text class="cls-type" x="240" y="144">: INT (FK)</text>
+            <text class="cls-field" x="16" y="168">source_profile</text><text class="cls-type" x="240" y="168">: JSON</text>
+            <text class="cls-field" x="16" y="192">recommended_roles</text><text class="cls-type" x="240" y="192">: JSON[]</text>
+            <text class="cls-field" x="16" y="216">suggested_skills</text><text class="cls-type" x="240" y="216">: JSON[]</text>
+            <text class="cls-field" x="16" y="240">job_matches</text><text class="cls-type" x="240" y="240">: JSON[]</text>
+          </svg>
+        </div>
+
+        <!-- On-chain class -->
+        <div class="uml-block">
+          <h3>CertificateRecord &nbsp;·&nbsp; <span style="font-family:'Outfit';font-size:12px;color:var(--gold);">on-chain (Ethereum)</span></h3>
+          <p>Solidity struct stored in <code>certificates[hash][institutionId]</code>. Mutability = append + revoke only.</p>
+          <svg class="uml-svg" viewBox="0 0 620 260" xmlns="http://www.w3.org/2000/svg">
+            <rect class="card" x="0" y="0" width="620" height="260" rx="10"/>
+            <line class="divider" x1="0" y1="44" x2="620" y2="44"/>
+            <line class="divider" x1="0" y1="72" x2="620" y2="72"/>
+            <text class="cls-name" x="16" y="28">CertificateRecord</text>
+            <text class="cls-title" x="16" y="62">Fields</text>
+            <text class="cls-field" x="16" y="96">certificateHash</text><text class="cls-type" x="260" y="96">: bytes32</text>
+            <text class="cls-field" x="16" y="120">institutionId</text><text class="cls-type" x="260" y="120">: bytes32</text>
+            <text class="cls-field" x="16" y="144">issuer</text><text class="cls-type" x="260" y="144">: address</text>
+            <text class="cls-field" x="16" y="168">issuedAt</text><text class="cls-type" x="260" y="168">: uint64</text>
+            <text class="cls-field" x="16" y="192">revokedAt</text><text class="cls-type" x="260" y="192">: uint64 (0 = active)</text>
+            <text class="cls-field" x="16" y="216">revoked</text><text class="cls-type" x="260" y="216">: bool</text>
+            <text class="cls-field" x="16" y="240">exists</text><text class="cls-type" x="260" y="240">: bool</text>
+          </svg>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Relationships table -->
+    <div class="diagram-card" style="margin-top: 22px; padding: 24px 28px;">
+      <div class="section-head" style="margin-bottom: 14px;">
+        <span class="section-num" style="font-size: 11px;">cardinality</span>
+        <h3 style="font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 600;">Relationships</h3>
+      </div>
+      <div class="uml-wrap" style="gap: 10px;">
+        <div style="display: grid; grid-template-columns: 180px 1fr 120px; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--line); font-size: 14px;">
+          <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent);">Institution</span>
+          <span>owns (composes) — users and certificates are scoped under one institution</span>
+          <span style="text-align:right; color: var(--muted); font-family: 'JetBrains Mono', monospace;">1 ↔ N each</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 180px 1fr 120px; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--line); font-size: 14px;">
+          <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent);">User (admin)</span>
+          <span>issues — an admin creates many certificate records</span>
+          <span style="text-align:right; color: var(--muted); font-family: 'JetBrains Mono', monospace;">1 ↔ N</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 180px 1fr 120px; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--line); font-size: 14px;">
+          <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent);">Certificate</span>
+          <span>anchored by — the certificate_hash + institutionId pair maps to on-chain CertificateRecord</span>
+          <span style="text-align:right; color: var(--muted); font-family: 'JetBrains Mono', monospace;">1 ↔ 1</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 180px 1fr 120px; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--line); font-size: 14px;">
+          <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent);">Certificate</span>
+          <span>has many — verification attempts accumulate as one row per request</span>
+          <span style="text-align:right; color: var(--muted); font-family: 'JetBrains Mono', monospace;">1 ↔ N</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 180px 1fr 120px; gap: 12px; padding: 10px 0; font-size: 14px;">
+          <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent);">Certificate</span>
+          <span>yields — one AI recommendation record per certificate (cascade delete)</span>
+          <span style="text-align:right; color: var(--muted); font-family: 'JetBrains Mono', monospace;">1 ↔ 0..1</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────────────────────────────────────────────────────── -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <h2>Notes</h2>
+    </div>
+    <p class="section-desc">Three diagrams, three audiences: context for stakeholders, component view for engineering leads, UML class diagram for DB / API alignment.</p>
+
+    <div class="notes">
+      <div class="note">
+        <div class="note-title">Why these diagrams</div>
+        <p class="note-body">The context diagram answers "who is outside the system?" — the UML class diagram answers "what does the system remember?" — the component diagram answers "where does work happen?"</p>
+      </div>
+      <div class="note">
+        <div class="note-title">Multi-tenancy</div>
+        <p class="note-body">Every certificate record is scoped by institutionId. The compound key (certificateHash, institutionId) is the unique axis across both MySQL and the smart contract.</p>
+      </div>
+      <div class="note">
+        <div class="note-title">On-chain authority</div>
+        <p class="note-body">Only the wallet registered for an institutionId may call <code>issueCertificate</code> / <code>revokeCertificate</code>. The contract owner registers institutions; everything else is enforced by <code>onlyAuthorizedIssuer</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    CertiChain AI · Software Design Specification · Context & UML diagrams · <span style="font-family: 'JetBrains Mono', monospace;">v1.0</span>
+  </footer>
+
+</main>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    securityLevel: 'loose',
+    themeVariables: {
+      fontFamily: "'Outfit', system-ui, sans-serif",
+      fontSize: '13px',
+      primaryColor: '#ffffff',
+      primaryBorderColor: '#cfded6',
+      primaryTextColor: '#14171e',
+      lineColor: '#2f6f5e',
+      secondaryColor: '#eaf3ef',
+      tertiaryColor: '#f3eee5',
+      background: '#ffffff',
+      clusterBkg: '#fafaf6',
+      clusterBorder: '#e9e3d6',
+      edgeLabelBackground: '#ffffff'
+    },
+    flowchart: { curve: 'basis', padding: 12 }
+  });
+</script>
+</body>
+</html>

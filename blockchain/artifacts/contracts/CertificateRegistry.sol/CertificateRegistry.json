@@ -1,0 +1,470 @@
+{
+  "_format": "hh3-artifact-1",
+  "contractName": "CertificateRegistry",
+  "sourceName": "contracts/CertificateRegistry.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "certificateHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "CertificateAlreadyExists",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "certificateHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "CertificateAlreadyRevoked",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "certificateHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "CertificateNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "InstitutionNotRegistered",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidCertificateHash",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidInstitutionId",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "issuer",
+          "type": "address"
+        }
+      ],
+      "name": "NotAuthorizedIssuer",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotOwner",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "certificateHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "certificateId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "issuer",
+          "type": "address"
+        }
+      ],
+      "name": "CertificateIssued",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "certificateHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "certificateId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "issuer",
+          "type": "address"
+        }
+      ],
+      "name": "CertificateRevoked",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "issuerWallet",
+          "type": "address"
+        }
+      ],
+      "name": "InstitutionRegistered",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "certificateHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getCertificate",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "certificateHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "institutionId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "issuer",
+              "type": "address"
+            },
+            {
+              "internalType": "uint64",
+              "name": "issuedAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revokedAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bool",
+              "name": "revoked",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ICertificateRegistry.CertificateRecord",
+          "name": "record",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "certificateHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getCertificateId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "certificateId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "institutionIssuers",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "issuer",
+          "type": "address"
+        }
+      ],
+      "name": "isAuthorizedIssuer",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "certificateHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "issueCertificate",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "certificateId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "issuerWallet",
+          "type": "address"
+        }
+      ],
+      "name": "registerInstitution",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "certificateHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "revokeCertificate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalIssued",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "certificateHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "verifyCertificate",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "valid",
+          "type": "bool"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "certificateHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "institutionId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "issuer",
+              "type": "address"
+            },
+            {
+              "internalType": "uint64",
+              "name": "issuedAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revokedAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bool",
+              "name": "revoked",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ICertificateRegistry.CertificateRecord",
+          "name": "record",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561000f575f80fd5b505f80546001600160a01b03191633179055610ac78061002e5f395ff3fe608060405234801561000f575f80fd5b506004361061009b575f3560e01c8063a5268b3011610063578063a5268b301461013c578063ae0c95b21461015c578063ce99f65e1461019a578063f5be3193146101c2578063fc1bfa9c146101cb575f80fd5b80631f75435d1461009f57806331a5c6a3146100c9578063325a14be146100de57806357bcf883146100f15780638da5cb5b14610112575b5f80fd5b6100b26100ad366004610976565b6101de565b6040516100c09291906109f6565b60405180910390f35b6100dc6100d7366004610976565b6102bf565b005b6100dc6100ec366004610a14565b610440565b6101046100ff366004610976565b61051c565b6040519081526020016100c0565b5f54610124906001600160a01b031681565b6040516001600160a01b0390911681526020016100c0565b61014f61014a366004610976565b61083a565b6040516100c09190610a4d565b61018a61016a366004610a14565b5f91825260016020526040909120546001600160a01b0391821691161490565b60405190151581526020016100c0565b6101246101a8366004610a5b565b60016020525f90815260409020546001600160a01b031681565b61010460055481565b6101046101d9366004610976565b610932565b6040805160e0810182525f80825260208201819052918101829052606081018290526080810182905260a0810182905260c08101829052505f838152600260208181526040808420868552825292839020835160e08101855281548152600182015492810192909252918201546001600160a01b0381169382019390935267ffffffffffffffff600160a01b90930483166060820152600390910154918216608082015260ff600160401b83048116151560a0830152600160481b90920490911615801560c08301819052906102b657508060a00151155b91509250929050565b5f8181526001602052604090205481906001600160a01b03166102fd57604051638b0c89ab60e01b8152600481018290526024015b60405180910390fd5b5f818152600160205260409020546001600160a01b0316331461033f57604051600162617a2d60e11b03198152600481018290523360248201526044016102f4565b5f83815260026020908152604080832085845290915290206003810154600160481b900460ff1661038d5760405163f790677f60e01b815260048101859052602481018490526044016102f4565b6003810154600160401b900460ff16156103c4576040516347859a7560e11b815260048101859052602481018490526044016102f4565b600381018054600160401b68ffffffffffffffffff199091164267ffffffffffffffff16171790555f848152600460209081526040808320868452825291829020549151338152859187917f926340714baf57a4951310b9c5d09616642acec766f19be78704473bc094bebb910160405180910390a450505050565b5f546001600160a01b0316331461046a576040516330cd747160e01b815260040160405180910390fd5b8161048857604051637780916560e11b815260040160405180910390fd5b6001600160a01b0381166104c457604051600162617a2d60e11b03198152600481018390526001600160a01b03821660248201526044016102f4565b5f8281526001602052604080822080546001600160a01b0319166001600160a01b0385169081179091559051909184917f26706ce3e1952061ce6e37d975684c66cd9a087b66a20c255891219b27bd130d9190a35050565b5f8181526001602052604081205482906001600160a01b031661055557604051638b0c89ab60e01b8152600481018290526024016102f4565b5f818152600160205260409020546001600160a01b0316331461059757604051600162617a2d60e11b03198152600481018290523360248201526044016102f4565b836105b557604051635006807360e11b815260040160405180910390fd5b826105d357604051637780916560e11b815260040160405180910390fd5b5f84815260026020908152604080832086845290915290206003810154600160481b900460ff161561062257604051631303939160e01b815260048101869052602481018590526044016102f4565b5f848152600360205260408120805460019290610640908490610a72565b90915550505f8481526003602052604081205460058054919550600192909161066a908490610a72565b925050819055506040518060e00160405280868152602001858152602001336001600160a01b031681526020014267ffffffffffffffff1681526020015f67ffffffffffffffff1681526020015f151581526020016001151581525060025f8781526020019081526020015f205f8681526020019081526020015f205f820151815f0155602082015181600101556040820151816002015f6101000a8154816001600160a01b0302191690836001600160a01b0316021790555060608201518160020160146101000a81548167ffffffffffffffff021916908367ffffffffffffffff1602179055506080820151816003015f6101000a81548167ffffffffffffffff021916908367ffffffffffffffff16021790555060a08201518160030160086101000a81548160ff02191690831515021790555060c08201518160030160096101000a81548160ff0219169083151502179055509050508260045f8781526020019081526020015f205f8681526020019081526020015f20819055508284867f8be98eeeec1e3306b1536c3537a8c5c84bb4c42882710724a1d1af87d2da58153360405161082a91906001600160a01b0391909116815260200190565b60405180910390a4505092915050565b6040805160e0810182525f80825260208201819052918101829052606081018290526080810182905260a0810182905260c0810191909152505f828152600260208181526040808420858552825292839020835160e08101855281548152600182015492810192909252918201546001600160a01b0381169382019390935267ffffffffffffffff600160a01b90930483166060820152600390910154918216608082015260ff600160401b83048116151560a0830152600160481b909204909116151560c0820181905261092c5760405163f790677f60e01b815260048101849052602481018390526044016102f4565b92915050565b5f8281526004602090815260408083208484529091528120549081900361092c5760405163f790677f60e01b815260048101849052602481018390526044016102f4565b5f8060408385031215610987575f80fd5b50508035926020909101359150565b805182526020810151602083015260018060a01b036040820151166040830152606081015167ffffffffffffffff8082166060850152806080840151166080850152505060a0810151151560a083015260c0810151151560c08301525050565b82151581526101008101610a0d6020830184610996565b9392505050565b5f8060408385031215610a25575f80fd5b8235915060208301356001600160a01b0381168114610a42575f80fd5b809150509250929050565b60e0810161092c8284610996565b5f60208284031215610a6b575f80fd5b5035919050565b8082018082111561092c57634e487b7160e01b5f52601160045260245ffdfea26469706673582212204a60737d0b6ffa21fc4f018497e8835749b8abe0369244be21cd10925c57f24064736f6c63430008180033",
+  "deployedBytecode": "0x608060405234801561000f575f80fd5b506004361061009b575f3560e01c8063a5268b3011610063578063a5268b301461013c578063ae0c95b21461015c578063ce99f65e1461019a578063f5be3193146101c2578063fc1bfa9c146101cb575f80fd5b80631f75435d1461009f57806331a5c6a3146100c9578063325a14be146100de57806357bcf883146100f15780638da5cb5b14610112575b5f80fd5b6100b26100ad366004610976565b6101de565b6040516100c09291906109f6565b60405180910390f35b6100dc6100d7366004610976565b6102bf565b005b6100dc6100ec366004610a14565b610440565b6101046100ff366004610976565b61051c565b6040519081526020016100c0565b5f54610124906001600160a01b031681565b6040516001600160a01b0390911681526020016100c0565b61014f61014a366004610976565b61083a565b6040516100c09190610a4d565b61018a61016a366004610a14565b5f91825260016020526040909120546001600160a01b0391821691161490565b60405190151581526020016100c0565b6101246101a8366004610a5b565b60016020525f90815260409020546001600160a01b031681565b61010460055481565b6101046101d9366004610976565b610932565b6040805160e0810182525f80825260208201819052918101829052606081018290526080810182905260a0810182905260c08101829052505f838152600260208181526040808420868552825292839020835160e08101855281548152600182015492810192909252918201546001600160a01b0381169382019390935267ffffffffffffffff600160a01b90930483166060820152600390910154918216608082015260ff600160401b83048116151560a0830152600160481b90920490911615801560c08301819052906102b657508060a00151155b91509250929050565b5f8181526001602052604090205481906001600160a01b03166102fd57604051638b0c89ab60e01b8152600481018290526024015b60405180910390fd5b5f818152600160205260409020546001600160a01b0316331461033f57604051600162617a2d60e11b03198152600481018290523360248201526044016102f4565b5f83815260026020908152604080832085845290915290206003810154600160481b900460ff1661038d5760405163f790677f60e01b815260048101859052602481018490526044016102f4565b6003810154600160401b900460ff16156103c4576040516347859a7560e11b815260048101859052602481018490526044016102f4565b600381018054600160401b68ffffffffffffffffff199091164267ffffffffffffffff16171790555f848152600460209081526040808320868452825291829020549151338152859187917f926340714baf57a4951310b9c5d09616642acec766f19be78704473bc094bebb910160405180910390a450505050565b5f546001600160a01b0316331461046a576040516330cd747160e01b815260040160405180910390fd5b8161048857604051637780916560e11b815260040160405180910390fd5b6001600160a01b0381166104c457604051600162617a2d60e11b03198152600481018390526001600160a01b03821660248201526044016102f4565b5f8281526001602052604080822080546001600160a01b0319166001600160a01b0385169081179091559051909184917f26706ce3e1952061ce6e37d975684c66cd9a087b66a20c255891219b27bd130d9190a35050565b5f8181526001602052604081205482906001600160a01b031661055557604051638b0c89ab60e01b8152600481018290526024016102f4565b5f818152600160205260409020546001600160a01b0316331461059757604051600162617a2d60e11b03198152600481018290523360248201526044016102f4565b836105b557604051635006807360e11b815260040160405180910390fd5b826105d357604051637780916560e11b815260040160405180910390fd5b5f84815260026020908152604080832086845290915290206003810154600160481b900460ff161561062257604051631303939160e01b815260048101869052602481018590526044016102f4565b5f848152600360205260408120805460019290610640908490610a72565b90915550505f8481526003602052604081205460058054919550600192909161066a908490610a72565b925050819055506040518060e00160405280868152602001858152602001336001600160a01b031681526020014267ffffffffffffffff1681526020015f67ffffffffffffffff1681526020015f151581526020016001151581525060025f8781526020019081526020015f205f8681526020019081526020015f205f820151815f0155602082015181600101556040820151816002015f6101000a8154816001600160a01b0302191690836001600160a01b0316021790555060608201518160020160146101000a81548167ffffffffffffffff021916908367ffffffffffffffff1602179055506080820151816003015f6101000a81548167ffffffffffffffff021916908367ffffffffffffffff16021790555060a08201518160030160086101000a81548160ff02191690831515021790555060c08201518160030160096101000a81548160ff0219169083151502179055509050508260045f8781526020019081526020015f205f8681526020019081526020015f20819055508284867f8be98eeeec1e3306b1536c3537a8c5c84bb4c42882710724a1d1af87d2da58153360405161082a91906001600160a01b0391909116815260200190565b60405180910390a4505092915050565b6040805160e0810182525f80825260208201819052918101829052606081018290526080810182905260a0810182905260c0810191909152505f828152600260208181526040808420858552825292839020835160e08101855281548152600182015492810192909252918201546001600160a01b0381169382019390935267ffffffffffffffff600160a01b90930483166060820152600390910154918216608082015260ff600160401b83048116151560a0830152600160481b909204909116151560c0820181905261092c5760405163f790677f60e01b815260048101849052602481018390526044016102f4565b92915050565b5f8281526004602090815260408083208484529091528120549081900361092c5760405163f790677f60e01b815260048101849052602481018390526044016102f4565b5f8060408385031215610987575f80fd5b50508035926020909101359150565b805182526020810151602083015260018060a01b036040820151166040830152606081015167ffffffffffffffff8082166060850152806080840151166080850152505060a0810151151560a083015260c0810151151560c08301525050565b82151581526101008101610a0d6020830184610996565b9392505050565b5f8060408385031215610a25575f80fd5b8235915060208301356001600160a01b0381168114610a42575f80fd5b809150509250929050565b60e0810161092c8284610996565b5f60208284031215610a6b575f80fd5b5035919050565b8082018082111561092c57634e487b7160e01b5f52601160045260245ffdfea26469706673582212204a60737d0b6ffa21fc4f018497e8835749b8abe0369244be21cd10925c57f24064736f6c63430008180033",
+  "linkReferences": {},
+  "deployedLinkReferences": {},
+  "immutableReferences": {},
+  "inputSourceName": "project/contracts/CertificateRegistry.sol",
+  "buildInfoId": "solc-0_8_24-4314eec24f9b1e6ef3bffdd1003cb26afad4b641"
+}
