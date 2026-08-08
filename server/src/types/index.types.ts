@@ -54,7 +54,7 @@ export interface InstitutionCreateInput {
   short_code: string;
   domain: string;
   wallet_address: string;
-  description?: string;
+  description?: string ;
   is_active?: boolean;
 }
 

@@ -32,7 +32,7 @@ export const buildCertificateFingerprint = (certificate: CertificateInput): stri
   return JSON.stringify(normalizedPayload); // this is going to be used to generate the pdf certiccate - i will return object a json string
 };
 
-// This creates a fingerprint nd build s the hash that is going to be stored on the blochchain 
+// This creates a fingerprint nd builds the hash that is going to be stored on the blochchain 
 export const createCertificateHash = (certificate: CertificateInput): CertificateHashPayload => {
   const fingerprint = buildCertificateFingerprint(certificate);
   const certificateHash = `0x${createHash("sha256").update(fingerprint).digest("hex")}`;

@@ -35,6 +35,7 @@ export interface DecodedToken {
     id: number
     role: string
     username: string
+    email: string
 }
 
 // export interface AuthenticatedRequest extends Request {

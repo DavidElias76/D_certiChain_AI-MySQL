@@ -20,6 +20,14 @@ export const AuthRepository = {
         return rows.length ? (rows[0] as OmitPasswordUser) : null;
   },
 
+  async findByEmail(email: string): Promise<findUserByIdOtpType | null> {
+        const [rows] = await pool.execute<DbRow[]>(
+                `SELECT * FROM users WHERE email = ?`,
+                [email.toLowerCase()]
+        );
+        return rows.length ? (rows[0] as findUserByIdOtpType) : null;
+  },
+
     async findUserByIdOtp (email: string): Promise<findUserByIdOtpType | null> {
         const [rows] = await pool.execute<DbRow[]>(`
             SELECT 
@@ -55,7 +63,7 @@ export const AuthRepository = {
     // create a function that updates the password when the user forgot the password
     async UpdatePassword(hashedPassword: string, email: string) {
         const [result] = await pool.execute<DbResult>(`
-            UPDATE users SET passowrd = ? WHERE email = ?    
+            UPDATE users SET password = ? WHERE email = ?    
         `, [hashedPassword, email])
 
          return result.affectedRows > 0;

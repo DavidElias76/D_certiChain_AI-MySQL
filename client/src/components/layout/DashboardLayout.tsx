@@ -11,8 +11,12 @@ import {
   Award,
   Search,
   Building2,
+  Wallet,
+  LandmarkIcon
 } from "lucide-react";
 import { useState } from "react";
+
+import { useWallet } from "../../context/WalletContext";
 
 function NavItem({
   to,
@@ -47,6 +51,7 @@ export default function DashboardLayout() {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { disconnectWallet, connectWallet, connecting, account} = useWallet()
 
   const isStudent = user?.role === "student";
   const isAdmin = user?.role === "admin";
@@ -86,7 +91,8 @@ export default function DashboardLayout() {
                 System Administration
               </p>
               <NavItem to="/system/admin/dashboard" icon={LayoutDashboard} label="Dashboard" end />
-              <NavItem to="/system/admin/register" icon={Building2} label="Register Institution" />
+              <NavItem to="/system/admin/register" icon={Building2} label="Register Institutions" />
+              <NavItem to="/system/admin/manage-institutions" icon={LandmarkIcon} label="Manage Institutions" />
               <NavItem to="/system/admin/analytics" icon={BarChart3} label="Analytics" />
             </>
           )}
@@ -122,8 +128,7 @@ export default function DashboardLayout() {
           <div className="relative">
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xs transition-all"
-            >
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xs transition-all">
               <div className="w-9 h-9 bg-indigo-100 dark:bg-indigo-900 rounded-xs flex items-center justify-center text-indigo-600 dark:text-indigo-300 font-semibold shrink-0">
                 {user?.username?.[0]?.toUpperCase() || "?"}
               </div>
@@ -164,13 +169,31 @@ export default function DashboardLayout() {
               ? "University Administration"
               : "Student Portal"}
           </h2>
-          <div className="text-sm text-slate-600 dark:text-slate-400">
-            Welcome, <span className="font-medium text-slate-900 dark:text-white">{user?.username}</span>
-          </div>
+
+          { !isStudent &&  
+            <>
+              <div className="flex items-center gap-4">
+                <div className="text-sm text-slate-600 dark:text-slate-400">
+                  Welcome, <span className="font-medium text-slate-900 dark:text-white">{user?.username}</span>
+                </div>
+                <button
+                  onClick={account ? disconnectWallet : connectWallet}
+                  disabled={connecting}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-medium rounded-xs transition-colors"
+                >
+                  <Wallet size={16} />
+                  {connecting ? (
+                    <span>Connecting...</span>
+                  ) : account ? (
+                    <span className="max-w-30 truncate">{account.slice(0, 6)}...{account.slice(-4)}</span>
+                  ) : (
+                    <span>Connect Wallet</span>
+                  )}
+                </button>
+              </div>
+            </>
+          }
         </header>
-
-        {/* The button needs to be added here */}
-
         {/* Page content */}
         <main className="flex-1 overflow-auto p-8 bg-slate-50 dark:bg-slate-950">
           <Outlet />

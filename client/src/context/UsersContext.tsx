@@ -54,11 +54,14 @@ export function UsersProvider({ children }: Props) {
   const getUsers = async (): Promise<void> => {
     try {
       setLoading(true);
-      const response = await api.get("/users", { withCredentials: true });
-      setUsers(response.data?.user)
+      const response = await api.get("/users/", { withCredentials: true });
+      const data = response.data
+      const userList = Array.isArray(data) ? data : (data?.user || data?.users || []);
+      setUsers(userList);
+      setUsers(response.data)
     } catch (error) {
-      console.error("Error fetching users", error);
       setUsers([]);
+      console.error("Error fetching users", error);
     } finally {
       setLoading(false);
     }
@@ -77,7 +80,7 @@ export function UsersProvider({ children }: Props) {
   const addUsers = async (data: AddUserData): Promise<void> => {
     try {
       setLoading(true);
-      const response = await api.post("/users", data, { withCredentials: true });
+      const response = await api.post("/users/add", data, { withCredentials: true });
       setMessage(response.data?.message || "User added successfully");
       await getUsers();
     } catch (error: any) {

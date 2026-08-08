@@ -6,7 +6,7 @@ import useUsers from "../../context/UsersContext";
 export type UserRole = 'admin' | "student" | "employer";
 
 export type IUser = {
-  _id?: string;
+  id?: string;
   username: string;
   email: string;
   password?: string;
@@ -92,8 +92,8 @@ export default function UsersModal({ showAddModal, user, setShowAddModal }: User
     }
 
     try {
-      if (isEditing && user?._id) {
-        await updateUsersById(user._id, userData);
+      if (isEditing && user?.id) {
+        await updateUsersById(user.id, userData);
       } else {
         await addUsers(userData);
       }
@@ -107,7 +107,7 @@ export default function UsersModal({ showAddModal, user, setShowAddModal }: User
 
   return createPortal(
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white w-full max-w-2xl rounded-lg shadow-lg overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-2xl border border-slate-200 dark:border-slate-800 shadow-lg overflow-hidden">
         <div className="flex justify-between items-center p-6 border-b">
           <h2 className="text-xl font-semibold text-slate-900">
             {isEditing ? "Edit User" : "Add New User"}
@@ -119,7 +119,7 @@ export default function UsersModal({ showAddModal, user, setShowAddModal }: User
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {error && (
-            <div className="p-4 rounded-lg border border-red-200 bg-red-50 text-red-600 text-sm">
+            <div className="p-4 border border-red-200 bg-red-50 text-red-600 text-sm">
               {error}
             </div>
           )}
@@ -134,7 +134,7 @@ export default function UsersModal({ showAddModal, user, setShowAddModal }: User
                   required
                   value={userData.username}
                   onChange={(e) => setUserData({ ...userData, username: e.target.value })}
-                  className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400"
+                  className="w-full px-4 py-3 border border-slate-200 focus:outline-none focus:border-slate-400"
                   placeholder="John Doe"
                 />
               </div>
@@ -146,7 +146,7 @@ export default function UsersModal({ showAddModal, user, setShowAddModal }: User
                   required
                   value={userData.email}
                   onChange={(e) => setUserData({ ...userData, email: e.target.value })}
-                  className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400"
+                  className="w-full px-4 py-3 border border-slate-200 focus:outline-none focus:border-slate-400"
                   placeholder="student.number@students.kca.ac.ke"
                 />
               </div>
@@ -157,7 +157,7 @@ export default function UsersModal({ showAddModal, user, setShowAddModal }: User
                   required
                   value={userData.role}
                   onChange={(e) => setUserData({ ...userData, role: e.target.value as UserRole })}
-                  className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400"
+                  className="w-full px-4 py-3 border border-slate-200 focus:outline-none focus:border-slate-400"
                 >
                   <option value="">Select Role</option>
                   <option value="student">Student</option>
@@ -177,7 +177,7 @@ export default function UsersModal({ showAddModal, user, setShowAddModal }: User
                     required
                     value={userData.institutionName}
                     onChange={(e) => setUserData({ ...userData, institutionName: e.target.value })}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400"
+                    className="w-full px-4 py-3 border border-slate-200 focus:outline-none focus:border-slate-400"
                     placeholder="KCA University"
                   />
                 </div>
@@ -193,7 +193,7 @@ export default function UsersModal({ showAddModal, user, setShowAddModal }: User
                     type={showPassword ? "text" : "password"}
                     value={userData.password}
                     onChange={(e) => setUserData({ ...userData, password: e.target.value })}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 pr-12"
+                    className="w-full px-4 py-3 border border-slate-200 focus:outline-none focus:border-slate-400 pr-12"
                     placeholder={isEditing ? "Enter new password" : "Minimum 6 characters"}
                   />
                   <button
@@ -213,7 +213,7 @@ export default function UsersModal({ showAddModal, user, setShowAddModal }: User
                     type={showConfirmPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 pr-12"
+                    className="w-full px-4 py-3 border border-slate-200 focus:outline-none focus:border-slate-400 pr-12"
                     placeholder="Confirm password"
                   />
                   <button
@@ -232,14 +232,14 @@ export default function UsersModal({ showAddModal, user, setShowAddModal }: User
             <button
               type="button"
               onClick={setShowAddModal}
-              className="flex-1 py-3 border border-slate-300 rounded-lg text-slate-700 font-medium hover:bg-slate-50"
+              className="flex-1 py-3 border border-slate-300 text-slate-700 font-medium hover:bg-slate-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-500 disabled:opacity-70 transition-colors"
+              className="flex-1 py-3 bg-indigo-600 text-white font-medium hover:bg-indigo-500 disabled:opacity-70 transition-colors"
             >
               {loading ? "Saving..." : isEditing ? "Update User" : "Add User"}
             </button>

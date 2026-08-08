@@ -61,4 +61,12 @@ interface ICertificateRegistry {
         external
         view
         returns (bool);
+
+    /**
+     * Returns the numeric certificateId for a given hash + institution.
+     */
+    function getCertificateId(bytes32 certificateHash, bytes32 institutionId)
+        external
+        view
+        returns (uint256 certificateId);
 }

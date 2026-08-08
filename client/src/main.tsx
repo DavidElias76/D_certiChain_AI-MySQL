@@ -14,7 +14,7 @@ createRoot(document.getElementById('root')!).render(
         <Toaster
           position="top-right"
           toastOptions={{
-            duration: 4000,
+            duration: 2000,
             style: {
               fontFamily: "'Plus Jakarta Sans', sans-serif",
               fontSize: "13px",

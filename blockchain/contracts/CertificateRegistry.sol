@@ -14,23 +14,23 @@ import "./interfaces/ICertificateRegistry.sol";
  */
 contract CertificateRegistry is ICertificateRegistry {
 
-    address public owner;
+    address public owner; // who is the owner of this function
 
     /// institutionId → authorized issuer wallet address
     mapping(bytes32 => address) public institutionIssuers;
 
-    /// (certificateHash, institutionId) → CertificateRecord
+    /// (certificateHash, institutionId) → CertificateRecord - this is an object that has the property certificate hash and institutionid -> used to link the institution  
     mapping(bytes32 => mapping(bytes32 => CertificateRecord)) private certificates;
 
-    /// institutionId → sequential counter
+    /// institutionId → sequential counter - The number of certificate each instutution has
     mapping(bytes32 => uint256) private institutionCertCount;
 
-    /// (certificateHash, institutionId) → numeric certificateId
+    /// (certificateHash, institutionId) → numeric certificateId - This is an object that has the institution id and certificate hash property
     mapping(bytes32 => mapping(bytes32 => uint256)) private certificateIds;
 
     uint256 public totalIssued; // overall platform counter
 
-    // ── Events
+    // ── Events - also called console.logg in javascript and other languages
     event CertificateIssued(
         bytes32 indexed certificateHash,
         bytes32 indexed institutionId,
@@ -77,7 +77,7 @@ contract CertificateRegistry is ICertificateRegistry {
         _;
     }
 
-    // ── Constructor
+    // ── Constructor - who called this function - it will be runned only once 
     constructor() {
         owner = msg.sender;
     }
@@ -91,6 +91,7 @@ contract CertificateRegistry is ICertificateRegistry {
         external
         onlyOwner
     {
+        // check if the instution id exist in blockchain
         if (institutionId == bytes32(0)) revert InvalidInstitutionId();
         if (issuerWallet == address(0)) revert NotAuthorizedIssuer(institutionId, issuerWallet);
 
@@ -103,7 +104,7 @@ contract CertificateRegistry is ICertificateRegistry {
 
     /**
      * Issues a certificate on-chain.
-     * Rejects empty hashes and prevents duplicate issuance.
+     * Rejects empty hashes and prevents duplicate issuance. - Only the institution can issue certificate
      */
     function issueCertificate(bytes32 certificateHash, bytes32 institutionId)
         external

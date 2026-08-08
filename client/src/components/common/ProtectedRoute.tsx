@@ -24,10 +24,13 @@ export default function ProtectedRoute({ allowedRoles }: { allowedRoles?: string
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     // If user doesn't have permission, send them to their specific dashboard
     // This prevents the infinite loop by ensuring they land on a route they ARE allowed to see
+
+    // NB: The role of the employee needs to be added missing in the allowedRoles
     const roleToPath: Record<string, string> = {
       systemAdmin: "/system/admin/dashboard",
       admin: "/admin/dashboard",
       student: "/dashboard",
+      // employer: "/dashboard",
     };
     const defaultPath = roleToPath[user.role] ?? "/";
     

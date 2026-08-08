@@ -68,6 +68,31 @@
       "inputs": [
         {
           "internalType": "bytes32",
+          "name": "certificateHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        }
+      ],
+
+      "name": "getCertificateId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "certificateId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
           "name": "institutionId",
           "type": "bytes32"
         },
@@ -112,6 +137,7 @@
       "stateMutability": "nonpayable",
       "type": "function"
     },
+
     {
       "inputs": [
         {
@@ -125,6 +151,7 @@
           "type": "address"
         }
       ],
+
       "name": "registerInstitution",
       "outputs": [],
       "stateMutability": "nonpayable",
@@ -221,5 +248,5 @@
   "deployedLinkReferences": {},
   "immutableReferences": {},
   "inputSourceName": "project/contracts/interfaces/ICertificateRegistry.sol",
-  "buildInfoId": "solc-0_8_24-4314eec24f9b1e6ef3bffdd1003cb26afad4b641"
+  "buildInfoId": "solc-0_8_24-7d587356f4a4ad0ce17c9f5582557b715ca12d87"
 }

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import {
   addInstitutionsService,
   getInstitutionsService,
+//   getInstitutionByIdService,
   updateInstitutionService,
   deleteInstitutionService,
 } from "../services/institution.service";
@@ -9,9 +10,9 @@ import { CustomError } from "../types/error.types";
 
 type InstitutionInput = {
   name: string;
-  shortCode: string;
+  short_code: string;
   domain: string;
-  walletAddress?: string;
+  wallet_address: string;
   description?: string;
   isActive?: boolean;
 };
@@ -30,23 +31,36 @@ export const getInstitutionController = async (
   }
 };
 
+// The get institutionByIdController needs to be added in this file
 export const addInstitutionController = async (
   req: Request<{}, unknown, InstitutionInput, {}>,
   res: Response<{ message: string} | { error: string }>
 ) => {
   try {
-    const { name, shortCode, domain, walletAddress, description } = req.body;
+    const { name, short_code, domain, wallet_address, description } = req.body;
 
-    if (!name || !shortCode || !domain) {
+    if (!name || !short_code || !domain) {
       return res.status(400).json({ error: "Name, short code, and domain are required" });
     }
 
+    if(!wallet_address) {
+        res.status(400).json({ message: "Wallet address is required"});
+    }
+
     // Validate wallet address format if provided
-    if (walletAddress && !/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+    if (wallet_address && !/^0x[a-fA-F0-9]{40}$/.test(wallet_address)) {
       return res.status(400).json({ error: "Invalid Ethereum wallet address format" });
     }
 
-    await addInstitutionsService({ name, shortCode, domain, walletAddress, description });
+    const addedInstitution = await addInstitutionsService({ 
+        name, short_code, domain, wallet_address, description 
+    });
+
+    if (!addedInstitution) {
+        const error = new Error("Failed to add new Institution ") as CustomError;
+        error.statusCode = 404;
+        throw error;
+    }
 
     return res.status(201).json({ message: "Institution added successfully" });
   } catch (err) {
@@ -69,11 +83,18 @@ export const updateInstitutionController = async (
     }
 
     // Validate wallet address format if being updated
-    if (updates.walletAddress && !/^0x[a-fA-F0-9]{40}$/.test(updates.walletAddress)) {
+    if (updates.wallet_address && !/^0x[a-fA-F0-9]{40}$/.test(updates.wallet_address)) {
       return res.status(400).json({ error: "Invalid Ethereum wallet address format" });
     }
 
-    await updateInstitutionService(Number(id), updates);
+    const updatedInstitution = await updateInstitutionService(Number(id), updates);
+
+    if (!updatedInstitution) {
+        const error = new Error("Failed to update institution") as CustomError;
+        error.statusCode = 404;
+        throw error;
+    }
+    
     res.status(200).json({ message: "Institution updated successfully" });
   } catch (err) {
     const error = err as CustomError;

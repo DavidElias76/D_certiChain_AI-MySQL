@@ -1,34 +1,89 @@
-import { useState } from "react";
-import { Plus, Search, Edit2, Trash2, ShieldCheck, AlertCircle } from "lucide-react";
-import useUsers from "../../context/UsersContext";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  Users,
+  Search,
+  Plus,
+  Edit2,
+  Trash2,
+  ShieldCheck,
+  AlertCircle,
+  Loader2,
+  Mail,
+  Building2,
+  ArrowLeft,
+  Filter,
+  XCircle,
+  Eye,
+} from "lucide-react";
 import toast from "react-hot-toast";
+import useUsers from "../../context/UsersContext";
 import UsersModal from "../../components/modals/AddUsersModal";
 
+type UserRole = "admin" | "student" | "employer" | "systemAdmin";
+type StatusFilter = "all" | "verified" | "pending";
+
 export default function ManageUsers() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const { users, loading, getUsers, deleteUsersById } = useUsers();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [roleFilter, setRoleFilter] = useState<UserRole | "all">("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
+  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  const { users, deleteUsersById } = useUsers();
+  // Reload users on mount
+  useEffect(() => {
+    getUsers();
+  }, []);
 
-  const filteredUsers = users.filter(user =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Stats
+  const stats = useMemo(() => {
+    return {
+      total: users.length,
+      verified: users.filter((u) => u.isVerified).length,
+      pending: users.filter((u) => !u.isVerified).length,
+    };
+  }, [users]);
+
+  // Filter
+  const filtered = useMemo(() => {
+    return users.filter((user) => {
+      const matchStatus =
+        statusFilter === "all" ||
+        (statusFilter === "verified" && user.isVerified) ||
+        (statusFilter === "pending" && !user.isVerified);
+
+      const matchRole = roleFilter === "all" || user.role === roleFilter;
+
+      const term = search.toLowerCase().trim();
+      const matchSearch =
+        !term ||
+        (user.username || "").toLowerCase().includes(term) ||
+        (user.email || "").toLowerCase().includes(term) ||
+        (user.institutionName || "").toLowerCase().includes(term);
+
+      return matchStatus && matchRole && matchSearch;
+    });
+  }, [users, search, statusFilter, roleFilter]);
 
   const handleEditUser = (user: any) => {
     setEditingUser(user);
     setShowAddModal(true);
   };
 
-  const handleDeleteUser = async (user: any) => {
-    if (!window.confirm(`Are you sure you want to delete ${user.username}?`)) return;
-    
+  const handleDeleteUser = async () => {
+    if (!deleteTarget) return;
     try {
-      await deleteUsersById(user._id);
-      toast.success("User deleted successfully");
-    } catch (error) {
+      setDeleting(true);
+      await deleteUsersById(deleteTarget.id);
+      toast.success(`User ${deleteTarget.username} deleted`);
+      setDeleteTarget(null);
+    } catch {
       toast.error("Failed to delete user");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -37,93 +92,300 @@ export default function ManageUsers() {
     setEditingUser(null);
   };
 
+  const roleBadgeStyles: Record<UserRole, string> = {
+    admin: "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800/50",
+    student: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50",
+    employer: "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50",
+    systemAdmin: "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/50",
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8 pb-12">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Manage Users</h1>
-          <p className="text-slate-600 text-sm mt-1">View and manage all registered users</p>
+          <Link
+            to="/admin/dashboard"
+            className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-2"
+          >
+            <ArrowLeft size={16} /> Back to Dashboard
+          </Link>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+            <Users className="text-indigo-600 dark:text-indigo-400" size={28} />
+            Manage Users
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+            Add, edit, and remove users registered under your institution.
+          </p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-500 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-sm transition-colors text-sm"
         >
-          <Plus size={18} />
-          Add New User
+          <Plus size={16} /> Add New User
         </button>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-4 top-3.5 text-slate-400" size={18} />
-        <input
-          type="text"
-          placeholder="Search users by name or email..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400"
-        />
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/40">
+              <Users className="text-indigo-600 dark:text-indigo-400" size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Total</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.total}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/40">
+              <ShieldCheck className="text-emerald-600 dark:text-emerald-400" size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Verified</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.verified}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-amber-50 dark:bg-amber-950/40">
+              <AlertCircle className="text-amber-600 dark:text-amber-400" size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Pending</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.pending}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th className="px-6 py-4 text-left text-xs font-medium text-slate-500">NAME</th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-slate-500">EMAIL</th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-slate-500">ROLE</th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-slate-500">INSTITUTION</th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-slate-500">STATUS</th>
-              <th className="px-6 py-4 text-center text-xs font-medium text-slate-500">ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {filteredUsers.map((user) => (
-              <tr key={user.id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4 font-medium text-slate-900">{user.username}</td>
-                <td className="px-6 py-4 text-slate-600">{user.email}</td>
-                <td className="px-6 py-4">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium capitalize
-                    ${user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                    {user.role}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-slate-600">{user.institutionName || "—"}</td>
-                <td className="px-6 py-4">
-                  <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${user.isVerified ? 'text-emerald-600' : 'text-amber-600'}`}>
-                    {user.isVerified ? <ShieldCheck size={16} /> : <AlertCircle size={16} />}
-                    {user.isVerified ? "Verified" : "Pending"}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-center">
-                  <div className="flex justify-center gap-6">
-                    <button 
-                      onClick={() => handleEditUser(user)}
-                      className="flex items-center gap-1.5 text-slate-500 hover:text-indigo-600 transition-colors text-sm font-medium"
-                    >
-                      <Edit2 size={18} />
-                      <span>Edit</span>
-                    </button>
-
-                    <button 
-                      onClick={() => handleDeleteUser(user)}
-                      className="flex items-center gap-1.5 text-slate-500 hover:text-red-600 transition-colors text-sm font-medium"
-                    >
-                      <Trash2 size={18} />
-                      <span>Delete</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Search + Filter Bar */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by username, email, or institution..."
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+            />
+          </div>
+          <div className="relative">
+            <Filter size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value as UserRole | "all")}
+              className="pl-10 pr-8 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all appearance-none cursor-pointer"
+            >
+              <option value="all">All Roles</option>
+              <option value="student">Students</option>
+              <option value="admin">Admins</option>
+              <option value="employer">Employers</option>
+              <option value="systemAdmin">System Admins</option>
+            </select>
+          </div>
+          <div className="relative">
+            <Filter size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+              className="pl-10 pr-8 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all appearance-none cursor-pointer"
+            >
+              <option value="all">All Statuses</option>
+              <option value="verified">Verified Only</option>
+              <option value="pending">Pending Only</option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <UsersModal 
+      {/* Table */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider">
+            Users ({filtered.length})
+          </h2>
+        </div>
+
+        {loading ? (
+          <div className="p-12 text-center">
+            <Loader2 className="animate-spin text-indigo-600 mx-auto" size={32} />
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-3">Loading users...</p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="p-12 text-center">
+            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
+              <Users className="text-slate-400" size={28} />
+            </div>
+            <h3 className="text-slate-900 dark:text-white font-semibold mb-1">No users found</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">
+              {search || statusFilter !== "all" || roleFilter !== "all"
+                ? "Try adjusting your search or filters."
+                : "Get started by adding your first user."}
+            </p>
+            {!search && statusFilter === "all" && roleFilter === "all" && (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-colors"
+              >
+                <Plus size={16} /> Add First User
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                <tr>
+                  <th className="text-left px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">User</th>
+                  <th className="text-left px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Email</th>
+                  <th className="text-left px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Role</th>
+                  <th className="text-left px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Institution</th>
+                  <th className="text-left px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                  <th className="text-right px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {filtered.map((user) => (
+                  <tr
+                    key={user.id}
+                    className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 bg-indigo-100 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-semibold text-sm shrink-0">
+                          {user.username?.[0]?.toUpperCase() || "?"}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-900 dark:text-white truncate">{user.username}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate font-mono">ID: {user.id}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                        <Mail size={14} className="text-slate-400 shrink-0" />
+                        <span className="truncate max-w-[220px]">{user.email}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-1 text-xs font-semibold capitalize ${
+                          roleBadgeStyles[user.role] ||
+                          "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                        }`}
+                      >
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {user.institutionName ? (
+                        <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                          <Building2 size={14} className="text-slate-400 shrink-0" />
+                          <span className="truncate max-w-[200px]">{user.institutionName}</span>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      {user.isVerified ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-xs font-semibold border border-emerald-200 dark:border-emerald-800/50">
+                          <ShieldCheck size={12} /> Verified
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 text-xs font-semibold border border-amber-200 dark:border-amber-800/50">
+                          <AlertCircle size={12} /> Pending
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleEditUser(user)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors"
+                        >
+                          <Edit2 size={14} /> Edit
+                        </button>
+                        <button
+                          onClick={() => setDeleteTarget(user)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                        >
+                          <Trash2 size={14} /> Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Add/Edit User Modal */}
+      <UsersModal
         showAddModal={showAddModal}
         user={editingUser}
         setShowAddModal={closeModal}
       />
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-md">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
+              <div className="w-10 h-10 bg-red-100 dark:bg-red-950/40 flex items-center justify-center">
+                <XCircle className="text-red-600 dark:text-red-400" size={22} />
+              </div>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Delete User</h2>
+            </div>
+            <div className="p-6 space-y-3">
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-3 border border-slate-200 dark:border-slate-700">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">User to delete</p>
+                <p className="font-semibold text-slate-900 dark:text-white">{deleteTarget.username}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{deleteTarget.email}</p>
+              </div>
+              <p className="text-sm text-slate-600 dark:text-slate-300">
+                This will permanently remove the user from the system. Any certificates
+                they issued will remain, but the user account will be deleted.
+              </p>
+            </div>
+            <div className="p-6 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+                className="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold transition-colors text-sm disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteUser}
+                disabled={deleting}
+                className="px-5 py-2.5 bg-red-600 hover:bg-red-500 disabled:bg-red-800 text-white font-semibold transition-colors text-sm flex items-center gap-2"
+              >
+                {deleting ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" /> Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={16} /> Delete User
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -11,8 +11,6 @@ import { UsersRepository } from "../repositories/users.repository";
 import { AuthRepository } from "../repositories/auth.repository";
 import bcrypt from "bcrypt"
 
-// const TOKEN_EXPIRY_SECONDS = 7 * 24 * 60 * 60 * 1000;
-
 const REFRESH_TOKEN_EXPIRY_SECONDS = 15 * 24 * 60 * 60 * 1000;
 
 export const signInController = async (
@@ -32,11 +30,7 @@ export const signInController = async (
             sameSite: "lax",       
             path: "/",
         });
-
-        // send the get otp code to verify the user
-        const randomNumber = await OptCode();
-        await sendEmailOtp(email, randomNumber);
-
+        
         res.status(200).json({
             message: "User signed in successfully",
             accessToken,
@@ -67,8 +61,7 @@ export const signUpController = async (
             return res.status(400).json({ message: "Fill out all the fields" });
         }
 
-        // find a wa to make the institution name to null when the role is employer
-
+        // find a way to make the institution name to null when the role is employer
         const validRoles = ["student", "employer", "admin", "systemAdmin"];
         if(!validRoles.includes(role)) {
             return res.status(400).json({
@@ -114,7 +107,8 @@ export const signUpController = async (
             username, 
             email, 
             password,  
-            institution_name
+            role,
+            institution_name,
         );
 
          res.cookie("refreshToken", refreshToken, {
@@ -143,28 +137,31 @@ export const signUpController = async (
 }
 
 // This need to be tested with the real wallet address - This will be added when the sepolia and a connect button
+// The wallet address controller not working
 export const updateWalletAddressController = async (
-    req: Request<{ id: number }, unknown, { wallet_address: string}, {}>,
+    req: Request<{}, unknown, { wallet_address: string }, {}>,
     res: Response<{ message: string} | { error: string}>
 ) => {
     try {
+        const user = (req as any).user as { id: number } | undefined; // get the user from the request instead of the wallet context
         const { wallet_address } = req.body;
-        const { id }= req.params;
-        
+
+        console.log(wallet_address)
+        console.log(user)
         if (!wallet_address) {
             return res.status(400).json({
                 error: "Wallet address required."
             });
         }
-        
-        if (!id) {
+
+        if (!user?.id) {
             return res.status(401).json({
                 error: "Unauthorized."
             });
         }
-        
-        await updateWalletAddressService(Number(id), wallet_address);
-        
+
+        await updateWalletAddressService(user.id, wallet_address.toLowerCase().trim());
+
         return res.status(200).json({
             message: "Wallet address updated successfully."
         });
@@ -176,7 +173,10 @@ export const updateWalletAddressController = async (
 };
 
 // verify token - the isVerfied value will be sent to true and proceed with the login
-export const verifyController = (req: any, res: any): void => {
+export const verifyController = (
+    req: any, 
+    res: any
+): void => {
     try {
         res.status(200).json({
             authenticated: true,
@@ -184,17 +184,21 @@ export const verifyController = (req: any, res: any): void => {
             user: {
                 id: req.user?.id,
                 username: req.user?.username,
-                role: req.user?.role
+                role: req.user?.role,
+                email: (req.user as any)?.email,
             }
     });
         
     } catch (error) {
         const err = error as CustomError;
-        return res.status(err.statusCode || 500).json({ error: err.message || "User not authenticated!" });
+        return res.status(err.statusCode || 500).json({ error: err.message || "Unauthorized!" });
     }
 }
 
-export const signOutController = (req: Request, res: Response) => {
+export const signOutController = (
+    req: Request, 
+    res: Response<{ message: string } | { error: string }>
+) => {
     try {
         res.clearCookie("refreshToken", {
           httpOnly: true,
@@ -209,41 +213,47 @@ export const signOutController = (req: Request, res: Response) => {
     }
 };
 
-export const refreshController = (req: Request, res: Response): void => {
+export const refreshController = async (
+    req: Request<{}, unknown, {}, {}>, 
+    res: Response<{ accessToken: string } | { error: string} | { message: string}>
+): Promise<void> => {
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
         res.status(401).json({ message: "No refresh token provided" });
         return;
     }
-
     try {
         const decoded = jwt.verify(
             refreshToken,
             process.env.REFRESH_TOKEN_SECRET as string
         ) as { id: number };
+
+        const user = await UsersRepository.findUserById(decoded.id);
+        if (!user) {
+            res.status(401).json({ message: "User not found" });
+            return;
+        }
         
         const accessToken = jwt.sign(
-            { id: decoded.id },
+            { id: user.id, username: user.username, role: user.role },
             process.env.ACCESS_TOKEN_SECRET as string,
             { expiresIn: "15m" }
         );
 
         res.status(200).json({ accessToken });
-
   } catch(error) {
     const err = error as CustomError;
     res.status(403).json({ message: "Invalid or expired refresh token", error: err.message });
   }
 };
 
-// the forgot password - get the emal and send the otp code an d verify
 export const forgotPasswordController = async (
     req: Request<{}, unknown, { email: string }, {}>, 
     res: Response<{ message: string } | { error: string }>
 ) => {
     try {
         const { email } = req.body;
-        let existingUser = await AuthRepository.findUserByIdOtp(email);
+        let existingUser = await AuthRepository.findByEmail(email);
 
         if(!existingUser) {
             return res.status(400).json({ message: 'User not found!'})
@@ -264,7 +274,6 @@ export const forgotPasswordController = async (
         );
 
         res.status(200).json({ message: 'OTP sent to your email'})
-
     } catch (error) {
         const err = error as CustomError;
         return res.status(err.statusCode || 500).json({
@@ -281,7 +290,7 @@ export const verifyPasswordController = async (
     try {
         const { OptCode, email } = req.body;
 
-        const existingUser = await AuthRepository.findUserByIdOtp(email);
+        const existingUser = await AuthRepository.findByEmail(email);
 
         if (!existingUser) {
             return res.status(404).json({
@@ -289,14 +298,12 @@ export const verifyPasswordController = async (
             });
         }
 
-        // No OTP generated
         if (!existingUser.verifyOtp) {
             return res.status(400).json({
                 message: "No OTP found. Please request a new one."
             });
         }
 
-        // OTP expired
         if (!existingUser.verifyOtpExpiryAt || existingUser.verifyOtpExpiryAt.getTime() < Date.now()) {
             return res.status(400).json({
                 message: "OTP has expired. Please request a new one."
@@ -315,7 +322,6 @@ export const verifyPasswordController = async (
         existingUser.verifyOtpExpiryAt = null;
 
         return res.status(200).json({ success: true, message: 'OTP verified successfully'});
-
     } catch (error) {
         const err = error as CustomError;
         return res.status(err.statusCode || 500).json({
@@ -326,12 +332,12 @@ export const verifyPasswordController = async (
 
 // update the password after verification
 export const UpdatePasswordController = async (
-    req: Request<{}, unknown, { password: string; email: string}, {}>,
+    req: Request<{}, unknown, {email: string; password: string}, {}>,
     res: Response<{ message: string} | { error: string}>
 ) => {
     try {
-    const { password, email } = req.body;
-    const existingUser = await UsersRepository.findByEmail(email)
+    const { email, password } = req.body;
+    const existingUser = await AuthRepository.findByEmail(email);
 
      if (!existingUser) {
       const error = new Error("User does not exist") as CustomError;
@@ -340,12 +346,11 @@ export const UpdatePasswordController = async (
     }
 
     const salt: string = await bcrypt.genSalt(10);
-    const hashedPassword: string = await bcrypt.hash(existingUser.password, salt);
+    const hashedPassword: string = await bcrypt.hash(password, salt);
 
     await AuthRepository.UpdatePassword(hashedPassword, email)
 
     return res.status(200).json({ message: "Password updated successfully" })
-
 } catch (error) {
      const err = error as CustomError;
         return res.status(err.statusCode || 500).json({

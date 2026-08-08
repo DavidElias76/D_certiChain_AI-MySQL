@@ -1,32 +1,31 @@
 import { InstitutionRepository } from "../repositories/institution.repository";
 import type { CustomError } from "../types/error.types";
 
-// ─── Get All Active Institutions ─────────────────────────────
+// Get All Active Institutions 
 export const getInstitutionsService = async () => {
   return InstitutionRepository.findAll();
 };
 
-// ─── Get Institution by ID ────────────────────────────────────
-export const getInstitutionByIdService = async (id: number) => {
-  const institution = await InstitutionRepository.findById(id);
-  if (!institution) {
-    const error = new Error("Institution not found") as CustomError;
-    error.statusCode = 404;
-    throw error;
-  }
-  return institution;
-};
+//  Get Institution by ID 
+// export const getInstitutionByIdService = async (id: number) => {
+//   const institution = await InstitutionRepository.findById(id);
+//   if (!institution) {
+//     const error = new Error("Institution not found") as CustomError;
+//     error.statusCode = 404;
+//     throw error;
+//   }
+//   return institution;
+// };
 
-// ─── Add Institution ──────────────────────────────────────────
+// Add Institution 
 export const addInstitutionsService = async (data: {
   name: string;
   short_code: string;
   domain: string;
-  wallet_address?: string;
+  wallet_address: string;
   description?: string;
   is_active?: boolean;
 }) => {
-  // Check duplicate domain
   const existingByDomain = await InstitutionRepository.findByDomain(data.domain);
   if (existingByDomain) {
     const error = new Error("An institution with this domain already exists") as CustomError;
@@ -34,7 +33,6 @@ export const addInstitutionsService = async (data: {
     throw error;
   }
 
-  // Check duplicate short code
   const existingByCode = await InstitutionRepository.findByShortCode(data.short_code);
   if (existingByCode) {
     const error = new Error("An institution with this short code already exists") as CustomError;
@@ -46,7 +44,7 @@ export const addInstitutionsService = async (data: {
     name: data.name.trim(),
     short_code: data.short_code,
     domain: data.domain,
-    wallet_address: data.wallet_address ?? "",
+    wallet_address: data.wallet_address,
     description: data.description,
     is_active: data.is_active ?? true,
   });
@@ -54,7 +52,7 @@ export const addInstitutionsService = async (data: {
   return InstitutionRepository.findById(newId);
 };
 
-// ─── Update Institution ───────────────────────────────────────
+// Update Institution 
 export const updateInstitutionService = async (
   id: number,
   updates: Partial<{
@@ -72,10 +70,11 @@ export const updateInstitutionService = async (
     error.statusCode = 404;
     throw error;
   }
-  return InstitutionRepository.findById(id);
+  
+  return updated;
 };
 
-// ─── Soft-Delete Institution ─────────────────────────────────
+// Soft-Delete Institution 
 export const deleteInstitutionService = async (id: number) => {
   const deleted = await InstitutionRepository.softDelete(id);
   if (!deleted) {
@@ -83,5 +82,6 @@ export const deleteInstitutionService = async (id: number) => {
     error.statusCode = 404;
     throw error;
   }
-  return InstitutionRepository.findById(id);
+
+  return deleted;
 };

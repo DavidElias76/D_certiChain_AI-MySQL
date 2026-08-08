@@ -1,11 +1,13 @@
-import api from "../services/api";
-import { useContext, useState, createContext, useEffect, type ReactNode } from "react";
+import api, { setApiToken } from "../services/api";
+import { useContext, useState, createContext, useEffect, type ReactNode, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import  type { AxiosRequestConfig, AxiosError } from "axios"
 
 export interface User {
   id: number;
   username: string;
   role: string;
+  email?: string;
 }
 
 export interface LoginData {
@@ -21,27 +23,41 @@ export interface RegisterData {
   institution_name?: string;
 }
 
-interface VerifyResponse {
-  user: User;
-}
+// interface VerifyResponse {
+//   user: User;
+// }
 
 interface SendOtpCodeType {
-    message: string,
-    error: string
-    success?: boolean
+  message: string;
+  error: string;
+  success?: boolean;
+}
+
+interface authResponse {
+  message?: string;
+  user: User;
+  accessToken: string;
+}
+
+interface VerifyResponseType {
+  authenticated: boolean,
+  message: string,
+  user: User
 }
 
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
-  register: (data: RegisterData) => Promise<void>;
-  logIn: (data: LoginData) => Promise<any>;
+  register: (data: RegisterData) => Promise<authResponse>;
+  logIn: (data: LoginData) => Promise<authResponse>;
   logOut: () => Promise<void>;
-  error: string
-  message: string,
-  sendOtpCode: (email: string) => Promise<SendOtpCodeType>
-  verfiyOtpCode: (OtpCode: number, email: string) => Promise<SendOtpCodeType>
-  resetPassword: (password: string, email: string) => Promise<SendOtpCodeType>
+  error: string;
+  message: string;
+  token: string | null;
+  sendOtpCode: (email: string) => Promise<SendOtpCodeType>;
+  verfiyOtpCode: (OtpCode: number, email: string) => Promise<SendOtpCodeType>;
+  resetPassword: (password: string, email: string) => Promise<SendOtpCodeType>;
+  updateWalletAddress: (wallet_address: string) => Promise<void>;
 }
 
 interface Props {
@@ -53,57 +69,157 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: Props) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [ error, setError] = useState<string>('')
-  const [ message, setMessage ] = useState<string>('')
+  const [error, setError] = useState<string>("");
+  const [message, setMessage] = useState<string>("");
+  const [token, setToken] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    const verifyUser = async () => {
+    let isMounted = true;
+
+    const bootstrapAuth = async () => {
       try {
-        const response = await api.get<VerifyResponse>("/auth/verify", {
-          withCredentials: true,
-        });
-        if (response?.data?.user) {
-          setUser(response.data.user);
-        } else {
-          setLoading(false);
-          setUser(null);
+        setLoading(true);
+        let currentToken = token;
+
+        if (!currentToken) {
+          const refreshResponse = await api.post(
+            "/auth/refresh",
+            {},
+            { withCredentials: true }
+          );
+          currentToken = refreshResponse.data.accessToken;
+          if (!isMounted) return;
+          setToken(currentToken);
+          setApiToken(currentToken);
         }
-      } catch {
+
+        const verifyResponse = await api.get<VerifyResponseType>("/auth/verify", {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${currentToken}` },
+        });
+
+        if (!isMounted) return;
+
+        if (verifyResponse.data?.user) {
+          setUser(verifyResponse.data.user);
+        } else {
+          setUser(null);
+          setToken(null);
+          setApiToken(null);
+        }
+      } catch (err: any) {
+        if (!isMounted) return;
+        const msg =
+          err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Failed to authenticate the user";
+        setError(msg);
         setUser(null);
+        setToken(null);
+        setApiToken(null);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
-    verifyUser();
+    bootstrapAuth();
+    return () => { isMounted = false; };
+}, []);
+
+  useLayoutEffect(() => {
+    let isRefreshing = false;
+    let failedQueue: {
+      resolve: (token: string) => void;
+      reject: (err: unknown) => void;
+    }[] = [];
+
+    const processQueue = (error: unknown, newToken: string | null = null) => {
+      failedQueue.forEach(({ resolve, reject }) => {
+        if (error || !newToken) reject(error);
+        else resolve(newToken);
+      });
+      failedQueue = [];
+    };
+
+    const refreshInterceptor = api.interceptors.response.use(
+      (response) => response,
+      async (error: AxiosError) => {
+        const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+        const status = error.response?.status; 
+        const isAuthEndpoint = originalRequest.url?.includes("/auth/refresh");
+
+        if (status !== 401 || originalRequest._retry || isAuthEndpoint) {  
+          return Promise.reject(error);
+        }
+
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({
+              resolve: (newToken: string) => {
+                if (originalRequest.headers) {
+                  originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                }
+                resolve(api(originalRequest));
+              },
+              reject,
+            });
+          });
+        }
+        
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        try {
+          const refreshResponse = await api.post(
+            "/auth/refresh",
+            {},
+            { withCredentials: true }
+          );
+          const newToken = refreshResponse.data.accessToken;
+
+          setToken(newToken);
+          setApiToken(newToken);
+
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          }
+
+          processQueue(null, newToken);
+          return api(originalRequest);
+        } catch (refreshError) {
+          processQueue(refreshError, null);
+          setUser(null);
+          setToken(null);
+          setApiToken(null);
+          return Promise.reject(refreshError);
+        } finally {
+          isRefreshing = false;
+        }
+      }
+    );
+    return () => {
+      api.interceptors.response.eject(refreshInterceptor);
+    };
   }, []);
 
-  const register = async (data: RegisterData): Promise<void> => {
-    try {
-      const response = await api.post("/auth/register", data, {
-        withCredentials: true,
-      });
-      setUser(response.data.user);
-      setError(response.data.error)
-    } catch (error) {
-      console.error("Registration error", error);
-      throw error;
-    }
-  };
 
-  const logIn = async (data: LoginData): Promise<any> => {
+  const logIn = async (data: LoginData): Promise<authResponse> => {
     try {
-      const response = await api.post("/auth/login", data, {
-        withCredentials: true,
-      });
-      setError(error)
+      setError("");
+      const response = await api.post("/auth/login", 
+        data, 
+        { withCredentials: true }
+      );
+
+      if (response?.data?.accessToken) {
+        setToken(response.data.accessToken); 
+        setApiToken(response.data.accessToken);
+      }
       const userData = response?.data?.user || null;
-      console.log(userData);
       setUser(userData);
-
-      // Redirect based on role after login
+      
       if (userData?.role === "systemAdmin") {
         navigate("/system/admin/dashboard", { replace: true });
       } else if (userData?.role === "admin") {
@@ -111,73 +227,139 @@ export function AuthProvider({ children }: Props) {
       } else {
         navigate("/dashboard", { replace: true });
       }
-
+      
       return response.data;
-    } catch (error: any) {
-      console.error("Login error", error);
+    } catch (err: any) {
+      const msg = err.response?.data?.error || err.response?.data?.message || "Login failed";
+      setError(msg);
       setUser(null);
-      throw error;
+      throw err;
+    }
+  };
+
+  const register = async (data: RegisterData): Promise<authResponse> => {
+    try {
+      setError("");
+      const response = await api.post("/auth/register", data, {
+        withCredentials: true,
+      });
+      if (response?.data?.accessToken) {
+        setToken(response.data.accessToken);
+        setApiToken(response.data.accessToken);
+      }
+      setUser(response.data.user);
+      return response.data;
+    } catch (err: any) {
+      const msg = err.response?.data?.error || "Registration failed";
+      setError(msg);
+      throw err;
     }
   };
 
   const logOut = async (): Promise<void> => {
     try {
       await api.post("/auth/logout", {}, { withCredentials: true });
-      setUser(null);
-      setError(error)
     } catch {
-      setUser(null); // Force logout even if API fails
+      setUser(null);
+    } finally {
+      setToken(null);
+      setApiToken(null);
+      setUser(null);
+      setError("");
+      setMessage("");
+      navigate("/login", { replace: true });
     }
   };
 
-  // send the otp code
-  const sendOtpCode = async (email: string) => {
+  const sendOtpCode = async (email: string): Promise<SendOtpCodeType> => {
     try {
-      const response = await api.post("/auth/forgot-password", { email: email.trim().toLowerCase() }, { withCredentials: true });
-      setMessage(response.data.message)
-      setError(response.data.error)
+      const response = await api.post(
+        "/auth/forgot-password",
+        { email: email.trim().toLowerCase() },
+        { withCredentials: true }
+      );
+      setMessage(response.data.message || "");
       return response.data;
-    } catch (error) {
-      throw error;
+    } catch (err: any) {
+      const msg = err.response?.data?.error || "Failed to send OTP";
+      throw { error: msg } as SendOtpCodeType;
     }
   };
 
-  // send the verify email and set the value of is_verifed to true
-
-  const verfiyOtpCode = async(otp: number, email: string) => {
+  const verfiyOtpCode = async (
+    otp: number,
+    email: string
+  ): Promise<SendOtpCodeType> => {
     try {
-      const response = await api.post("/verfiy-forgot-password-otp",
-        { OptCode: Number(otp), email: email.trim().toLowerCase()},
-        { withCredentials: true })
-      if(response.data.success === true){
-          setMessage(response.data.message)
+      const response = await api.post(
+        "/auth/verfiy-forgot-password-otp",
+        { OptCode: Number(otp), email: email.trim().toLowerCase() },
+        { withCredentials: true }
+      );
+      if (response.data.success === true) {
+        setMessage(response.data.message || "");
       } else {
-        setMessage(response.data.message)
-        setError(response.data.error)
+        setMessage(response.data.message || "");
       }
       return response.data;
-    } catch (error) {
-      throw error
+    } catch (err: any) {
+      const msg = err.response?.data?.error || "Verification failed";
+      throw { error: msg } as SendOtpCodeType;
     }
-  }
+  };
 
-  // reset the password
-  const resetPassword = async (password: string, email: string): Promise<SendOtpCodeType> => {
+  const resetPassword = async (
+    email: string,
+    password: string
+  ): Promise<SendOtpCodeType> => {
     try {
       const response = await api.post(
         "/auth/reset-password",
         { password, email: email.trim().toLowerCase() },
         { withCredentials: true }
       );
-      setMessage(response.data?.message);
+      setMessage(response.data?.message || "");
       return response.data;
-    } catch (error) {
-      throw error;
+    } catch (err: any) {
+      const msg = err.response?.data?.error || "Reset failed";
+      throw { error: msg } as SendOtpCodeType;
     }
-  }
+  };
+
+  const updateWalletAddress = async (wallet_address: string): Promise<void> => {
+    if (!user) {
+      throw new Error("User is not authenticated");
+    }
+    try {
+      const response = await api.put(
+        `/auth/wallet/${user.id}`,
+        { wallet_address },
+        { withCredentials: true, headers: token ? { Authorization: `Bearer ${token}` } : {} }
+      );
+      setMessage(response.data.message || "Wallet updated");
+    } catch (err: any) {
+      const msg = err.response?.data?.error || "Failed to update wallet";
+      throw new Error(msg);
+    }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, loading, register, logIn, logOut, error, message, sendOtpCode, verfiyOtpCode, resetPassword }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        register,
+        logIn,
+        logOut,
+        error,
+        message,
+        sendOtpCode,
+        verfiyOtpCode,
+        resetPassword,
+        updateWalletAddress,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

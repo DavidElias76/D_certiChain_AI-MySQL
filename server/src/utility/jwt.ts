@@ -8,6 +8,7 @@ interface JwtPayload {
   id: number;
   username: string;
   role: string;
+  email: string;
 }
 
 // generate the access token

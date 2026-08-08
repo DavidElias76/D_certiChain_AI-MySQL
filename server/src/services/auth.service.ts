@@ -6,6 +6,8 @@ import jwt from "jsonwebtoken";
 import { UsersRepository } from "../repositories/users.repository";
 import { generateAccessToken, generateRefreshToken } from "../utility/jwt"
 import { OmitPasswordUser } from "../types/index.types";
+import { UserRole } from "../types/auth.types";
+import { UserCreateInput } from "../models_sequelize_typescript";
 
 export const signInService = async (email: string, password: string) => {
   try {
@@ -30,6 +32,7 @@ export const signInService = async (email: string, password: string) => {
         id: existingUser.id,
         role: existingUser.role,
         username: existingUser.username,
+        email: existingUser.email,
       }
 
     const accessToken: string = await generateAccessToken(payload)
@@ -53,6 +56,7 @@ export const signUpService = async (
   username: string,
   email: string,
   password: string,
+  role: UserRole,
   institution_name: string,
 ) => {
   try {
@@ -75,7 +79,7 @@ export const signUpService = async (
       username,
       email,
       password: hashedPassword.trim(),
-      role: "student",
+      role,
       institution_name: institution_name,
     });
 
@@ -83,6 +87,7 @@ export const signUpService = async (
         id: newUser.id,
         username: newUser.username,
         role: newUser.role,
+        email: newUser.email,
     }
 
     const accessToken: string = await generateAccessToken(payload)

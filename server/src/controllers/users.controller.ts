@@ -103,7 +103,7 @@ export const addUsersController = async (
 
 export const updateUsersController = async (
     req: Request<{ id: string}, unknown, Partial<UserCreateInput>, {}>,
-    res: Response
+    res: Response<{ message: string } | { error: string }>
 ) => {
     try {
         const { id } = req.params;
@@ -121,7 +121,6 @@ export const updateUsersController = async (
 
         await updateUsersService(Number(id), userUpdate)
         return res.status(200).json({ message: "User updated successsfully"})
-
     } catch (err) {
         const error = err as CustomError
         return res.status(error.statusCode || 500).json({ error: error.message })

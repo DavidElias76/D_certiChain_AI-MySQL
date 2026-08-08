@@ -32,25 +32,28 @@ export default function SystemAdminLoginPage() {
     }
   };
 
+  // The system admin page has a strcture problem  no text being displayed due to background color white - make the changes
+
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col lg:flex-row font-sans transition-colors duration-300">
-      <div className="hidden lg:flex lg:w-1/2 relative bg-slate-50 items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent)]" />
-        <div className="absolute top-0 left-0 p-12 flex items-center justify-between w-full">
+      {/* Left side branding panel */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-linear-to-br from-indigo-700 via-indigo-800 to-slate-900 dark:from-indigo-950 dark:to-slate-900 items-center justify-center overflow-hidden p-12 transition-colors">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent)] pointer-events-none" />
+        <div className="absolute top-0 left-0 p-12 flex items-center justify-between w-full z-20">
           <Link
             to="/"
-            className="flex items-center gap-2 text-white/90 hover:text-white transition-colors"
+            className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
           >
             <ArrowLeft size={20} /> Back
           </Link>
         </div>
 
-        <div className="relative z-10 text-center px-12">
-          <div className="bg-white/10 backdrop-blur-lg border border-white/20 p-6 inline-block mb-8">
+        <div className="relative z-10 text-center px-6">
+          <div className="bg-white/10 backdrop-blur-lg border border-white/20 p-6 rounded-2xl inline-block mb-8 shadow-xl">
             <ShieldCheck size={64} className="text-white" />
           </div>
           <h2 className="text-4xl font-bold text-white mb-6">Platform Administration</h2>
-          <p className="text-indigo-100 text-lg max-w-md mx-auto">
+          <p className="text-indigo-100 text-lg max-w-md mx-auto leading-relaxed">
             Manage universities, monitor certificate issuance and oversee the entire CertiChain AI platform.
           </p>
         </div>
@@ -62,7 +65,7 @@ export default function SystemAdminLoginPage() {
         </div>
 
         <div className="w-full max-w-md">
-          <div className="lg:hidden mb-8 text-center">
+          <div className="mb-8 text-center">
             <div className="inline-flex items-center gap-2 mb-4">
               <div className="bg-indigo-600 p-1.5">
                 <ShieldCheck className="text-white" size={24} />
@@ -95,7 +98,7 @@ export default function SystemAdminLoginPage() {
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   placeholder="admin@certichain.ai"
                   required
-                  className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-900 border rounded-lg border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                 />
               </div>
             </div>
@@ -112,7 +115,7 @@ export default function SystemAdminLoginPage() {
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   placeholder="••••••••"
                   required
-                  className="w-full pl-12 pr-12 py-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="w-full pl-12 pr-12 py-3.5 bg-slate-50 dark:bg-slate-900 border rounded-lg border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                 />
                 <button
                   type="button"
@@ -127,7 +130,7 @@ export default function SystemAdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 text-white font-bold shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 mt-8"
+              className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 rounded-lg disabled:bg-indigo-800 text-white font-bold shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 mt-8"
             >
               {loading ? (
                 <>

@@ -8,8 +8,8 @@ import cookieParser from "cookie-parser"
 import connectDB from "./config/DbConnection"
 import authRoutes from "./routes/auth.routes"
 import usersRoutes from "./routes/users.routes"
-// import certificateRoutes from "./routes/certificate.routes"
-// import institutionRoutes from "./routes/institution.routes"
+import certificateRoutes from "./routes/certificate.routes"
+import institutionRoutes from "./routes/institution.routes"
 
 dotenv.config();
 
@@ -31,8 +31,8 @@ app.use(cookieParser());
 //  routes
 app.use('/api/auth', authRoutes)
 app.use('/api/users', usersRoutes); // This needs to be tested
-// app.use('/api/institution', institutionRoutes); // System admin - institution management
-// // app.use('/api/certificate', certificateRoutes)
+app.use('/api/certificate', certificateRoutes);
+app.use('/api/institution', institutionRoutes); // System admin - institution management
 
 // sever health check
 app.get("/api/health", (req: Request, res: Response) => {
@@ -48,7 +48,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   }
 );
 
-const starttServer = async (): Promise<void> => {
+const startServer = async (): Promise<void> => {
     try {
         await connectDB(); // This runs the database connection
         app.listen(PORT, (): void => {
@@ -60,4 +60,4 @@ const starttServer = async (): Promise<void> => {
     }
 }
 
-starttServer();
+startServer();

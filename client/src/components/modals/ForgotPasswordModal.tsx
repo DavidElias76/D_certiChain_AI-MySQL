@@ -9,10 +9,6 @@ type Step = "email" | "otp" | "reset";
 interface ForgotPasswordModalProps {
   showModal: boolean;
   onClose: () => void;
-  /**
-   * Optional callback fired after the reset-password step successfully
-   * updates the password. The page can use this to redirect to login.
-   */
   onReset?: (email: string) => void;
 }
 
@@ -132,7 +128,7 @@ export default function ForgotPasswordModal({ showModal, onClose, onReset }: For
 
     setLoading(true);
     try {
-      const data = await resetPassword(password, email);
+      const data = await resetPassword(email, password);
       toast.success(data?.message || "Password updated successfully");
       onReset?.(email.trim().toLowerCase());
       handleClose();
