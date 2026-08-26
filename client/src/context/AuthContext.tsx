@@ -326,6 +326,7 @@ export function AuthProvider({ children }: Props) {
     }
   };
 
+  // This need to be institituon in the instituion and not the users - user do not get the wallet address
   const updateWalletAddress = async (wallet_address: string): Promise<void> => {
     if (!user) {
       throw new Error("User is not authenticated");

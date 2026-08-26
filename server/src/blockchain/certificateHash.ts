@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { CertificateInput, CertificateHashPayload } from "../../types/blockchain";
+import type { CertificateInput, CertificateHashPayload } from "../types/blockchain";
 
 const normalizeText = (value: string): string => value.trim().toLowerCase(); // This functio takea a value and returns it into lowercase
 

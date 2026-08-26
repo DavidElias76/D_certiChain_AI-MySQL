@@ -56,6 +56,9 @@ export interface InstitutionCreateInput {
   wallet_address: string;
   description?: string ;
   is_active?: boolean;
+  wallet_type?: "server_custody" | "metamask";
+  wallet_private_key_encrypted?: string | null;
+  blockchain_inst_tx_hash: string | null
 }
 
 // certificate

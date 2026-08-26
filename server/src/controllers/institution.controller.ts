@@ -7,6 +7,7 @@ import {
   deleteInstitutionService,
 } from "../services/institution.service";
 import { CustomError } from "../types/error.types";
+import { InstitutionRepository } from "../repositories/institution.repository";
 
 type InstitutionInput = {
   name: string;
@@ -44,7 +45,7 @@ export const addInstitutionController = async (
     }
 
     if(!wallet_address) {
-        res.status(400).json({ message: "Wallet address is required"});
+        return res.status(400).json({ message: "Wallet address is required"});
     }
 
     // Validate wallet address format if provided
@@ -101,6 +102,31 @@ export const updateInstitutionController = async (
     return res.status(error.statusCode || 500).json({ error: error.message });
   }
 };
+
+export const updateInstitutionStatusController = async (
+  req: Request<{ id: string }, unknown, { is_active: boolean }, {}>,
+  res: Response<{ message: string} | { error: string }>
+) => {
+  try {
+    const id = Number(req.params.id)
+    const is_active = req.body;
+
+    if (typeof is_active !== 'boolean') {
+        return res.status(400).json({ error: "is_active must be a boolean" });
+    }
+
+    // update the status property and return the id - find a way to return te boolean value
+    await InstitutionRepository.updateStatus(id, is_active);
+
+    res.json({ 
+        message: `Institution ${is_active ? "activated" : "deactivated"} successfully` 
+    });
+
+  } catch (err) {
+    const error = err as CustomError;
+    return res.status(error.statusCode || 500).json({ error: error.message });
+  }
+}
 
 export const deleteInstitutionController = async (
   req: Request<{ id: string }, unknown, {}, {}>,

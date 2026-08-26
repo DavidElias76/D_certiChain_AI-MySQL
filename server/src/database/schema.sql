@@ -18,6 +18,13 @@ CREATE TABLE IF NOT EXISTS institutions (
     INDEX idx_institutions_wallet   (wallet_address)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+ALTER TABLE institutions
+ADD blockchain_inst_tx_hash VARCHAR(255) DEFAULT NULL;
+
+ALTER TABLE institutions
+  ADD COLUMN wallet_type ENUM('server_custody', 'metamask') NOT NULL DEFAULT 'server_custody',
+  ADD COLUMN wallet_private_key_encrypted TEXT NULL;  -- ONLY for server_custody institutions
+
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(80)   NOT NULL,

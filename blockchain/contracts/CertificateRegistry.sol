@@ -218,4 +218,6 @@ contract CertificateRegistry is ICertificateRegistry {
             revert CertificateNotFound(certificateHash, institutionId);
         }
     }
+
+    // Add a delete institution at the end of the project - it delete from the blockchain
 }

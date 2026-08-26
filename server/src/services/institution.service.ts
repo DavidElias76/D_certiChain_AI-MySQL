@@ -1,12 +1,12 @@
 import { InstitutionRepository } from "../repositories/institution.repository";
 import type { CustomError } from "../types/error.types";
-
+import { registerInstitutionOnChain } from "../blockchain/contracts";
 // Get All Active Institutions 
 export const getInstitutionsService = async () => {
   return InstitutionRepository.findAll();
 };
 
-//  Get Institution by ID 
+//  Get Institution by ID - not needed at this time - do not delete
 // export const getInstitutionByIdService = async (id: number) => {
 //   const institution = await InstitutionRepository.findById(id);
 //   if (!institution) {
@@ -40,6 +40,8 @@ export const addInstitutionsService = async (data: {
     throw error;
   }
 
+  const { txHash } = await registerInstitutionOnChain(data.name, data.wallet_address);
+
   const newId = await InstitutionRepository.create({
     name: data.name.trim(),
     short_code: data.short_code,
@@ -47,8 +49,9 @@ export const addInstitutionsService = async (data: {
     wallet_address: data.wallet_address,
     description: data.description,
     is_active: data.is_active ?? true,
+    blockchain_inst_tx_hash: txHash ?? null
   });
-
+  
   return InstitutionRepository.findById(newId);
 };
 

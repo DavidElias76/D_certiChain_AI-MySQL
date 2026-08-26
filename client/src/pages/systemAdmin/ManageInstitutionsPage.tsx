@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Building2,
@@ -11,132 +11,39 @@ import {
   Edit2,
   ShieldCheck,
   Power,
-  Copy,
-  Check,
   Loader2,
   X
 } from "lucide-react";
 import toast from "react-hot-toast";
-import api from "../../services/api";
+import { useInstitution } from "../../context/InstitutionContext";
 
-type Institution = {
-  _id?: string;
-  id?: number;
-  name: string;
-  shortCode: string;
-  domain: string;
-  walletAddress: string;
-  description?: string;
-  isActive: boolean;
-  createdAt?: string;
+type InstitutionInput = {
+    id?: number
+    name: string;
+    short_code: string;
+    domain: string;
+    wallet_address?: string;
+    description?: string | null;
+    is_active?: boolean | null;
 };
 
 export default function ManageInstitutionsPage() {
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { institutions, loading, toggleInstitutionStatus, updateInstitution } = useInstitution()
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
-  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Edit Modal State
-  const [editingInst, setEditingInst] = useState<Institution | null>(null);
+  const [editingInst, setEditingInst] = useState<InstitutionInput | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
 
-  const fetchInstitutions = async () => {
+  const handleToggleStatus = async (inst: InstitutionInput) => {
+    const newStatus = !inst.is_active;
     try {
-      setLoading(true);
-      const res = await api.get("/institution", { withCredentials: true });
-      const data = Array.isArray(res.data) ? res.data : res.data?.institutions || [];
-      
-      // Default fallback mock data if server list is empty (for rich preview)
-      if (data.length === 0) {
-        setInstitutions([
-          {
-            id: 1,
-            name: "KCA University",
-            shortCode: "KCAU",
-            domain: "kcau.ac.ke",
-            walletAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
-            description: "Leading technology and business university in East Africa.",
-            isActive: true,
-            createdAt: "2024-01-15",
-          },
-          {
-            id: 2,
-            name: "University of Nairobi",
-            shortCode: "UON",
-            domain: "uonbi.ac.ke",
-            walletAddress: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
-            description: "Premier public research university in Kenya.",
-            isActive: true,
-            createdAt: "2024-02-10",
-          },
-          {
-            id: 3,
-            name: "Strathmore University",
-            shortCode: "SU",
-            domain: "strathmore.edu",
-            walletAddress: "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
-            description: "Private chartered university specializing in business and IT.",
-            isActive: false,
-            createdAt: "2024-03-01",
-          },
-        ]);
-      } else {
-        setInstitutions(data);
-      }
-    } catch {
-      // Fallback data when API is offline
-      setInstitutions([
-        {
-          id: 1,
-          name: "KCA University",
-          shortCode: "KCAU",
-          domain: "kcau.ac.ke",
-          walletAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
-          description: "Leading technology and business university in East Africa.",
-          isActive: true,
-          createdAt: "2024-01-15",
-        },
-        {
-          id: 2,
-          name: "University of Nairobi",
-          shortCode: "UON",
-          domain: "uonbi.ac.ke",
-          walletAddress: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
-          description: "Premier public research university in Kenya.",
-          isActive: true,
-          createdAt: "2024-02-10",
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchInstitutions();
-  }, []);
-
-  const handleCopyWallet = (address: string) => {
-    navigator.clipboard.writeText(address);
-    setCopiedId(address);
-    toast.success("Wallet address copied");
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-
-  const handleToggleStatus = async (inst: Institution) => {
-    const newStatus = !inst.isActive;
-    try {
-      const instId = inst._id || inst.id;
-      await api.put(`/institution/${instId}`, { isActive: newStatus }, { withCredentials: true });
+      const instId = inst.id;
+      toggleInstitutionStatus(String(instId), newStatus)
       toast.success(`${inst.name} is now ${newStatus ? "Active" : "Inactive"}`);
     } catch {
-      // Local optimistic update
-      setInstitutions((prev) =>
-        prev.map((i) => (i.id === inst.id || i._id === inst._id ? { ...i, isActive: newStatus } : i))
-      );
-      toast.success(`${inst.name} status updated`);
+       toast.error("Failed to update institution status");
     }
   };
 
@@ -146,12 +53,9 @@ export default function ManageInstitutionsPage() {
     setSavingEdit(true);
 
     try {
-      const instId = editingInst._id || editingInst.id;
-      await api.put(`/institution/${instId}`, editingInst, { withCredentials: true });
+      const instId = editingInst.id;
+      updateInstitution(String(instId), editingInst)
       toast.success(`${editingInst.name} updated successfully`);
-      setInstitutions((prev) =>
-        prev.map((i) => (i.id === editingInst.id || i._id === editingInst._id ? editingInst : i))
-      );
       setEditingInst(null);
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Failed to update institution");
@@ -163,17 +67,16 @@ export default function ManageInstitutionsPage() {
   const filteredInstitutions = institutions.filter((inst) => {
     const matchesSearch =
       inst.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inst.shortCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inst.domain.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inst.walletAddress.toLowerCase().includes(searchTerm.toLowerCase());
+      inst.short_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      inst.domain.toLowerCase().includes(searchTerm.toLowerCase());
 
-    if (statusFilter === "active") return matchesSearch && inst.isActive;
-    if (statusFilter === "inactive") return matchesSearch && !inst.isActive;
+    if (statusFilter === "active") return matchesSearch && inst.is_active;
+    if (statusFilter === "inactive") return matchesSearch && !inst.is_active;
     return matchesSearch;
   });
 
-  const activeCount = institutions.filter((i) => i.isActive).length;
-  const inactiveCount = institutions.filter((i) => !i.isActive).length;
+  const activeCount = institutions.filter((i) => i.is_active).length;
+  const inactiveCount = institutions.filter((i) => !i.is_active).length;
 
   return (
     <div className="space-y-8 pb-12">
@@ -287,8 +190,7 @@ export default function ManageInstitutionsPage() {
                 ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
-          >
-            Inactive ({inactiveCount})
+          > Inactive ({inactiveCount})
           </button>
         </div>
       </div>
@@ -323,12 +225,12 @@ export default function ManageInstitutionsPage() {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {filteredInstitutions.map((inst) => (
-                  <tr key={inst._id || inst.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                  <tr key={inst.id || inst.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
                     {/* Institution Name & Badge */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400  flex items-center justify-center font-bold text-sm shrink-0">
-                          {inst.shortCode ? inst.shortCode.slice(0, 2) : inst.name.slice(0, 2).toUpperCase()}
+                          {inst.short_code ? inst.short_code.slice(0, 2) : inst.name.slice(0, 2).toUpperCase()}
                         </div>
                         <div>
                           <p className="font-bold text-slate-900 dark:text-white">{inst.name}</p>
@@ -342,7 +244,7 @@ export default function ManageInstitutionsPage() {
                     {/* Short Code */}
                     <td className="px-6 py-4">
                       <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-xs font-bold ">
-                        {inst.shortCode}
+                        {inst.short_code}
                       </span>
                     </td>
 
@@ -359,23 +261,26 @@ export default function ManageInstitutionsPage() {
                       <div className="flex items-center gap-2 font-mono text-xs text-slate-600 dark:text-slate-400">
                         <Wallet size={14} className="text-slate-400 shrink-0" />
                         <span>
-                          {inst.walletAddress
-                            ? `${inst.walletAddress.slice(0, 6)}...${inst.walletAddress.slice(-4)}`
+                          {inst.wallet_address
+                            ? `${inst.wallet_address.slice(0, 6)}...${inst.wallet_address.slice(-4)}`
                             : "Not Set"}
                         </span>
-                        {inst.walletAddress && (
-                          <button
-                            onClick={() => handleCopyWallet(inst.walletAddress)}
-                            className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"
-                            title="Copy Wallet Address"
-                          >
-                            {copiedId === inst.walletAddress ? (
-                              <Check size={14} className="text-emerald-500" />
-                            ) : (
-                              <Copy size={14} />
-                            )}
-                          </button>
-                        )}
+
+                        {/* There is no need to copy the wallet_address */}
+
+                        {/* {inst.wallet_address && (
+                          // <button
+                          //   onClick={() => handleCopyWallet(inst.wallet_address)}
+                          //   className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"
+                          //   title="Copy Wallet Address"
+                          // >
+                          //   {copiedId === inst.wallet_address ? (
+                          //     <Check size={14} className="text-emerald-500" />
+                          //   ) : (
+                          //     <Copy size={14} />
+                          //   )}
+                          // </button>
+                        )} */}
                       </div>
                     </td>
 
@@ -383,13 +288,13 @@ export default function ManageInstitutionsPage() {
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold -full ${
-                          inst.isActive
+                          inst.is_active
                             ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
                             : "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800"
                         }`}
                       >
                         <ShieldCheck size={12} />
-                        {inst.isActive ? "Active" : "Inactive"}
+                        {inst.is_active ? "Active" : "Inactive"}
                       </span>
                     </td>
 
@@ -403,17 +308,20 @@ export default function ManageInstitutionsPage() {
                         >
                           <Edit2 size={16} />
                         </button>
+                        {/* set the institution in_active aor active */}
                         <button
                           onClick={() => handleToggleStatus(inst)}
                           className={`p-1.5 transition-colors ${
-                            inst.isActive
-                              ? "text-slate-400 hover:text-amber-600"
-                              : "text-emerald-600 hover:text-emerald-500"
+                              inst.is_active
+                                  ? "text-slate-400 hover:text-amber-600"
+                                  : "text-emerald-600 hover:text-emerald-500"
                           }`}
-                          title={inst.isActive ? "Deactivate Institution" : "Activate Institution"}
-                        >
+                          title={inst.is_active ? "Deactivate Institution" : "Activate Institution"}
+                      >
                           <Power size={16} />
-                        </button>
+                      </button>
+
+                      {/* add a delete button to delete the user from the databse and also add a delete */}
                       </div>
                     </td>
                   </tr>
@@ -461,8 +369,8 @@ export default function ManageInstitutionsPage() {
                   </label>
                   <input
                     type="text"
-                    value={editingInst.shortCode}
-                    onChange={(e) => setEditingInst({ ...editingInst, shortCode: e.target.value.toUpperCase() })}
+                    value={editingInst.short_code}
+                    onChange={(e) => setEditingInst({ ...editingInst, short_code: e.target.value.toUpperCase() })}
                     required
                     className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700  text-sm text-slate-900 dark:text-white font-mono uppercase focus:outline-none focus:border-indigo-500"
                   />
@@ -488,25 +396,27 @@ export default function ManageInstitutionsPage() {
                 </label>
                 <input
                   type="text"
-                  value={editingInst.walletAddress}
-                  onChange={(e) => setEditingInst({ ...editingInst, walletAddress: e.target.value })}
+                  value={editingInst.wallet_address}
+                  onChange={(e) => setEditingInst({ ...editingInst, wallet_address: e.target.value })}
                   required
                   className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700  text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
-              <div className="flex items-center gap-3 pt-2">
+              {/* To be deteermined if needed at all */}
+
+              {/* <div className="flex items-center gap-3 pt-2">
                 <input
                   type="checkbox"
                   id="isActiveToggle"
-                  checked={editingInst.isActive}
-                  onChange={(e) => setEditingInst({ ...editingInst, isActive: e.target.checked })}
+                  checked={editingInst.is_active}
+                  onChange={(e) => setEditingInst({ ...editingInst, is_active: e.target.checked })}
                   className="w-4 h-4 text-indigo-600 "
                 />
                 <label htmlFor="isActiveToggle" className="text-sm font-medium text-slate-900 dark:text-white">
                   Active & Authorized for Minting
                 </label>
-              </div>
+              </div> */}
 
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <button
@@ -528,6 +438,7 @@ export default function ManageInstitutionsPage() {
           </div>
         </div>
       )}
+
     </div>
   );
 }

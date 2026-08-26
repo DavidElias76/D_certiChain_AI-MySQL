@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Building2,
   FileText,
   ShieldCheck,
   PlusCircle,
-  ArrowRight,
+  // ArrowRight,
   Globe,
   Hash,
   Activity,
@@ -14,41 +13,15 @@ import {
   XCircle,
   Loader2,
 } from "lucide-react";
-import api from "../../services/api";
-
-type Institution = {
-  _id: string;
-  name: string;
-  shortCode: string;
-  domain: string;
-  walletAddress: string;
-  isActive: boolean;
-  createdAt: string;
-};
+import { useInstitution } from "../../context/InstitutionContext";
 
 // NOTE: Need to see all the institutions, users absed on the school name, institution admin, recommendations, certificates issued and verified, revocked
 
 export default function SystemDashboardPage() {
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchInstitutions = async () => {
-      try {
-        const res = await api.get("/institution", { withCredentials: true });
-        setInstitutions(res.data || []);
-      } catch {
-        // silently fail in dashboard
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchInstitutions();
-  }, []);
+  const { institutions, loading } = useInstitution();
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
@@ -68,7 +41,6 @@ export default function SystemDashboardPage() {
         </Link>
       </div>
 
-      {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
           <div className="flex items-center justify-between mb-3">
@@ -93,22 +65,25 @@ export default function SystemDashboardPage() {
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider mb-1">Active</p>
           <p className="text-2xl font-bold text-slate-900 dark:text-white">
-            {loading ? "—" : institutions.filter((i) => i.isActive).length}
+            {loading ? "—" : institutions.filter((i) => i.is_active).length}
           </p>
         </div>
 
+        {/* delete this part or find a way to ocunt all the certificates - get the blockchain count of number of certificated 
+            to be removed if not neccessary
+        */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="p-2.5 bg-amber-50 dark:bg-amber-950/40">
               <FileText className="text-amber-600 dark:text-amber-400" size={20} />
             </div>
           </div>
+          
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider mb-1">Certificates Issued</p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-white">—</p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-white">0</p>
         </div>
       </div>
 
-      {/* Institutions table */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
@@ -158,7 +133,7 @@ export default function SystemDashboardPage() {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {institutions.map((inst) => (
                   <tr
-                    key={inst._id}
+                    key={inst.id}
                     className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
                   >
                     <td className="px-6 py-4">
@@ -173,24 +148,24 @@ export default function SystemDashboardPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-xs border border-slate-200 dark:border-slate-700">
-                        <Hash size={10} /> {inst.shortCode}
+                        <Hash size={10} /> {inst.short_code}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
                         <Globe size={14} className="text-slate-400 shrink-0" />
-                        <span className="truncate max-w-[200px]">{inst.domain}</span>
+                        <span className="truncate max-w-50">{inst.domain}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="font-mono text-xs text-slate-700 dark:text-slate-300">
-                        {inst.walletAddress
-                          ? `${inst.walletAddress.slice(0, 6)}...${inst.walletAddress.slice(-4)}`
+                        {inst.wallet_address
+                          ? `${inst.wallet_address.slice(0, 6)}...${inst.wallet_address.slice(-4)}`
                           : "—"}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      {inst.isActive ? (
+                      {inst.is_active ? (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-xs font-semibold border border-emerald-200 dark:border-emerald-800/50">
                           <CheckCircle2 size={12} /> Active
                         </span>

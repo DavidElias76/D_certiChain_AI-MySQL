@@ -18,6 +18,14 @@ export const InstitutionRepository = {
         return rows.length ? rows[0] as InstitutionCreateInput : null;
     },
 
+    async updateStatus(institutionId: number, is_active: boolean) {
+        const [result] = await pool.execute<DbResult>(
+            `UPDATE institutions SET is_active = ? WHERE id = ?`,
+            [is_active, institutionId]
+        )
+        return result.insertId;
+    },
+
    async findByDomain(domain: string): Promise<boolean> {
         const [rows] = await pool.execute<DbRow[]>(
             `SELECT id FROM institutions WHERE domain = ?`,
@@ -43,7 +51,9 @@ export const InstitutionRepository = {
                 short_code,
                 wallet_address,
                 description,
-                is_active
+                is_active,
+                wallet_type,
+                wallet_private_key_encrypted
             )
             VALUES (?, ?, ?, ?, ?, ?)`,
             [
@@ -53,6 +63,9 @@ export const InstitutionRepository = {
                 data.wallet_address,
                 data.description ?? null,
                 data.is_active ?? true,
+                data.wallet_type ?? "server_custody",
+                data.wallet_private_key_encrypted ?? null,
+                data.blockchain_inst_tx_hash ?? null
             ]
         );
         return result.insertId;
@@ -67,7 +80,9 @@ export const InstitutionRepository = {
         if (updates.short_code !== undefined) { fields.push("short_code = ?"); values.push(updates.short_code.trim()); }
         if (updates.wallet_address !== undefined) { fields.push("wallet_address = ?"); values.push(updates.wallet_address.trim()); }
         if (updates.description !== undefined) { fields.push("description = ?"); values.push(updates.description.trim()); }
-        if (updates.is_active !== undefined) { fields.push("is_active = ?"); values.push(updates.is_active); }
+        if (updates.is_active !== undefined) { fields.push("is_active = ?"); values.push(updates.is_active); 
+        if(updates.wallet_type != undefined) { fields.push("wallet_type = ?"); values.push(updates.wallet_type)}
+        if(updates.wallet_private_key_encrypted != undefined) { fields.push("wallet_private_key_encrypted = ?"); values.push(updates.wallet_private_key_encrypted)}}
 
         if (fields.length === 0) return false;
         values.push(id);

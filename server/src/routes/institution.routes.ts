@@ -4,6 +4,7 @@ import {
 //   getInstitutionByIdController,
   addInstitutionController,
   updateInstitutionController,
+  updateInstitutionStatusController,
   deleteInstitutionController,
 } from "../controllers/institution.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
@@ -18,7 +19,7 @@ router.get("/",
     getInstitutionController
 );
 
-// not needed it will be chnaged by the frontend
+// not needed it will be chnaged by the frontend - do not delete
 // router.get('/:id',
 //     authMiddleware,
 //     roleMiddleware["systemAdmin"],
@@ -36,6 +37,12 @@ router.put("/:id",
     roleMiddleware(["systemAdmin"]), 
     updateInstitutionController
 );
+
+router.patch('/:id', 
+    authMiddleware, 
+    roleMiddleware(["systemAdmin"]), 
+    updateInstitutionStatusController
+)
 
 router.delete("/:id", 
     authMiddleware,

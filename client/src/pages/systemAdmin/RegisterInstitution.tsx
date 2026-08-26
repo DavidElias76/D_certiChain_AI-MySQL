@@ -12,26 +12,29 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import api from "../../services/api";
+import { useWallet } from "../../context/WalletContext";
+import { useInstitution } from "../../context/InstitutionContext";
 
 type InstitutionForm = {
   name: string;
-  shortCode: string;
+  short_code: string;
   domain: string;
-  walletAddress: string;
+  wallet_address: string;
   description: string;
 };
 
 export default function RegisterInstitution() {
   const navigate = useNavigate();
+  const { account } = useWallet()
+  const { registerInstitution, loading } = useInstitution()
+  
   const [form, setForm] = useState<InstitutionForm>({
     name: "",
-    shortCode: "",
+    short_code: "",
     domain: "",
-    walletAddress: "",
+    wallet_address: account ?? "",
     description: "",
   });
-  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -40,35 +43,30 @@ export default function RegisterInstitution() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
     try {
-      await api.post("/institution/add", form, { withCredentials: true });
+      await registerInstitution(form);
       toast.success(`${form.name} has been registered successfully`);
       navigate("/system/admin/dashboard", { replace: true });
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Failed to register institution");
-    } finally {
-      setLoading(false);
+      throw err;
     }
   };
 
   const isValid =
     form.name.trim() &&
-    form.shortCode.trim() &&
+    form.short_code.trim() &&
     form.domain.trim() &&
-    form.walletAddress.trim() &&
-    /^0x[a-fA-F0-9]{40}$/.test(form.walletAddress);
+    form.wallet_address.trim() &&
+    /^0x[a-fA-F0-9]{40}$/.test(form.wallet_address);
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <Link
             to="/system/admin/dashboard"
-            className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-2"
-          >
+            className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-2">
             <ArrowLeft size={16} /> Back to Dashboard
           </Link>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
@@ -90,7 +88,6 @@ export default function RegisterInstitution() {
           </h2>
         </div>
         <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
-          {/* Institution Name */}
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Institution Name <span className="text-red-500">*</span>
@@ -112,7 +109,6 @@ export default function RegisterInstitution() {
             </div>
           </div>
 
-          {/* Short Code + Domain — side by side */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -126,7 +122,7 @@ export default function RegisterInstitution() {
                 <input
                   type="text"
                   name="shortCode"
-                  value={form.shortCode}
+                  value={form.short_code}
                   onChange={handleChange}
                   placeholder="e.g. KCAU"
                   maxLength={10}
@@ -160,7 +156,6 @@ export default function RegisterInstitution() {
             </div>
           </div>
 
-          {/* Wallet Address */}
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Issuing Wallet Address <span className="text-red-500">*</span>
@@ -173,10 +168,11 @@ export default function RegisterInstitution() {
               <input
                 type="text"
                 name="walletAddress"
-                value={form.walletAddress}
+                value={account ?? form.wallet_address}
                 onChange={handleChange}
                 placeholder="0x..."
                 required
+                readOnly
                 className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono"
               />
             </div>
