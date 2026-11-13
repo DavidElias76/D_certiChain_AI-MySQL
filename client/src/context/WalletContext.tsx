@@ -1,131 +1,264 @@
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import type { ReactNode } from "react";
 import { ethers } from "ethers";
+import type { EthereumProvider } from "../types/ethereum.d";
 import toast from "react-hot-toast";
 import { useAuth } from "./AuthContext";
-// import { useInstitution } from "./InstitutionContext";
+import { useInstitution } from "./InstitutionContext";
 
-// ── Types
+interface WalletOption {
+  id: string;
+  label: string;
+  icon: "metamask" | "rabby";
+  provider: EthereumProvider;
+}
+
 interface WalletContextValue {
+  // browser wallet (MetaMask / Rabby)
   account: string | null;
-  provider: ethers.BrowserProvider | null;
-  signer: ethers.JsonRpcSigner | null;
   connecting: boolean;
-  connectWallet: () => Promise<void>;
+  availableWallets: WalletOption[];
+  activeWalletLabel: string | null;
+  institutionLoaded: boolean;
+  connectWallet: (provider?: EthereumProvider) => Promise<void>;
   disconnectWallet: () => void;
+  // institution wallet
+  institutionWalletAddress: string | null;
+  hasInstitutionWallet: boolean;
+  canSetUpWallet: boolean;
+  settingUp: boolean;
+  setupInstitutionWallet: (privateKey: string) => Promise<boolean>;
 }
 
-interface Props {
-  children: ReactNode;
-}
+const CHECK_INTERVAL_MS = 15000;
+
+const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every((item: unknown) => typeof item === "string");
 
 const WalletContext = createContext<WalletContextValue | null>(null);
 
-export function WalletProvider({ children }: Props) {
+export function WalletProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<string | null>(null);
-  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
-  const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
+  const [injectedProvider, setInjectedProvider] = useState<EthereumProvider | null>(null);
   const [connecting, setConnecting] = useState(false);
-  const { updateWalletAddress } = useAuth();
-  // const { updateInstitutionWalletAddress,  } = useInstitution()
+  const [activeWalletLabel, setActiveWalletLabel] = useState<string | null>(null);
+  const [settingUp, setSettingUp] = useState(false);
 
+  const { user } = useAuth();
+   const { institution, getMyInstitution, setUpWallet } = useInstitution();
 
-  const refreshSigner = useCallback(async (newAccount: string | null) => {
-    if (!newAccount || !provider) return;
-    try {
-      const newSigner = await provider.getSigner(newAccount);
-      
-      setSigner(newSigner);
-      setAccount(newAccount);
+  const institutionId = user?.institution_id;
+   const isInstitutionUser = user?.role === "main_admin" || user?.role === "admin";
 
-      // Update wallet address in backend when account changes
-      await updateWalletAddress(newAccount);
-      // updateInstitutionWalletAddress(institutionId, newAccount) - find a way to update the wallet address when the account changes 
-      
+  const institutionLoaded = isInstitutionUser && institution !== null;
+  const institutionWalletAddress = institutionLoaded ? institution?.wallet_address ?? null : null;
 
-    } catch {
-      setAccount(null);
-      setProvider(null);
-      setSigner(null);
+  const hasInstitutionWallet = Boolean(institutionWalletAddress);
+  const canSetUpWallet = user?.role === "main_admin" && institutionLoaded && !hasInstitutionWallet;
+
+  const getAvailableWallets = useCallback((): WalletOption[] => {
+    const wallets: WalletOption[] = [];
+
+    if (window.ethereum?.isMetaMask) {
+      wallets.push({ id: "metamask", label: "MetaMask", icon: "metamask", provider: window.ethereum });
     }
-  }, [provider, updateWalletAddress]);
+    if (window.rabby?.isRabby) {
+      wallets.push({ id: "rabby", label: "Rabby Wallet", icon: "rabby", provider: window.rabby });
+    } else if (window.ethereum?.isRabby && !window.ethereum?.isMetaMask) {
+      wallets.push({ id: "rabby", label: "Rabby Wallet", icon: "rabby", provider: window.ethereum });
+    }
+    return wallets;
+  }, []);
 
-  useEffect(() => {
-    if (!window.ethereum) return;
+  // Connects the browser wallet only. Nothing is sent to the backend here.
+  const connectWallet = useCallback(
+    async (selectedProvider?: EthereumProvider) => {
+      const wallets = getAvailableWallets();
 
-    const onAccountsChanged = (accounts: unknown) => {
-      const accs = accounts as string[];
-      if (accs.length === 0) {
-        setAccount(null);
-        setProvider(null);
-        setSigner(null);
-        toast("Wallet disconnected in MetaMask.");
-      } else {
-        console.log("Account changed to:", accs[0]);
-        refreshSigner(accs[0]);
+      if (wallets.length === 0) {
+        toast.error("No Ethereum wallet found. Please install MetaMask or Rabby Wallet.");
+        return;
       }
-    };
 
-    const onChainChanged = () => {
-      window.location.reload();
-    };
+      let targetProvider = selectedProvider;
+      if (!targetProvider) {
+        if (wallets.length === 1) {
+          targetProvider = wallets[0].provider;
+        } else {
+          toast.error("Multiple wallets detected. Please select a wallet first.");
+          return;
+        }
+      }
 
-    window.ethereum.on("accountsChanged", onAccountsChanged);
-    window.ethereum.on("chainChanged", onChainChanged);
+      try {
+        setConnecting(true);
+        const browserProvider = new ethers.BrowserProvider(targetProvider);
+        await browserProvider.send("eth_requestAccounts", []);
+        const signer = await browserProvider.getSigner();
+        const address = await signer.getAddress();
 
-    return () => {
-      window.ethereum?.removeListener("accountsChanged", onAccountsChanged);
-      window.ethereum?.removeListener("chainChanged", onChainChanged);
-    };
-  }, [refreshSigner]);
+        setInjectedProvider(targetProvider);
+        setAccount(address);
 
-  const connectWallet = useCallback(async () => {
-    if (!window.ethereum) {
-      toast.error("No Ethereum wallet found. Please install MetaMask.");
-      return;
-    }
+        // get the provider of the wallet - rabby wallet or metamask
+        const label = wallets.find((w) => w.provider === targetProvider)?.label ?? "Unknown Wallet";
+        setActiveWalletLabel(label);
 
-    try {
-      setConnecting(true);
+        toast.success(`Connected via ${label}: ${address.slice(0, 6)}…${address.slice(-4)}`);
 
-      const browserProvider = new ethers.BrowserProvider(window.ethereum);
-      await browserProvider.send("eth_requestAccounts", []);
+      } catch (err: unknown) {
+        const errObj = err as { code?: number };
+        if (errObj.code === 4001) {
+          toast.error("Connection rejected. Please approve the request in your wallet.");
+          return;
+        }
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes("wallet must has at least one account")) {
+          toast.error("No accounts in wallet. Please create an account in your wallet extension first, then try again.");
+          return;
+        }
+        toast.error("Failed to connect wallet");
+      } finally {
+        setConnecting(false);
+      }
+    },
+    [getAvailableWallets]
+  );
 
-      const fetchedSigner = await browserProvider.getSigner();
-      const address = await fetchedSigner.getAddress();
-
-      // console.log("Connected wallet address:", address);
-      // console.log("MetaMask selected address:", window.ethereum.selectedAddress);
-
-      setProvider(browserProvider);
-      setSigner(fetchedSigner);
-      setAccount(address);
-
-      toast.success(`Wallet connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to connect wallet";
-      toast.error(msg);
-    } finally {
-      setConnecting(false);
-    }
-  }, [updateWalletAddress]);
+  // const disconnectWallet = useCallback(() => {
+  //   setAccount(null);
+  //   setInjectedProvider(null);
+  //   setActiveWalletLabel(null);
+  //   toast.success("Wallet disconnected");
+  // }, []);
 
   const disconnectWallet = useCallback(() => {
+    const provider = injectedProvider;
+    // Clear the app state first so nothing re-reads the account
     setAccount(null);
-    setProvider(null);
-    setSigner(null);
+    setInjectedProvider(null);
+    setActiveWalletLabel(null);
     toast.success("Wallet disconnected");
-  }, []);
+
+  // Then ask the wallet to drop this site's permission. Not every wallet supports it.
+  void provider
+    ?.request({ method: "wallet_revokePermissions", params: [{ eth_accounts: {} }] })
+    .catch(() => {});
+}, [injectedProvider]);
+
+  // Keep the connected account in sync. No backend calls here.
+  useEffect(() => {
+    if (!injectedProvider || !account) return;
+
+    const onAccountsChanged = (accounts: unknown) => {
+      if (!isStringArray(accounts)) {
+        console.error("Wallet emitted an invalid accountsChanged event", accounts);
+        return;
+      }
+      if (accounts.length === 0) {
+        disconnectWallet();
+      }  else if (accounts[0].toLowerCase() !== account.toLowerCase()) {
+        setAccount(accounts[0]);
+        toast.success(`Switched to ${accounts[0].slice(0, 6)}…${accounts[0].slice(-4)}`);
+      }
+    };
+    const onChainChanged = () => window.location.reload();
+
+    injectedProvider.on("accountsChanged", onAccountsChanged);
+    injectedProvider.on("chainChanged", onChainChanged);
+    return () => {
+      injectedProvider.removeListener("accountsChanged", onAccountsChanged);
+      injectedProvider.removeListener("chainChanged", onChainChanged);
+    };
+  }, [injectedProvider, account, disconnectWallet]);
+
+  // ── Institution wallet: every institution admin loads it, so all of them see the address
+  const refreshInstitution = useCallback(async () => {
+    if (!institutionId) return;
+    try {
+      await getMyInstitution(true);
+    } catch {
+      // silent background check
+    }
+  }, [institutionId, getMyInstitution]);
+
+  useEffect(() => {
+    if (isInstitutionUser) void refreshInstitution();
+  }, [isInstitutionUser, refreshInstitution]);
+
+  // While no wallet exists yet, re-check on a timer and when the tab regains focus
+  useEffect(() => {
+    if (!isInstitutionUser || hasInstitutionWallet) return;
+
+    const timer = setInterval(() => void refreshInstitution(), CHECK_INTERVAL_MS);
+    const onFocus = () => void refreshInstitution();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [isInstitutionUser, hasInstitutionWallet, refreshInstitution]);
+
+    // Called by the setup form with the pasted private key
+  const setupInstitutionWallet = useCallback(
+    async (privateKey: string): Promise<boolean> => {
+      if (settingUp) return false;
+      if (!canSetUpWallet) {
+        toast.error("Only the main admin can set up the institution wallet, once.");
+        return false;
+      }
+      if (!account) {
+        toast.error("Connect your wallet first.");
+        return false;
+      }
+
+      const trimmed = privateKey.trim();
+      const key = trimmed.startsWith("0x") ? trimmed : `0x${trimmed}`;
+
+      let derivedAddress: string;
+      try {
+        derivedAddress = new ethers.Wallet(key).address; // get the address from the derived key
+      } catch {
+        toast.error("That is not a valid private key.");
+        return false;
+      }
+
+      // this checks if the key is not equal to the derivedkey
+      if (derivedAddress.toLowerCase() !== account.toLowerCase()) {
+        toast.error("The private key does not belong to the connected account.");
+        return false;
+      }
+
+      try {
+        setSettingUp(true);
+        await setUpWallet(key);
+        toast.success("Institution wallet saved and registered on the blockchain");
+        return true;
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Failed to set up the institution wallet");
+        return false;
+      } finally {
+        setSettingUp(false);
+      }
+    },
+    [settingUp, canSetUpWallet, account, setUpWallet]
+  );
 
   return (
     <WalletContext.Provider
       value={{
         account,
-        provider,
-        signer,
         connecting,
+        availableWallets: getAvailableWallets(),
+        activeWalletLabel,
         connectWallet,
-        disconnectWallet
+        disconnectWallet,
+        institutionWalletAddress,
+        hasInstitutionWallet,
+        canSetUpWallet,
+        settingUp,
+        institutionLoaded,
+        setupInstitutionWallet,
       }}
     >
       {children}

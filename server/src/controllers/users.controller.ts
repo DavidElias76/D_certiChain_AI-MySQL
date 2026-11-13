@@ -1,142 +1,284 @@
 
 import type { Request, Response} from "express"
 import type { CustomError } from "../types/error.types";
-import { getUsersService, getUserByIdService, addUsersService, updateUsersService, deleteUserService } from "../services/users.service";
+import { getUsersByIdService, getUsersByRoleService, addUsersService, updateUsersService, updateAdminStatusService, deleteUserService } from "../services/users.service";
 import { OmitPasswordUser, User, UserRole } from "../types/index.types";
 import { UserCreateInput } from "../types/index.types"
+import {
+  CREATABLE_ROLES,
+  assertCanManage,
+  emailErrorForRole,
+  parseUserId,
+  MANAGEABLE_ROLES
+} from "../services/permissions/users.permissions";
+import { UsersRepository } from "../repositories/users.repository";
+import { ResponseException } from "pdf-parse";
+import { error } from "node:console";
 
 // implement caching that will get all the user and we will update the value of the user and everything from it
 // learn about caching - using reddis
-export const getUsersController = async (
-    req: Request<{}, unknown, User, {}>, 
-    res: Response<OmitPasswordUser[] | { error: string }>
-) => {
-    try {
-        const users = await getUsersService();
-        return res.status(200).json(users)
-    } catch (err) {
-        const error = err as CustomError
-        return res.status(error.statusCode || 500).json({ error: error.message })
-    }
-}
 
-export const getUserByIdController = async (
-    req: Request<{ id: string}, unknown, {}, {}>,
-    res: Response<{ message: string; user: OmitPasswordUser} | { error: string}>
+// get the user from the request and filter the users based on the role
+// export const getUsersController = async (
+//     req: Request<{}, unknown, User, {}>, 
+//     res: Response<OmitPasswordUser[] | { error: string }>
+// ) => {
+//     try {
+//         const users = await getUsersService();
+//         return res.status(200).json(users)
+//     } catch (err) {
+//         const error = err as CustomError
+//         return res.status(error.statusCode || 500).json({ error: error.message })
+//     }
+// }
+
+const ALLOWED_ROLES = ["systemAdmin", "main_admin", "admin"];
+
+export const getUsersByRoleController = async (
+  req: Request,
+  res: Response<OmitPasswordUser[] | { error: string }>
 ) => {
-    try {
-        const { id } = req.params;
-        const user = await getUserByIdService(Number(id))
-        if(!user) {
-            const error = new Error("User not found") as CustomError
-            error.statusCode = 404;
-            throw error;
-        }
-        res.status(200).json({
-            message: "success",
-            user
-        })
-    } catch (err) {
-        const error = err as CustomError
-        return res.status(error.statusCode || 500).json({ error: error.message })
+  try {
+    const user = req.user;
+    if (!user) {
+      res.status(401).json({ error: "Not authenticated" });
+      return;
     }
-}
+
+    if (!ALLOWED_ROLES.includes(user.role)) {
+      res.status(403).json({ error: "You do not have permission to view users." });
+      return;
+    }
+
+    // main_admin and admin are limited to their own institution.
+    if (user.role !== "systemAdmin" && !user.institution_id) {
+      res.status(403).json({ error: "Your account is not linked to an institution." });
+      return;
+    }
+
+    // The role and institution come from the token, never from the request.
+    const users = await getUsersByRoleService({
+      role: user.role,
+      institutionId: user.institution_id,
+    });
+
+    res.status(200).json(users as OmitPasswordUser[]);
+  } catch (err: any) {
+    const error = err as CustomError;
+    res.status(error.statusCode || 500).json({ error: error.message });
+  }
+};
+
+// this is not used
+export const getUsersByIdController = async (
+  req: Request<{ institutionId: string }, unknown, {}, { roles?: string[] }>,
+  res: Response<{ message: string; users: OmitPasswordUser[] } | { error: string }>
+) => {
+  try {
+    const { institutionId } = req.params;
+    const { roles } = req.query;
+
+    const id = Number(institutionId);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        error: "Invalid institution ID",
+      });
+    }
+
+    if (!roles || roles.length === 0) {
+      return res.status(400).json({
+        error: "At least one user role is required",
+      });
+    }
+
+    const users = await getUsersByIdService(id, roles);
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({
+        error: "No users found for this institution",
+      });
+    }
+
+    return res.status(200).json({
+      message: "success",
+      users,
+    });
+  } catch (err: any) {
+    const error = err as CustomError;
+
+    return res.status(error.statusCode || 500).json({
+      error: error.message || "Internal server error",
+    });
+  }
+};
 
 export const addUsersController = async (
-    req: Request<{}, unknown, UserCreateInput, {}>,
-    res: Response<{ message: string} | { error: string}>
+  req: Request<{}, unknown, UserCreateInput, {}>,
+  res: Response<{ message: string } | { error: string }>
 ) => {
-    try {
-        const { username, email, password, role, institution_name} = req.body
+  try {
+      const actor = req.user;
+      if (!actor) return res.status(401).json({ error: "Not authenticated" });
 
-        if(!username || !email || !password || !role) {
-            return res.status(400).json({ error: "Fill all fields" })
+      const creatable = CREATABLE_ROLES[actor.role];
+      if (!creatable) {
+        return res.status(403).json({ error: "You do not have permission to add users." });
+      }
+
+      const { username, email, password, role, registration_number, institution_name } = req.body;
+
+      let registrationNumber: string | null = null;
+      if (role === "student") {
+        registrationNumber = registration_number?.trim() ?? "";
+        if (!registrationNumber) {
+          return res.status(400).json({ error: "Registration number is required for students." });
+        }
+        if (registrationNumber.length > 50) {
+          return res.status(400).json({ error: "Registration number is too long." });
+        }
+      }
+
+      let targetInstitution: string;
+
+      if (actor.role === "systemAdmin") {
+        const requested = institution_name?.trim();
+        if (!requested) {
+          return res.status(400).json({ error: "Select an institution for this admin." });
         }
 
-        const validRoles = ["student", "employer", "admin", "systemAdmin"];
-        if(!validRoles.includes(role)) {
-            return res.status(400).json({
-                error: "Invalid role. Must be student, employer, or admin"
-            });
+        const institution = await UsersRepository.findByName(requested);
+        if (!institution) {
+          return res.status(404).json({ error: "Institution not found." });
         }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const studentEmailRegex = /^[a-zA-Z0-9._-]+@students\.[a-zA-Z0-9-]+\.ac\.ke$/;
-        if (role === "student") {
-            if (!institution_name) {
-                return res.status(400).json({
-                    error: "Institution name is required for students"
-                });
-            }
-
-            if (!studentEmailRegex.test(email)) {
-                return res.status(400).json({
-                    error: "Student email must be in the format username@students.institution.ac.ke"
-                });
-            }
-        } else {
-            if (!emailRegex.test(email)) {
-                return res.status(400).json({
-                    error: "Please provide a valid email address"
-                });
-            }
+        targetInstitution = institution.name; // use the stored spelling
+      } else {
+        if (!actor.institution_name) {
+          return res.status(403).json({ error: "Your account is not linked to an institution." });
         }
+        targetInstitution = actor.institution_name;
+      }
 
-        const { user } = await addUsersService(
-            username.trim(), 
-            email.trim(), 
-            password, 
-            role as UserRole,
-            institution_name?.trim(),
-        )
+      if (!creatable.includes(role)) {
+        return res.status(403).json({ error: `You can only add: ${creatable.join(", ")}.` });
+      }
 
-        if(!user) {
-            return res.status(500).json({ message: "Failed to create user" });
-        }
-        
-        return res.status(200).json({ message: "User added successfully"});
-    } catch (err) {
-        const error = err as CustomError
-        return res.status(error.statusCode || 500).json({ error: error.message })
+      const emailError = emailErrorForRole(role, email);
+      if (emailError) return res.status(400).json({ error: emailError });
+
+      // The institution always comes from the token, never from the request body.
+      const { user } = await addUsersService(
+        username.trim(),
+        email.trim(),
+        password,
+        role as UserRole,
+        registrationNumber,
+        targetInstitution
+      );
+
+      if (!user) return res.status(500).json({ error: "Failed to create user" });
+
+      return res.status(201).json({ message: "User registered successfully" });
+    } catch (err: any) {
+      const error = err as CustomError;
+      return res.status(error.statusCode || 500).json({ error: error.message });
     }
-}
+};
 
 export const updateUsersController = async (
-    req: Request<{ id: string}, unknown, Partial<UserCreateInput>, {}>,
-    res: Response<{ message: string } | { error: string }>
+  req: Request<{ id: string }, unknown, Partial<UserCreateInput>, {}>,
+  res: Response<{ message: string } | { error: string }>
 ) => {
-    try {
-        const { id } = req.params;
-        if(Object.keys(req.body).length === 0) {
-           return res.status(400).json({ error: "No data provided for update" }) 
-        }
-        const { username, email, password, role, institution_name } = req.body
-        const userUpdate = {
-            ...(username && { username}),
-            ...(email && { email }),
-            ...(password && { password}),
-            ...(role && { role }),
-            ...(institution_name && { institution_name })
-        }
+  try {
+    const actor = req.user;
+    if (!actor) return res.status(401).json({ error: "Not authenticated" });
 
-        await updateUsersService(Number(id), userUpdate)
-        return res.status(200).json({ message: "User updated successsfully"})
-    } catch (err) {
-        const error = err as CustomError
-        return res.status(error.statusCode || 500).json({ error: error.message })
+    const targetId = parseUserId(req.params.id);
+    const target = await assertCanManage(actor, targetId);
+
+    // institution_id / institution_name from the body are deliberately ignored.
+    const { username, email, password, role } = req.body ?? {};
+
+    if (role !== undefined) {
+      const assignable = CREATABLE_ROLES[actor.role] ?? [];
+      if (!assignable.includes(role)) {
+        return res.status(403).json({ error: "You cannot assign this role." });
+      }
     }
+
+    if (email) {
+      const emailError = emailErrorForRole(role ?? target.role, email);
+      if (emailError) return res.status(400).json({ error: emailError });
+    }
+
+    const userUpdate = {
+      ...(username && { username: username.trim() }),
+      ...(email && { email: email.trim() }),
+      ...(password && { password }),
+      ...(role && {
+        role: role as NonNullable<Parameters<typeof updateUsersService>[1]["role"]>,
+      }),
+    };
+
+    if (Object.keys(userUpdate).length === 0) {
+      return res.status(400).json({ error: "No data provided for update" });
+    }
+
+    await updateUsersService(targetId, userUpdate);
+
+    return res.status(200).json({ message: "User updated successfully" });
+  } catch (err: any) {
+    const error = err as CustomError;
+    return res.status(error.statusCode || 500).json({ error: error.message });
+  }
+};
+
+export const updateAdminStatusController = async(
+  req: Request<{ id: string}, {}, { is_verified: boolean}, {}>,
+  res: Response<any>
+) =>{
+  try {
+
+    const actor = req.user;
+    if (!actor) return res.status(401).json({ error: "Not authenticated" });
+
+    const role = req.user?.role; // only the main_admin and the systemAdmin can change the status of is_verified
+    if(role !== 'main_admin' && role !== 'systemAdmin') {
+       return res.status(404).json({ error: 'Not authorized to update the admin status'})
+    }
+
+    const targetId = parseUserId(req.params.id)
+    const isVerfied = req?.body?.is_verified
+
+    // check if this is a boolean
+    if(typeof isVerfied !== 'boolean') {
+      res.status(500).json({ error: 'The statsu must be a boolean value'})
+    } 
+
+    await updateAdminStatusService(targetId, isVerfied)
+
+    return res.status(200).json({ message: "Admin status updated successfully" });
+  } catch (err: any) {
+    const error = err as CustomError;
+    return res.status(error.statusCode || 500).json({ error: error.message });
+  }
 }
 
 export const deleteUsersController = async (
-    req: Request<{ id: string }>,
-    res: Response<{ message: string} | { error: string }>
+  req: Request<{ id: string }>,
+  res: Response<{ message: string } | { error: string }>
 ) => {
-    try {
-        const { id } = req.params;
-        await deleteUserService(Number(id));
-        return res.status(200).json({ message: "User deleted successfully"})
-    } catch (err) {
-        const error = err as CustomError
-        return res.status(error.statusCode || 500).json({ error: error.message})
-    }
-}
+  try {
+    const actor = req.user;
+    if (!actor) return res.status(401).json({ error: "Not authenticated" });
+
+    const targetId = parseUserId(req.params.id);
+    await assertCanManage(actor, targetId); // this need to be called by the systemAdmin, main_admin and the admin
+
+    await deleteUserService(targetId);
+    return res.status(200).json({ message: "User deleted successfully" });
+  } catch (err: any) {
+    const error = err as CustomError;
+    return res.status(error.statusCode || 500).json({ error: error.message });
+  }
+};

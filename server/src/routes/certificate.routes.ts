@@ -1,28 +1,49 @@
+import rateLimit from "express-rate-limit";
 import { Router } from "express";
 import {
   issueCertificateController,
-  getAllCertificatesController,
-  getCertificatesByIssuerController,
+  getCertificatesByInstitutionController,
+  getAllCertificatesCountController,
   getMyCertificatesController,
+  verifyCertificateController,
   revokeCertificateController,
+  verifyCertificateUploadController,
+  getCarrerRecommendationsController,
+  getCertificatePdfController
 } from "../controllers/certificate.controller";
-import { authMiddleware } from "../middlewares/auth.middleware";
+import { authMiddleware, optionalAuthMiddleware, requireRole, requireVerified } from "../middlewares/auth.middleware";
+import { singleFileUpload } from "../middlewares/upload.middleware";
+import { roleMiddleware } from "../middlewares/role.middleware";
 
 const router: Router = Router();
 
-// POST /certificate/issue — admin only
-router.post("/issue", authMiddleware, issueCertificateController);
+const verifyLimiter = rateLimit({
+  windowMs: 60_000,
+  limit: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many verification requests. Please wait a minute and try again." },
+});
 
-// GET /certificate/my — get certificates belonging to the logged-in student
-router.get("/my", authMiddleware, getMyCertificatesController);
+const uploadLimiter = rateLimit({
+  windowMs: 60_000,
+  limit: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many uploads. Please wait a minute and try again." },
+});
 
-// GET /certificate/all — admin only (all certs by this issuer) - This will be the admin based on the institution
-router.get("/all", authMiddleware, getCertificatesByIssuerController);
+// you can add the role middleware to prevent the unauthorized users and check if the user exist in the db
 
-// GET /certificate — get certificates issued by the logged-in user
-router.get("/", authMiddleware, getCertificatesByIssuerController);
-
-// DELETE /certificate/:id — revoke
-router.delete("/:id", authMiddleware, revokeCertificateController);
+router.get("/", authMiddleware,requireRole("main_admin", "admin"), getCertificatesByInstitutionController);
+router.get("/my", authMiddleware, requireRole('student'), getMyCertificatesController);
+// router.get("/count", authMiddleware, requireRole('systemAdmin'), getAllCertificatesCountController);
+router.get("/count", authMiddleware, (req, _res, next) => { console.log("[count]", req.user); next(); }, requireRole("systemAdmin"), getAllCertificatesCountController);
+router.get("/verify/:certificateNumber", verifyLimiter, optionalAuthMiddleware, verifyCertificateController);
+router.get("/:id/pdf", authMiddleware, getCertificatePdfController);
+router.post("/issue", authMiddleware, requireRole("main_admin", "admin"), requireVerified, issueCertificateController); // // POST /certificate/issue — main_admin and admin only if verified
+router.post("/verify/upload", uploadLimiter, singleFileUpload,optionalAuthMiddleware, verifyCertificateUploadController)
+router.post("/career-recommendataions/:id", authMiddleware, getCarrerRecommendationsController)
+router.delete("/:id", authMiddleware, requireRole("main_admin", "admin"), revokeCertificateController);
 
 export default router;

@@ -5,25 +5,23 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const ALGORITHM = "aes-256-gcm";
-const IV_LENGTH = 12;       // bytes (recommended for GCM)
-const AUTH_TAG_LENGTH = 16; // bytes
+const IV_LENGTH = 12;      
+const AUTH_TAG_LENGTH = 16; 
 
-// get the key from the env file
 const getMasterKey = (): Buffer => {
     const raw = process.env.MASTER_ENCRYPTION_KEY;
-    if(!raw) throw Error("MASTER_ENCRYPTION_KEY not set in .env")
+    if (!raw) throw new Error("MASTER_ENCRYPTION_KEY not set in .env");
     const clean = raw.startsWith("0x") ? raw.slice(2) : raw;
-    if (clean.length !== 64) {
+    if (!/^[a-fA-F0-9]{64}$/.test(clean)) {
         throw new Error("MASTER_ENCRYPTION_KEY must be 64 hex characters (32 bytes)");
     }
     return Buffer.from(clean, "hex");
-}
+};
 
-// Encrypt the master key
 const encryptPrivateKey = (plaintextPrivateKey: string): string => {
     const masterKey = getMasterKey()
     const iv = randomBytes(IV_LENGTH);
-    const cipher = createCipheriv(ALGORITHM, masterKey, iv); // encrypt the key
+    const cipher = createCipheriv(ALGORITHM, masterKey, iv, { authTagLength: AUTH_TAG_LENGTH }); // encrypt the key
 
     // take the cipler text and combine them with thr privatekey
     const encrypted = Buffer.concat([
@@ -39,7 +37,7 @@ const encryptPrivateKey = (plaintextPrivateKey: string): string => {
     ].join(":"); // joins them together to prevent tampering
 }
 
-// DECRYPT: takes the encrypted blob, returns the plaintext private key
+// DECRYPT: takes the encrypted blob, returns the plaintext private key - change the name to the decrytAddress
 const decryptPrivateKey = (encryptedBlob: string) => {
     const masterKey = getMasterKey()
     const parts = encryptedBlob.split(":"); // this return an array of three values
@@ -54,7 +52,7 @@ const decryptPrivateKey = (encryptedBlob: string) => {
     const authTag = Buffer.from(authTagHex, "hex");
     const ciphertext = Buffer.from(ciphertextHex, "hex");
 
-    const decipher = createDecipheriv(ALGORITHM, masterKey, iv);
+    const decipher = createDecipheriv(ALGORITHM, masterKey, iv, { authTagLength: AUTH_TAG_LENGTH });
     decipher.setAuthTag(authTag);
 
     const decrypted = Buffer.concat([

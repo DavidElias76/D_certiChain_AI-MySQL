@@ -4,7 +4,6 @@ import {
   Users,
   FileText,
   ShieldCheck,
-  TrendingUp,
   CheckCircle2,
   Loader2,
   Award,
@@ -101,63 +100,57 @@ export default function DashboardAdminPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {/* Total Certificates */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/40">
-              <FileText className="text-indigo-600 dark:text-indigo-400" size={20} />
-            </div>
-            <span className="text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-1">
-              <TrendingUp size={12} /> +12%
-            </span>
+        <div className="flex items-center gap-4 border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
+            <FileText size={20} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-xl font-bold text-slate-900 dark:text-white">
+              {loading ? "—" : stats.total.toLocaleString()}
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Total Certificates</p>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider mb-1">Total Certificates</p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-white">
-            {loading ? "—" : stats.total.toLocaleString()}
-          </p>
         </div>
 
         {/* Active */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/40">
-              <CheckCircle2 className="text-emerald-600 dark:text-emerald-400" size={20} />
-            </div>
-            <span className="text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-1">
-              <TrendingUp size={12} /> +5.4%
-            </span>
+        <div className="flex items-center gap-4 border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+            <CheckCircle2 size={20} />
+          </span>
+          <div>
+            <p className="text-xl font-bold text-slate-900 dark:text-white">
+              {loading ? "—" : stats.issued.toLocaleString()}
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Active</p>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider mb-1">Active</p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-white">
-            {loading ? "—" : stats.issued.toLocaleString()}
-          </p>
         </div>
 
         {/* Revoked */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2.5 bg-red-50 dark:bg-red-950/40">
-              <XCircle className="text-red-600 dark:text-red-400" size={20} />
-            </div>
+        <div className="flex items-center gap-4 border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400">
+            <XCircle size={20} />
+          </span>
+          <div>
+            <p className="text-xl font-bold text-slate-900 dark:text-white">
+              {loading ? "—" : stats.revoked.toLocaleString()}
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Revoked</p>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider mb-1">Revoked</p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-white">
-            {loading ? "—" : stats.revoked.toLocaleString()}
-          </p>
         </div>
 
         {/* This Month */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2.5 bg-amber-50 dark:bg-amber-950/40">
-              <Clock className="text-amber-600 dark:text-amber-400" size={20} />
-            </div>
+        <div className="flex items-center gap-4 border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
+            <Clock size={20} />
+          </span>
+          <div>
+            <p className="text-xl font-bold text-slate-900 dark:text-white">
+              {loading ? "—" : stats.thisMonth.toLocaleString()}
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">This Month</p>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider mb-1">This Month</p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-white">
-            {loading ? "—" : stats.thisMonth.toLocaleString()}
-          </p>
         </div>
       </div>
 
@@ -293,7 +286,7 @@ export default function DashboardAdminPage() {
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Institution</p>
               </div>
               <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                {user?.institutionName || "Your Institution"}
+                {user?.institution_name || "Your Institution"}
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Admin: {user?.username}</p>
             </div>

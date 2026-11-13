@@ -1,9 +1,6 @@
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Outlet, NavLink, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import {
-  LayoutDashboard,
-  ShieldCheck,
-  FileText,
+import { LayoutDashboard, ShieldCheck, FileText,
   Users,
   BarChart3,
   LogOut,
@@ -11,13 +8,20 @@ import {
   Award,
   Search,
   Building2,
-  Wallet,
-  LandmarkIcon
+  // Wallet,
+  LandmarkIcon,
+  UserPlus,
+  UserRound,
+  // BriefcaseBusiness,
+  // Info,
+  // Mail,
+  // Lightbulb
 } from "lucide-react";
 import { useState } from "react";
 
-import { useWallet } from "../../context/WalletContext";
-
+// import { useWallet } from "../../context/WalletContext";
+import InstitutionWalletStatus from "./InstitutionWalletStatus";
+// import { useWallet } from "../../context/WalletContext";
 function NavItem({
   to,
   icon: Icon,
@@ -39,8 +43,7 @@ function NavItem({
            ? "bg-indigo-500 text-white"
            : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-white"
          }`
-      }
-    >
+      }>
       <Icon size={18} />
       <span>{label}</span>
     </NavLink>
@@ -51,10 +54,17 @@ export default function DashboardLayout() {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { disconnectWallet, connectWallet, connecting, account} = useWallet()
+  // const [walletPickerOpen, setWalletPickerOpen] = useState(false);
+  // const { disconnectWallet, connectWallet, connecting, account, availableWallets, activeWalletLabel } = useWallet();
+  // const { disconnectWallet, account }= useWallet()
 
   const isStudent = user?.role === "student";
-  const isAdmin = user?.role === "admin";
+  // you can use one name to make it simple
+  const isEmployer = user?.role === "employer";
+  const isAlumni = user?.role === "alumni";
+  const isEmployerOrAlumni = isEmployer || isAlumni;
+  const isAdmin = user?.role === "admin" || user?.role === "main_admin";
+  // const isMainAdmin = user?.role === "main_admin";
   const isSystemAdmin = user?.role === "systemAdmin";
 
   const handleLogout = async () => {
@@ -77,6 +87,8 @@ export default function DashboardLayout() {
                   ? "Platform Admin"
                   : isAdmin
                   ? "University Admin"
+                  : isEmployerOrAlumni
+                  ? "Employer & Alumni"
                   : "Student Portal"}
               </p>
             </div>
@@ -91,8 +103,10 @@ export default function DashboardLayout() {
                 System Administration
               </p>
               <NavItem to="/system/admin/dashboard" icon={LayoutDashboard} label="Dashboard" end />
-              <NavItem to="/system/admin/register" icon={Building2} label="Register Institutions" />
+              <NavItem to="/system/admin/register-institutions" icon={Building2} label="Register Institutions" />
+              <NavItem to="/system/admin/register-main-admin" icon={UserPlus} label="Register Main Admin" />
               <NavItem to="/system/admin/manage-institutions" icon={LandmarkIcon} label="Manage Institutions" />
+              <NavItem to="/system/admin/manage-admins" icon={Users} label="Manage Admins" />
               <NavItem to="/system/admin/analytics" icon={BarChart3} label="Analytics" />
             </>
           )}
@@ -104,8 +118,11 @@ export default function DashboardLayout() {
               </p>
               <NavItem to="/admin/dashboard" icon={LayoutDashboard} label="Dashboard" end />
               <NavItem to="/admin/issue-certificates" icon={FileText} label="Issue Certificate" />
+              {user?.role === "main_admin" && (
+                <NavItem to="/admin/register-admin" icon={UserPlus} label="Manage Admins" />
+              )}
               <NavItem to="/admin/manage-certificates" icon={ShieldCheck} label="Manage Certificates" />
-              <NavItem to="/admin/manage-users" icon={Users} label="Manage Users" />
+              <NavItem to="/admin/manage-users" icon={Users} label="Manage Students" />
               <NavItem to="/admin/analytics" icon={BarChart3} label="Analytics" />
             </>
           )}
@@ -119,6 +136,17 @@ export default function DashboardLayout() {
               <NavItem to="/my-certificates" icon={Award} label="My Certificates" />
               <NavItem to="/verify-certificate" icon={Search} label="Verify Certificate" />
               <NavItem to="/career-recommendations" icon={BarChart3} label="Career Recommendations" />
+            </>
+          )}
+
+          {isEmployerOrAlumni && (
+            <>
+              <p className="px-4 text-xs font-medium text-slate-500 uppercase tracking-wider mb-4">
+                Employer Portal
+              </p>
+              {/* not needed at the moment */}
+              {/* <NavItem to="/employer/dashboard" icon={LayoutDashboard} label="Dashboard" /> */}
+              <NavItem to="/employer/verify-certificate" icon={ShieldCheck} label="Verify Certificate" end/>
             </>
           )}
         </nav>
@@ -145,10 +173,16 @@ export default function DashboardLayout() {
 
             {dropdownOpen && (
               <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xs shadow-sm py-1 z-50">
+                <Link
+                  to="/profile"
+                  onClick={() => setDropdownOpen(false)}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 text-sm transition-colors">
+                  <UserRound size={18} />
+                  Profile
+                </Link>
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm transition-colors"
-                >
+                  className="w-full flex items-center gap-3 px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm transition-colors">
                   <LogOut size={18} />
                   Sign Out
                 </button>
@@ -167,35 +201,16 @@ export default function DashboardLayout() {
               ? "Platform Administration"
               : isAdmin
               ? "University Administration"
+              : isEmployerOrAlumni
+              ? "Employer & Alumni Portal"
               : "Student Portal"}
           </h2>
 
-          { !isStudent &&  
-            <>
-              <div className="flex items-center gap-4">
-                <div className="text-sm text-slate-600 dark:text-slate-400">
-                  Welcome, <span className="font-medium text-slate-900 dark:text-white">{user?.username}</span>
-                </div>
-                <button
-                  onClick={account ? disconnectWallet : connectWallet}
-                  disabled={connecting}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-medium rounded-xs transition-colors"
-                >
-                  <Wallet size={16} />
-                  {connecting ? (
-                    <span>Connecting...</span>
-                  ) : account ? (
-                    <span className="max-w-30 truncate">{account.slice(0, 6)}...{account.slice(-4)}</span>
-                  ) : (
-                    <span>Connect Wallet</span>
-                  )}
-                </button>
-              </div>
-            </>
-          }
-        </header>
+          {isAdmin && <InstitutionWalletStatus />}
+            
+          </header>
         {/* Page content */}
-        <main className="flex-1 overflow-auto p-8 bg-slate-50 dark:bg-slate-950">
+        <main className="flex-1 overflow-auto bg-slate-50 p-4 dark:bg-slate-950 sm:p-6">
           <Outlet />
         </main>
       </div>

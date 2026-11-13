@@ -1,6 +1,19 @@
-export type UserRole = "admin" | "student" | "employer" | "systemAdmin";
+export type UserRole = "admin" | "student" | "employer" | "systemAdmin" | "main_admin" | "alumni";
 
 export interface User {
+  id: number;
+  username: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  institution_id: number | null;
+  institution_name: string | null;
+  is_verified: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface UserResponse {
   id: number;
   username: string;
   email: string;
@@ -12,6 +25,16 @@ export interface User {
   is_verified: boolean;
   created_at: Date;
   updated_at: Date;
+}
+
+export interface QueryResponse {
+  id: number;
+  username: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  institution_id: number | null;
+  institution_name: string | null;
 }
 
 export type OmitPasswordUser = Omit<User, "password">;
@@ -30,21 +53,23 @@ export interface UserCreateInput {
   email: string;
   password: string;
   role: UserRole;
-  institution_id?: number;
+  registration_number?: string | null
+  institution_id?: number | null;
   institution_name?: string;
-  wallet_address?: string;
   is_verified?: boolean; // This wil use the Otp code that will be sent to the line
 }
 
-// institution
 export interface Institution {
   id: number;
   name: string;
   short_code: string;
   domain: string;
-  wallet_address: string;
+  wallet_address: string | null;
   description: string | null;
   is_active: boolean;
+  blockchain_inst_tx_hash: string | null;
+  institution_chain_id: string | null;
+  wallet_registered_at: Date | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -53,12 +78,9 @@ export interface InstitutionCreateInput {
   name: string;
   short_code: string;
   domain: string;
-  wallet_address: string;
-  description?: string ;
+  wallet_address?: string | null; // always null at creation, set later by the wallet setup
+  description?: string | null;
   is_active?: boolean;
-  wallet_type?: "server_custody" | "metamask";
-  wallet_private_key_encrypted?: string | null;
-  blockchain_inst_tx_hash: string | null
 }
 
 // certificate
@@ -91,6 +113,7 @@ export interface Certificate {
   updated_at: Date;
 }
 
+// the os the input
 export interface CertificateCreateInput {
   student_name: string;
   registration_number: string;
@@ -101,7 +124,7 @@ export interface CertificateCreateInput {
   graduation_date: Date;
   gpa?: string;
   classification?: string;
-  skills?: string[];
+  // skills?: string[]; // this will be removed and be generated the AI recommendation
   certificate_number: string;
   certificate_hash: string;
   blockchain_tx_hash?: string;
@@ -109,10 +132,19 @@ export interface CertificateCreateInput {
   qr_code_url?: string;
   certificate_pdf_url?: string;
   issued_by: number;
+  institution_id?: number;
+  certificate_id: number
+}
+
+export interface CertificateResult {
+  id: number;
+  certificate_number: string;
+  certificate_hash: string;
+  status: string;
 }
 
 // verifications logs
-export type VerifierType = "student" | "employer" | "public";
+export type VerifierType = "student" | "employer" | "alumni" | "public";
 export type VerificationResult = "verified" | "invalid" | "revoked";
 
 export interface VerificationLog {

@@ -7,7 +7,22 @@ import { UsersRepository } from "../repositories/users.repository";
 import { generateAccessToken, generateRefreshToken } from "../utility/jwt"
 import { OmitPasswordUser } from "../types/index.types";
 import { UserRole } from "../types/auth.types";
-import { UserCreateInput } from "../models_sequelize_typescript";
+
+export const buildTokenPayload = (user: {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+  institution_id?: number | null;
+  institution_name?: string | null;
+}) => ({
+  id: user.id,
+  username: user.username,
+  email: user.email,
+  role: user.role,
+  institution_id: user.institution_id ?? null,
+  institution_name: user.institution_name ?? null,
+});
 
 export const signInService = async (email: string, password: string) => {
   try {
@@ -27,21 +42,18 @@ export const signInService = async (email: string, password: string) => {
       error.statusCode = 401;
       throw error;
     }
-    
-    const payload = {
-        id: existingUser.id,
-        role: existingUser.role,
-        username: existingUser.username,
-        email: existingUser.email,
-      }
 
-    const accessToken: string = await generateAccessToken(payload)
-    const refreshToken: string = await generateRefreshToken(payload.id)
-
-    const user: UserResponseService = {
+    const payload = buildTokenPayload(existingUser);
+    const accessToken: string = await generateAccessToken(payload);
+    const refreshToken: string = await generateRefreshToken(existingUser.id);
+   
+    const user = {
       id: existingUser.id,
       username: existingUser.username,
+      email: existingUser.email,
       role: existingUser.role,
+      institution_id: existingUser.institution_id,
+      institution_name: existingUser.institution_name
     };
 
     return { user, accessToken, refreshToken };
@@ -99,7 +111,10 @@ export const signUpService = async (
       user: {
         id: newUser.id,
         username: newUser.username,
+        email: newUser.email,
         role: newUser.role,
+        institution_id: newUser.institution_id,
+        institution_name: newUser.institution_name
       },
     };
   } catch (error) {
@@ -107,7 +122,6 @@ export const signUpService = async (
     throw error;
   }
 };
-
 
 export const updateWalletAddressService = async (id: number, wallet_address: string) => {
   try {

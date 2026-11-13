@@ -9,23 +9,33 @@ import {
   Award,
   Plus,
   Minus,
-  Cpu
+  Cpu,
+  BadgeCheck,
+  CheckCircle2,
+  Fingerprint,
+  GraduationCap,
+  Landmark,
+  LockKeyhole,
+  Sparkles,
 } from 'lucide-react';
 import ThemeToggle from '../components/common/ThemeToggle';
 
 const FAQItem = ({ question, answer }: { question: string, answer: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="border-b border-border-muted dark:border-slate-800 last:border-0">
+    <div className="border-b border-slate-200 dark:border-slate-800 last:border-0">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full py-5 flex items-center justify-between text-left hover:text-primary transition-colors"
+        aria-expanded={isOpen}
+        className="flex w-full items-center justify-between gap-4 py-5 text-left transition-colors hover:text-indigo-600 dark:hover:text-indigo-400 rounded-md"
       >
-        <span className="text-base font-semibold text-on-surface dark:text-white">{question}</span>
-        {isOpen ? <Minus size={18} /> : <Plus size={18} />}
+        <span className="text-sm font-semibold text-slate-900 dark:text-white sm:text-base">{question}</span>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-slate-200 text-indigo-600 dark:border-slate-700 dark:text-indigo-400">
+          {isOpen ? <Minus size={16} /> : <Plus size={16} />}
+        </span>
       </button>
       <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96 pb-5' : 'max-h-0'}`}>
-        <p className="text-sm text-on-surface-variant dark:text-slate-400 leading-relaxed">
+        <p className="pr-10 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
           {answer}
         </p>
       </div>
@@ -35,28 +45,29 @@ const FAQItem = ({ question, answer }: { question: string, answer: string }) => 
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-surface-subtle dark:bg-slate-950 text-on-surface dark:text-slate-200 selection:bg-primary/30 font-sans transition-colors duration-300">
+    <>
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-indigo-200 dark:bg-slate-950 dark:text-slate-200">
       {/* Header */}
-      <header className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-border-muted dark:border-slate-800/50">
-        <div className="max-w-container mx-auto px-6 py-3 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="bg-primary p-1.5">
+      <header className="fixed top-0 z-50 w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 sm:px-8">
+          <Link to="/" className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center bg-indigo-600">
               <ShieldCheck className="text-white" size={20} />
             </div>
-            <span className="text-lg font-bold tracking-tight text-on-surface dark:text-white">CertiChain <span className="text-primary">AI</span></span>
+            <span className="text-base font-bold tracking-tight text-slate-900 dark:text-white sm:text-lg">CertiChain <span className="text-indigo-600 dark:text-indigo-400">AI</span></span>
           </Link>
-          <div className="hidden md:flex items-center gap-8 text-[13px] font-semibold tracking-wider">
-            <a href="#features" className="hover:text-primary dark:hover:text-white transition-colors">Features</a>
-            <a href="#how-it-works" className="hover:text-primary dark:hover:text-white transition-colors">How It Works</a>
-            <a href="#use-cases" className="hover:text-primary dark:hover:text-white transition-colors">Use Cases</a>
-            <a href="#faq" className="hover:text-primary dark:hover:text-white transition-colors">FAQ</a>
-          </div>
-          <div className="flex items-center gap-3">
+          <nav aria-label="Main navigation" className="hidden items-center gap-7 text-sm font-semibold text-slate-600 dark:text-slate-300 lg:flex">
+            <a href="#features" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">Features</a>
+            <a href="#how-it-works" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">How It Works</a>
+            <a href="#use-cases" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">Use Cases</a>
+            <a href="#faq" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">FAQ</a>
+          </nav>
+          <div className="flex items-center gap-2 sm:gap-3">
             <ThemeToggle />
-            <Link to="/login" className="text-[13px] font-semibold hover:text-primary dark:hover:text-white transition-colors px-3 tracking-wider rounded-md border-0">
+            <Link to="/login" className="px-2 py-2 text-sm font-semibold text-slate-700 transition-colors hover:text-indigo-600 dark:text-slate-200 dark:hover:text-indigo-400 sm:px-3 rounded-md">
               Log in
             </Link>
-            <Link to="/register" className="bg-primary hover:bg-primary-container text-white px-4 py-2 text-[13px] font-semibold transition-all rounded-md">
+            <Link to="/register" className="bg-indigo-600 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 sm:px-4 rounded-md">
               Get Started
             </Link>
           </div>
@@ -64,45 +75,85 @@ const LandingPage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-28 pb-16 lg:pt-40 lg:pb-24 overflow-hidden bg-white dark:bg-slate-950">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(45%_40%_at_50%_50%,rgba(10,105,218,0.05)_0%,rgba(0,0,0,0)_100%)] dark:bg-[radial-gradient(45%_40%_at_50%_50%,rgba(10,105,218,0.08)_0%,rgba(0,0,0,0)_100%)]" />
-        
-        <div className="max-w-container mx-auto px-6 text-center flex flex-col items-center">
-          <div className="max-w-4xl">
-            <span className="inline-block px-3 py-1 bg-indigo-600 dark:bg-slate-900 border border-border-muted dark:border-slate-800 text-slate-200 dark:text-slate-300 text-[12px] font-semibold mb-6 tracking-wider rounded-lg">
-              Blockchain-powered certificate verification
+      <section className="relative overflow-hidden border-b border-slate-200 bg-white pt-28 dark:border-slate-800 dark:bg-slate-950 sm:pt-32 lg:pt-36">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_75%_30%,rgba(99,102,241,0.12),transparent_42%)] dark:bg-[radial-gradient(ellipse_at_75%_30%,rgba(79,70,229,0.18),transparent_42%)]" />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 pb-16 sm:px-8 sm:pb-20 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:pb-24">
+          <div>
+            <span className="inline-flex items-center gap-2 border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-indigo-700 dark:border-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-300 rounded-md">
+              <ShieldCheck size={14} /> Blockchain-powered credentials
             </span>
-            
-            <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-on-surface dark:text-white mb-6 leading-[1.2]">
-              Trust in every credential. <br/>
-              Verify, manage and grow with AI-powered certificate intelligence.
+            <h1 className="mt-6 max-w-2xl text-4xl font-bold leading-[1.08] tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-6xl">
+              Trust in every <span className="text-indigo-600 dark:text-indigo-400">credential.</span>
             </h1>
-            
-            <p className="max-w-2xl mx-auto text-[18px] text-on-surface-variant dark:text-slate-400 mb-8 leading-relaxed">
-              CertiChain AI combines blockchain verification with AI career guidance to give universities, students and employers a unified platform for trusted credentials.
+            <p className="mt-6 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-400 sm:text-lg">
+              Verify, manage and grow with AI-powered certificate intelligence. One trusted platform for universities, students and employers.
             </p>
-
-            <div className="flex items-center justify-center gap-3">
-              <Link to="/register" className="bg-primary text-white px-8 py-3 font-bold text-[15px] hover:bg-primary-container transition-all flex items-center gap-2 tracking-widest rounded-md">
-                Verify Certificates
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link to="/register" className="inline-flex items-center justify-center gap-2 bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 rounded-md">
+                Verify Certificates <ArrowRight size={16} />
               </Link>
-              <Link to="/login" className="bg-transparent border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-3 font-bold text-[15px] transition-all flex items-center gap-2 tracking-widest rounded-md">
+              <Link to="/login" className="inline-flex items-center justify-center border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition-colors hover:border-indigo-400 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-indigo-700 dark:hover:text-indigo-300 rounded-md">
                 Log in
               </Link>
+            </div>
+            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium text-slate-500 dark:text-slate-400">
+              <span className="inline-flex items-center gap-2"><CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400" /> Tamper-evident records</span>
+              <span className="inline-flex items-center gap-2"><CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400" /> Simple certificate checks</span>
+            </div>
+          </div>
+
+          <div aria-label="Illustration of a verified academic certificate" className="relative mx-auto w-full max-w-lg">
+            <div aria-hidden="true" className="absolute -inset-5 bg-indigo-100/70 blur-3xl dark:bg-indigo-950/50" />
+            <div className="relative border border-slate-200 bg-white p-4 shadow-2xl shadow-indigo-950/10 dark:border-slate-700 dark:bg-slate-900 sm:p-6">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-9 w-9 items-center justify-center bg-indigo-600 text-white"><Landmark size={18} /></span>
+                  <div>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">Academic Credential</p>
+                    <p className="mt-0.5 text-[10px] text-slate-500">Digital certificate record</p>
+                  </div>
+                </div>
+                <span className="inline-flex items-center gap-1.5 border border-emerald-200 bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">
+                  <BadgeCheck size={13} /> Verified
+                </span>
+              </div>
+              <div className="py-7 text-center sm:py-9">
+                <span className="mx-auto flex h-14 w-14 items-center justify-center border border-indigo-100 bg-indigo-50 text-indigo-600 dark:border-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-300">
+                  <GraduationCap size={28} />
+                </span>
+                <p className="mt-5 text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">Certificate of achievement</p>
+                <div className="mx-auto mt-4 h-2 w-3/5 bg-slate-200 dark:bg-slate-700" />
+                <div className="mx-auto mt-2 h-1.5 w-2/5 bg-slate-100 dark:bg-slate-800" />
+                <div className="mx-auto mt-6 h-px w-4/5 bg-slate-100 dark:bg-slate-800" />
+                <div className="mx-auto mt-4 grid w-4/5 grid-cols-2 gap-3">
+                  <div className="h-7 border border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-950" />
+                  <div className="h-7 border border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-950" />
+                </div>
+              </div>
+              <div className="flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
+                <span className="inline-flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
+                  <LockKeyhole size={13} className="text-indigo-600 dark:text-indigo-400" /> Secured with blockchain proof
+                </span>
+                <Fingerprint size={24} className="text-indigo-300 dark:text-indigo-700" />
+              </div>
+            </div>
+            <div className="absolute -bottom-5 -left-4 hidden items-center gap-2 border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-lg dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 sm:flex">
+              <Sparkles size={15} className="text-indigo-600 dark:text-indigo-400" /> Trusted credentials, made simple
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 scroll-mt-16 bg-white dark:bg-slate-950">
-        <div className="max-w-container mx-auto px-6">
-          <div className="max-w-2xl mx-auto text-center mb-12">
-            <span className="text-slate-900 dark:text-primary-container text-[30px] font-extrabold">Features</span>
-            <h2 className="text-2xl lg:text-3xl font-bold text-on-surface dark:text-white mt-3 tracking-tight">Everything you need to validate credentials</h2>
+      <section id="features" className="scroll-mt-20 bg-slate-50 py-20 dark:bg-slate-950">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-400">Features</span>
+            <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white lg:text-3xl">Everything you need to validate credentials</h2>
+            <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">From secure issuance to instant checks, keep trusted credentials moving.</p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
               { title: "Blockchain Verification", icon: ShieldCheck, desc: "Immutable certificate records stored on-chain with cryptographic proof of authenticity." },
               { title: "Instant Verification", icon: Search, desc: "Scan QR code or upload PDF for real-time blockchain validation." },
@@ -111,28 +162,28 @@ const LandingPage = () => {
               { title: "Digital Certificates", icon: Award, desc: "Students receive secure PDF certificates with embedded QR codes." },
               { title: "Employer Portal", icon: Building2, desc: "Bulk verification and instant background checks for recruiters." }
             ].map((feature, i) => (
-              <div key={i} className="bg-white dark:bg-slate-950 border border-border-muted dark:border-slate-800 p-6 hover:border-primary transition-all group">
-                <div className="w-10 h-10 bg-surface-container-low dark:bg-slate-900 flex items-center justify-center mb-4 border border-border-muted dark:border-slate-800">
-                  <feature.icon className="text-primary dark:text-primary-container" size={22} />
+              <div key={i} className="group border border-slate-200 bg-white p-6 transition-colors hover:border-indigo-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-800">
+                <div className="mb-5 flex h-11 w-11 items-center justify-center border border-indigo-100 bg-indigo-50 text-indigo-600 transition-colors group-hover:bg-indigo-600 group-hover:text-white dark:border-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-300 dark:group-hover:bg-indigo-600">
+                  <feature.icon size={21} />
                 </div>
-                <h3 className="text-[17px] font-bold text-on-surface dark:text-white mb-3 tracking-tight">{feature.title}</h3>
-                <p className="text-[14px] text-on-surface-variant dark:text-slate-400 leading-relaxed">{feature.desc}</p>
+                <h3 className="mb-2 text-base font-bold tracking-tight text-slate-900 dark:text-white">{feature.title}</h3>
+                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">{feature.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-{/* the heading and the sub heading need to be different */}
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-24 bg-slate-50 dark:bg-slate-900/50 transition-colors scroll-mt-20">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-2xl lg:text-4xl font-bold text-slate-900 dark:text-white mb-4">How It Works</h2>
-            <p className="text-slate-900 dark:text-slate-400 text-xl font-bold">Simple, secure process for students and employers</p>
+      <section id="how-it-works" className="scroll-mt-20 border-y border-slate-200 bg-white py-20 dark:border-slate-800 dark:bg-slate-900/40">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="mb-12 text-center">
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-400">A clear process</span>
+            <h2 className="mt-3 text-2xl font-bold text-slate-900 dark:text-white lg:text-3xl">How It Works</h2>
+            <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">Simple, secure steps for students and employers.</p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid gap-4 md:grid-cols-3">
             {[
               { 
                 step: "01. Issue", 
@@ -147,12 +198,12 @@ const LandingPage = () => {
                 desc: "Employers scan the QR code or upload the PDF for instant blockchain verification of the certificate." 
               }
             ].map((item, i) => (
-              <div key={i} className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-8">
-                <span className="text-slate-900 dark:text-indigo-400 font-mono font-bold text-base block mb-4">
+              <div key={i} className="border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-950 sm:p-7">
+                <span className="mb-5 flex h-15 w-50 items-center justify-center border border-indigo-200 bg-indigo-50 font-mono text-sm font-bold text-indigo-700 dark:border-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-300">
                   {item.step}
                 </span>
-                <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-white">Step {i+1}</h3>
-                <p className="text-slate-600 dark:text-slate-400">
+                <h3 className="mb-2 text-lg font-bold text-slate-900 dark:text-white">Step {i+1}</h3>
+                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                   {item.desc}
                 </p>
               </div>
@@ -162,16 +213,17 @@ const LandingPage = () => {
       </section>
 
       {/* Use Cases Section */}
-      <section id="use-cases" className="py-20 bg-white dark:bg-slate-950 scroll-mt-16">
-        <div className="max-w-container mx-auto px-6">
-          <div className="max-w-2xl mx-auto text-center mb-12">
-            <span className="text-slate-900 dark:text-primary-container font-mono text-[25px] font-bold">Use cases</span>
-            <h2 className="text-2xl lg:text-3xl font-bold text-on-surface dark:text-white mt-3 tracking-tight">
+      <section id="use-cases" className="scroll-mt-20 bg-slate-50 py-20 dark:bg-slate-950">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-400">Use cases</span>
+            <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white lg:text-3xl">
               Built for every stakeholder
             </h2>
+            <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">A shared foundation for institutions, graduates, and hiring teams.</p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-10">
+          <div className="grid gap-4 md:grid-cols-3">
             {[
               { 
                 title: "Universities", 
@@ -188,12 +240,15 @@ const LandingPage = () => {
             ].map((item, i) => (
               <div 
                 key={i} 
-                className="text-center p-8 border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all"
+                className="border border-slate-200 bg-white p-6 transition-colors hover:border-indigo-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-800 sm:p-8"
               >
-                <h3 className="text-[17px] font-bold text-on-surface dark:text-white mb-4 tracking-tight">
+                <span className="mb-5 flex h-10 w-10 items-center justify-center border border-indigo-100 bg-indigo-50 text-indigo-600 dark:border-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-300">
+                  {i === 0 ? <Landmark size={19} /> : i === 1 ? <GraduationCap size={19} /> : <Building2 size={19} />}
+                </span>
+                <h3 className="mb-2 text-base font-bold tracking-tight text-slate-900 dark:text-white">
                   {item.title}
                 </h3>
-                <p className="text-[14px] text-on-surface-variant dark:text-slate-400 leading-relaxed">
+                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                   {item.desc}
                 </p>
               </div>
@@ -203,29 +258,30 @@ const LandingPage = () => {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-20 bg-white dark:bg-slate-950 transition-colors scroll-mt-16">
-        <div className="max-w-container mx-auto px-6">
-          <div className="grid lg:grid-cols-3 gap-12">
-            <div className="text-center lg:text-left">
-              <h2 className="text-2xl lg:text-3xl font-bold text-on-surface dark:text-white mb-4 tracking-tight">
+      <section id="faq" className="scroll-mt-20 border-t border-slate-200 bg-white py-20 dark:border-slate-800 dark:bg-slate-900/40">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-400">Help center</span>
+              <h2 className="mb-4 mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white lg:text-3xl">
                 Frequently Asked Questions
               </h2>
-              <p className="text-[14px] text-on-surface-variant dark:text-slate-400 mb-6 leading-relaxed">
+              <p className="mb-6 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                 Everything you need to know about CertiChain AI and our blockchain verification process.
               </p>
               
-              <div className="bg-auth-navy p-6 text-white text-center border border-border-muted rounded-2xl">
-                <h4 className="font-bold text-sm mb-2 tracking-wider">Still have questions?</h4>
-                <p className="text-slate-400 text-[12px] mb-5 leading-relaxed">
+              <div className="border border-slate-800 bg-slate-950 p-6 text-white dark:border-slate-700">
+                <h4 className="mb-2 text-sm font-bold">Still have questions?</h4>
+                <p className="mb-5 text-sm leading-relaxed text-slate-400">
                   Can't find the answer you're looking for? Please chat with our friendly team.
                 </p>
-                <button className="bg-primary text-white px-6 py-2.5 rounded-lg font-bold text-[12px] hover:bg-primary-container transition-colors tracking-widest">
+                <button className="bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 rounded-md">
                   Contact Support
                 </button>
               </div>
             </div>
             
-            <div className="lg:col-span-2 space-y-6">
+            <div className="divide-y divide-slate-200 border-y border-slate-200 dark:divide-slate-800 dark:border-slate-800">
               <FAQItem 
                 question="How does blockchain verification work?" 
                 answer="When a certificate is issued, a unique cryptographic hash is generated and stored on the Ethereum blockchain. When someone verifies the certificate, our system re-calculates the hash and compares it with the one on the ledger. If they match, the certificate is 100% authentic."
@@ -248,79 +304,84 @@ const LandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-surface-subtle dark:bg-slate-950">
-        <div className="max-w-container mx-auto px-6">
-          <div className="bg-auth-navy dark:bg-primary p-10 lg:p-16 text-center text-white rounded-2xl border border-border-muted dark:border-slate-800">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-4 tracking-tight">
-              Ready to get started?
-            </h2>
-            <p className="text-slate-300 text-[15px] mb-8 max-w-lg mx-auto leading-relaxed">
-              Join universities, students and employers building trust in digital credentials.
-            </p>
-            <Link 
-              to="/register" 
-              className="inline-flex items-center gap-2 bg-white text-auth-navy dark:text-white dark:bg-primary-container px-8 py-3 font-bold text-[15px] hover:bg-surface-subtle transition-all tracking-widest rounded-lg"
-            >
-              Get Started <ArrowRight size={18} />
-            </Link>
+      <section className="bg-slate-50 py-16 dark:bg-slate-950 sm:py-20">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="relative overflow-hidden border border-slate-800 bg-slate-950 px-6 py-12 text-center text-white dark:border-slate-800 sm:px-10 lg:py-16">
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_120%,rgba(79,70,229,0.55),transparent_58%)]" />
+            <div className="relative">
+              <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-300"><ShieldCheck size={14} /> Credentials you can trust</span>
+              <h2 className="mb-4 mt-3 text-3xl font-bold tracking-tight lg:text-4xl">
+                Ready to get started?
+              </h2>
+              <p className="mx-auto mb-8 mt-3 max-w-lg text-sm leading-relaxed text-slate-300 sm:text-base">
+                Join universities, students and employers building trust in digital credentials.
+              </p>
+              <Link
+                to="/register"
+                className="inline-flex items-center gap-2 bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 rounded-md"
+              >
+                Get Started <ArrowRight size={18} />
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-white dark:bg-slate-950 border-t border-border-muted dark:border-slate-800">
-        <div className="max-w-container mx-auto px-6">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+      <footer className="border-t border-slate-200 bg-white py-12 dark:border-slate-800 dark:bg-slate-950">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="mb-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <ShieldCheck className="text-primary" size={24} />
-                <span className="text-base font-bold tracking-tight text-on-surface dark:text-white">CertiChain AI</span>
+              <div className="mb-4 flex items-center gap-2.5">
+                <span className="flex h-8 w-8 items-center justify-center bg-indigo-600"><ShieldCheck className="text-white" size={18} /></span>
+                <span className="text-base font-bold tracking-tight text-slate-900 dark:text-white">CertiChain AI</span>
               </div>
-              <p className="text-on-surface-variant text-[13px] leading-relaxed">
+              <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                 Blockchain-powered certificate verification and AI career guidance platform.
               </p>
             </div>
 
             <div>
-              <h4 className="font-bold text-sm text-on-surface dark:text-white mb-4 tracking-wider">Product</h4>
-              <ul className="space-y-3 text-[13px] text-on-surface-variant">
-                <li><a href="#" className="hover:text-primary transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">API</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Status</a></li>
+              <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">Product</h4>
+              <ul className="space-y-3 text-sm text-slate-500 dark:text-slate-400">
+                <li><a href="#" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">Features</a></li>
+                <li><a href="#" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">Pricing</a></li>
+                <li><a href="#" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">API</a></li>
+                <li><a href="#" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">Status</a></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-bold text-sm text-on-surface dark:text-white mb-4 tracking-wider">Resources</h4>
-              <ul className="space-y-3 text-[13px] text-on-surface-variant">
-                <li><a href="#" className="hover:text-primary transition-colors">Documentation</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Guides</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Support</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Blog</a></li>
+              <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">Resources</h4>
+              <ul className="space-y-3 text-sm text-slate-500 dark:text-slate-400">
+                <li><a href="#" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">Documentation</a></li>
+                <li><a href="#" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">Guides</a></li>
+                <li><a href="#" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">Support</a></li>
+                <li><a href="#" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">Blog</a></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-bold text-sm text-on-surface dark:text-white mb-4 tracking-wider">Company</h4>
-              <ul className="space-y-3 text-[13px] text-on-surface-variant">
-                <li><a href="#" className="hover:text-primary transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Contact</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Privacy</a></li>
+              <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">Company</h4>
+              <ul className="space-y-3 text-sm text-slate-500 dark:text-slate-400">
+                <li><a href="#" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">About</a></li>
+                <li><a href="#" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">Careers</a></li>
+                <li><a href="#" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">Contact</a></li>
+                <li><a href="#" className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400">Privacy</a></li>
               </ul>
             </div>
           </div>
 
-          <div className="pt-6 border-t border-border-muted dark:border-slate-900 text-center md:text-left">
-            <p className="text-on-surface-variant text-[11px] tracking-widest">
+          <div className="border-t border-slate-200 pt-6 text-center dark:border-slate-800 md:text-left">
+            <p className="text-[11px] tracking-wider text-slate-500 dark:text-slate-400">
               © 2026 CertiChain AI. All rights reserved.
             </p>
           </div>
         </div>
       </footer>
     </div>
-  );
+    </>
+  )
 };
 
 export default LandingPage;

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Users,
@@ -14,36 +14,61 @@ import {
   ArrowLeft,
   Filter,
   XCircle,
-  Eye,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import useUsers from "../../context/UsersContext";
-import UsersModal from "../../components/modals/AddUsersModal";
+import useUsers, { type IUser } from "../../context/UsersContext";
+import UsersModal, {
+  type IUser as ModalUser,
+  type UserRole as ModalUserRole,
+} from "../../components/modals/AddUsersModal";
+import useAuth from "../../context/AuthContext";
+// const EDITABLE_ROLES: ModalUserRole[] = ["student", "employer", "admin"];
+
+const toModalUser = (u: IUser): ModalUser => ({
+  id: String(u.id),
+  username: u.username,
+  email: u.email,
+  role: u.role as ModalUserRole,
+  registration_number: u.registration_number ?? null,
+  institution_name: u.institution_name ?? undefined,
+  isVerified: u.is_verified,
+});
 
 type UserRole = "admin" | "student" | "employer" | "systemAdmin";
-type StatusFilter = "all" | "verified" | "pending";
+type StatusFilter = "all" | "active" | "pending";
 
 export default function ManageUsers() {
-  const { users, loading, getUsers, deleteUsersById } = useUsers();
+  const { users, loading, deleteUsersById } = useUsers();
+  const { user } = useAuth()
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [roleFilter, setRoleFilter] = useState<UserRole | "all">("all");
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editingUser, setEditingUser] = useState<any>(null);
-  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+  const [editingUser, setEditingUser] = useState<IUser | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<IUser | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const main_admin = user?.role === "main_admin";
 
-  // Reload users on mount
-  useEffect(() => {
-    getUsers();
-  }, []);
+  const onUserAdded = async() => {
+    toast.success('User added sucessfully')
+  };
+
+  const onUserEdited = async() => {
+    toast.success('user updated successfully')
+  }
+
+  const filteredUsers = useMemo(() => {
+    return users
+      .filter((user) => user.role === (main_admin ? "student" : "admin"))
+      .sort((a, b) => a.username.localeCompare(b.username))
+  }, [users, main_admin])
 
   // Stats
   const stats = useMemo(() => {
     return {
       total: users.length,
-      verified: users.filter((u) => u.isVerified).length,
-      pending: users.filter((u) => !u.isVerified).length,
+      verified: users.filter((u) => u.is_verified).length,
+      pending: users.filter((u) => !u.is_verified).length,
     };
   }, [users]);
 
@@ -52,8 +77,8 @@ export default function ManageUsers() {
     return users.filter((user) => {
       const matchStatus =
         statusFilter === "all" ||
-        (statusFilter === "verified" && user.isVerified) ||
-        (statusFilter === "pending" && !user.isVerified);
+        (statusFilter === "active" && user.is_verified) ||
+        (statusFilter === "pending" && !user.is_verified);
 
       const matchRole = roleFilter === "all" || user.role === roleFilter;
 
@@ -62,13 +87,13 @@ export default function ManageUsers() {
         !term ||
         (user.username || "").toLowerCase().includes(term) ||
         (user.email || "").toLowerCase().includes(term) ||
-        (user.institutionName || "").toLowerCase().includes(term);
+        (user.institution_name || "").toLowerCase().includes(term);
 
       return matchStatus && matchRole && matchSearch;
     });
   }, [users, search, statusFilter, roleFilter]);
 
-  const handleEditUser = (user: any) => {
+  const handleEditUser = (user: IUser) => {
     setEditingUser(user);
     setShowAddModal(true);
   };
@@ -77,7 +102,7 @@ export default function ManageUsers() {
     if (!deleteTarget) return;
     try {
       setDeleting(true);
-      await deleteUsersById(deleteTarget.id);
+      await deleteUsersById(Number(deleteTarget.id));
       toast.success(`User ${deleteTarget.username} deleted`);
       setDeleteTarget(null);
     } catch {
@@ -115,12 +140,12 @@ export default function ManageUsers() {
             Manage Users
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-            Add, edit, and remove users registered under your institution.
+            Add, edit and remove users registered under your institution.
           </p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-sm transition-colors text-sm"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-sm transition-colors text-sm"
         >
           <Plus size={16} /> Add New User
         </button>
@@ -175,15 +200,15 @@ export default function ManageUsers() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by username, email, or institution..."
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+              className="w-full pl-10 pr-4 py-2.5 rounded-md bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
             />
           </div>
           <div className="relative">
-            <Filter size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <Filter size={18} className="absolute left-3.5 rounded-md top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value as UserRole | "all")}
-              className="pl-10 pr-8 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all appearance-none cursor-pointer"
+              className="pl-10 pr-8 py-2.5 rounded-md bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all appearance-none cursor-pointer"
             >
               <option value="all">All Roles</option>
               <option value="student">Students</option>
@@ -193,14 +218,14 @@ export default function ManageUsers() {
             </select>
           </div>
           <div className="relative">
-            <Filter size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <Filter size={18} className="absolute left-3.5 rounded-md top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-              className="pl-10 pr-8 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all appearance-none cursor-pointer"
+              className="pl-10 pr-8 py-2.5 rounded-md bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all appearance-none cursor-pointer"
             >
               <option value="all">All Statuses</option>
-              <option value="verified">Verified Only</option>
+              <option value="active">Verified Only</option>
               <option value="pending">Pending Only</option>
             </select>
           </div>
@@ -234,9 +259,9 @@ export default function ManageUsers() {
             {!search && statusFilter === "all" && roleFilter === "all" && (
               <button
                 onClick={() => setShowAddModal(true)}
-                className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-colors"
+                className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-colors"
               >
-                <Plus size={16} /> Add First User
+                <Plus size={16} /> Add User
               </button>
             )}
           </div>
@@ -248,13 +273,17 @@ export default function ManageUsers() {
                   <th className="text-left px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">User</th>
                   <th className="text-left px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Email</th>
                   <th className="text-left px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Role</th>
+                  <th className="text-left px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Registration Number</th>
                   <th className="text-left px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Institution</th>
                   <th className="text-left px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
                   <th className="text-right px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {filtered.map((user) => (
+
+                {/* This dsisplays all the users i want to make the chnage and dispplay users based on the institution  */}
+                
+                {filteredUsers.map((user) => (
                   <tr
                     key={user.id}
                     className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
@@ -273,33 +302,42 @@ export default function ManageUsers() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
                         <Mail size={14} className="text-slate-400 shrink-0" />
-                        <span className="truncate max-w-[220px]">{user.email}</span>
+                        <span className="truncate max-w-55">{user.email}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center px-2.5 py-1 text-xs font-semibold capitalize ${
-                          roleBadgeStyles[user.role] ||
+                          roleBadgeStyles[user.role as UserRole] ||
                           "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
                         }`}
                       >
                         {user.role}
                       </span>
                     </td>
+                      <td className="px-6 py-4">
+                        {user.registration_number ? (
+                          <span className="font-mono text-xs text-slate-700 dark:text-slate-300">
+                            {user.registration_number}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400">—</span>
+                        )}
+                      </td>
                     <td className="px-6 py-4">
-                      {user.institutionName ? (
+                      {user.institution_name ? (
                         <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
                           <Building2 size={14} className="text-slate-400 shrink-0" />
-                          <span className="truncate max-w-[200px]">{user.institutionName}</span>
+                          <span className="truncate max-w-50">{user.institution_name}</span>
                         </div>
                       ) : (
                         <span className="text-slate-400">—</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      {user.isVerified ? (
+                      {user.is_verified ? (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-xs font-semibold border border-emerald-200 dark:border-emerald-800/50">
-                          <ShieldCheck size={12} /> Verified
+                          <ShieldCheck size={12} /> Active
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 text-xs font-semibold border border-amber-200 dark:border-amber-800/50">
@@ -334,8 +372,12 @@ export default function ManageUsers() {
       {/* Add/Edit User Modal */}
       <UsersModal
         showAddModal={showAddModal}
-        user={editingUser}
+        user={editingUser ? toModalUser(editingUser) : null}
+        authUser={user}
         setShowAddModal={closeModal}
+        // filteredInstitutionUsers={filteredInstitutionUsers}
+        onUserAdded={onUserAdded}
+        onUserEdited={onUserEdited}
       />
 
       {/* Delete Confirmation Modal */}

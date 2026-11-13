@@ -14,84 +14,91 @@ import {
   Loader2,
 } from "lucide-react";
 import { useInstitution } from "../../context/InstitutionContext";
-
-// NOTE: Need to see all the institutions, users absed on the school name, institution admin, recommendations, certificates issued and verified, revocked
+import useCertificates from "../../context/CertificateContext";
 
 export default function SystemDashboardPage() {
   const { institutions, loading } = useInstitution();
+  const { totalCount } = useCertificates();
 
   return (
-    <div className="space-y-8 pb-12">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-            <Activity className="text-indigo-600 dark:text-indigo-400" size={28} />
+    <div className="mx-auto max-w-6xl space-y-6 pb-8">
+      <section className="relative flex min-h-32 flex-col justify-center gap-4 overflow-hidden px-1 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative z-10 max-w-2xl">
+          <div className="mb-2 flex items-center gap-3">
+            <Activity size={24} className="text-indigo-600 dark:text-indigo-400" />
+            <p className="text-[11px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+              System overview
+            </p>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
             Platform Dashboard
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
             Overview of registered institutions and certificate activity.
           </p>
         </div>
         <Link
-          to="/system/admin/register"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-sm transition-colors text-sm"
+          to="/system/admin/register-institutions"
+          className="relative z-10 inline-flex w-fit items-center justify-center gap-2 bg-indigo-600 px-4 py-2.5 text-sm rounded-md font-semibold text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950"
         >
           <PlusCircle size={16} />
           Register Institution
         </Link>
-      </div>
+      </section>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/40">
-              <Building2 className="text-indigo-600 dark:text-indigo-400" size={20} />
-            </div>
-            <span className="text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-1">
-              <TrendingUp size={12} /> +1
-            </span>
+      <section aria-label="Platform overview" className="grid gap-3 sm:grid-cols-3">
+        <div className="flex items-center gap-4 border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
+            <Building2 size={20} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-xl font-bold text-slate-900 dark:text-white">
+              {loading ? "—" : institutions.length}
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Total Institutions</p>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider mb-1">Total Institutions</p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-white">
-            {loading ? "—" : institutions.length}
-          </p>
+          <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+            <TrendingUp size={12} /> +1
+          </span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/40">
-              <CheckCircle2 className="text-emerald-600 dark:text-emerald-400" size={20} />
-            </div>
+        <div className="flex items-center gap-4 border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
+            <CheckCircle2 size={20} />
+          </span>
+          <div>
+            <p className="text-xl font-bold text-slate-900 dark:text-white">
+              {loading ? "—" : institutions.filter((i) => i.is_active).length}
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Active</p>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider mb-1">Active</p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-white">
-            {loading ? "—" : institutions.filter((i) => i.is_active).length}
-          </p>
         </div>
 
         {/* delete this part or find a way to ocunt all the certificates - get the blockchain count of number of certificated 
             to be removed if not neccessary
         */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2.5 bg-amber-50 dark:bg-amber-950/40">
-              <FileText className="text-amber-600 dark:text-amber-400" size={20} />
-            </div>
+        <div className="flex items-center gap-4 border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
+            <FileText size={20} />
+          </span>
+          <div>
+            {/* This wil have the number of all certificates from the database and the blockchain - which will be the same */}
+            {/* te requeest couut is not bing sent to the backed */}
+            <p className="text-xl font-bold text-slate-900 dark:text-white">{totalCount}</p>
+            <p className="text-sm  text-slate-500 dark:text-slate-400">Certificates Issued</p>
           </div>
-          
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider mb-1">Certificates Issued</p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-white">0</p>
         </div>
-      </div>
+      </section>
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-            <ShieldCheck size={16} className="text-indigo-600" /> Registered Institutions
+      <section className="overflow-hidden border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-5 py-4 dark:border-slate-800 sm:px-6">
+          <h2 className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
+            <ShieldCheck size={18} className="text-indigo-600 dark:text-indigo-400" />
+            Registered Institutions
           </h2>
           <Link
             to="/system/admin/register"
-            className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-semibold flex items-center gap-1"
+            className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-indigo-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-indigo-400"
           >
             Add New <PlusCircle size={12} />
           </Link>
@@ -99,66 +106,70 @@ export default function SystemDashboardPage() {
 
         {loading ? (
           <div className="p-12 text-center">
-            <Loader2 className="animate-spin text-indigo-600 mx-auto" size={32} />
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-3">Loading institutions...</p>
+            <Loader2 className="mx-auto animate-spin text-indigo-600 dark:text-indigo-400" size={32} />
+            <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">Loading institutions...</p>
           </div>
         ) : institutions.length === 0 ? (
           <div className="p-12 text-center">
-            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center bg-slate-100 dark:bg-slate-800">
               <Building2 className="text-slate-400" size={28} />
             </div>
-            <h3 className="text-slate-900 dark:text-white font-semibold mb-1">No institutions yet</h3>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">
+            <h3 className="mb-1 font-semibold text-slate-900 dark:text-white">No institutions yet</h3>
+            <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
               Get started by registering your first institution.
             </p>
             <Link
               to="/system/admin/register"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-colors"
+              className="inline-flex items-center gap-2 bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
             >
               <PlusCircle size={16} /> Register First Institution
             </Link>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+            <table className="w-full min-w-225 text-sm">
+              <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
                 <tr>
-                  <th className="text-left px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Institution</th>
-                  <th className="text-left px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Short Code</th>
-                  <th className="text-left px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Domain</th>
-                  <th className="text-left px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Wallet Address</th>
-                  <th className="text-left px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Institution</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Admin</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Short Code</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Domain</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Wallet Address</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {institutions.map((inst) => (
                   <tr
                     key={inst.id}
-                    className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
+                    className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30"
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-indigo-100 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-semibold text-sm shrink-0">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-indigo-100 text-sm font-semibold text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
                           {inst.name?.[0]?.toUpperCase() || "?"}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-semibold text-slate-900 dark:text-white truncate">{inst.name}</p>
+                          <p className="truncate font-semibold text-slate-900 dark:text-white">{inst.name}</p>
                         </div>
                       </div>
                     </td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                      {inst.main_admin_name || "—"}
+                    </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-xs border border-slate-200 dark:border-slate-700">
+                      <span className="inline-flex items-center gap-1 border border-slate-200 bg-slate-100 px-2.5 py-1 font-mono text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                         <Hash size={10} /> {inst.short_code}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                      <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                         <Globe size={14} className="text-slate-400 shrink-0" />
-                        <span className="truncate max-w-50">{inst.domain}</span>
+                        <span className="max-w-50 truncate">{inst.domain}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="font-mono text-xs text-slate-700 dark:text-slate-300">
+                      <span className="font-mono text-xs text-slate-600 dark:text-slate-300">
                         {inst.wallet_address
                           ? `${inst.wallet_address.slice(0, 6)}...${inst.wallet_address.slice(-4)}`
                           : "—"}
@@ -166,11 +177,11 @@ export default function SystemDashboardPage() {
                     </td>
                     <td className="px-6 py-4">
                       {inst.is_active ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-xs font-semibold border border-emerald-200 dark:border-emerald-800/50">
+                        <span className="inline-flex items-center gap-1.5 border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-800/50 dark:bg-emerald-950/40 dark:text-emerald-400">
                           <CheckCircle2 size={12} /> Active
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 text-xs font-semibold border border-red-200 dark:border-red-800/50">
+                        <span className="inline-flex items-center gap-1.5 border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400">
                           <XCircle size={12} /> Inactive
                         </span>
                       )}
@@ -181,7 +192,7 @@ export default function SystemDashboardPage() {
             </table>
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

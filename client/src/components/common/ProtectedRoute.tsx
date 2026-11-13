@@ -29,8 +29,10 @@ export default function ProtectedRoute({ allowedRoles }: { allowedRoles?: string
     const roleToPath: Record<string, string> = {
       systemAdmin: "/system/admin/dashboard",
       admin: "/admin/dashboard",
+      main_admin: "/admin/dashboard",
       student: "/dashboard",
-      // employer: "/dashboard",
+      employer: "/employer/verify-certificate",
+      alumni: "/employer/verify-certificate",
     };
     const defaultPath = roleToPath[user.role] ?? "/";
     

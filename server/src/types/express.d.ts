@@ -5,7 +5,10 @@ declare global {
             user?: {
                 id: number;
                 username: string
+                email: string
                 role: string;
+                institution_name: string
+                institution_id: number | null
             };
         }
     }

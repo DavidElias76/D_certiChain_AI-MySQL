@@ -15,7 +15,7 @@ export interface CertificateRegistry$Type {
   readonly deployedLinkReferences: {};
   readonly immutableReferences: {};
   readonly inputSourceName: "project/contracts/CertificateRegistry.sol";
-  readonly buildInfoId: "solc-0_8_24-14e2b82b6c4274819330e719f78d07dad91888f3";
+  readonly buildInfoId: "solc-0_8_24-e10a5b09a0935f4d5cc2a8949326e5c1f886152c";
 };
 
 import "hardhat/types/artifacts";

@@ -23,7 +23,6 @@ export default function SystemAdminLoginPage() {
 
     try {
       await logIn(form);
-      // AuthContext.logIn() sets user state AND navigates to /system/admin/dashboard
       toast.success('Welcome Back, System Admin')
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Invalid credentials");
@@ -32,124 +31,154 @@ export default function SystemAdminLoginPage() {
     }
   };
 
-  // The system admin page has a strcture problem  no text being displayed due to background color white - make the changes
-
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col lg:flex-row font-sans transition-colors duration-300">
-      {/* Left side branding panel */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-linear-to-br from-indigo-700 via-indigo-800 to-slate-900 dark:from-indigo-950 dark:to-slate-900 items-center justify-center overflow-hidden p-12 transition-colors">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent)] pointer-events-none" />
-        <div className="absolute top-0 left-0 p-12 flex items-center justify-between w-full z-20">
-          <Link
-            to="/"
-            className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-          >
-            <ArrowLeft size={20} /> Back
-          </Link>
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 transition-colors dark:bg-slate-950 dark:text-white lg:grid lg:grid-cols-2">
+      <aside className="relative hidden overflow-hidden border-r border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-900 lg:flex lg:flex-col lg:justify-between lg:p-10 xl:p-14">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -left-28 -top-24 h-96 w-96 rounded-full bg-indigo-200/50 blur-3xl dark:bg-indigo-900/20" />
+          <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-indigo-100/70 blur-3xl dark:bg-indigo-950/30" />
         </div>
+        <Link
+          to="/"
+          className="relative z-10 inline-flex w-fit items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-slate-300 dark:hover:text-indigo-300"
+        >
+          <ArrowLeft size={16} /> Back to home
+        </Link>
 
-        <div className="relative z-10 text-center px-6">
-          <div className="bg-white/10 backdrop-blur-lg border border-white/20 p-6 rounded-2xl inline-block mb-8 shadow-xl">
-            <ShieldCheck size={64} className="text-white" />
+        <div className="relative z-10 max-w-xl py-12">
+          <div className="mb-7 flex h-14 w-14 items-center justify-center border border-indigo-200 bg-white text-indigo-600 dark:border-indigo-800 dark:bg-slate-950 dark:text-indigo-400">
+            <ShieldCheck size={30} />
           </div>
-          <h2 className="text-4xl font-bold text-white mb-6">Platform Administration</h2>
-          <p className="text-indigo-100 text-lg max-w-md mx-auto leading-relaxed">
-            Manage universities, monitor certificate issuance and oversee the entire CertiChain AI platform.
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+            Secure platform access
           </p>
+          <h2 className="text-3xl font-bold leading-tight tracking-tight text-slate-900 dark:text-white xl:text-4xl">
+            Platform Administration
+          </h2>
+          <p className="mt-4 max-w-lg text-base leading-relaxed text-slate-600 dark:text-slate-400">
+            Manage institutions and oversee certificate activity across CertiChain AI.
+          </p>
+          <div className="mt-8 flex items-center gap-3 border border-indigo-100 bg-white/80 p-4 dark:border-indigo-900/60 dark:bg-slate-950/60">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400">
+              <Lock size={17} />
+            </span>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              Authorized access for system administrators.
+            </p>
+          </div>
         </div>
-      </div>
 
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 relative">
-        <div className="absolute top-8 right-8">
-          <ThemeToggle />
-        </div>
+        <p className="relative z-10 text-xs text-slate-500 dark:text-slate-500">
+          CertiChain AI · Platform administration
+        </p>
+      </aside>
 
+      <main className="flex min-h-screen items-center justify-center px-5 py-8 sm:px-8 lg:px-10">
         <div className="w-full max-w-md">
-          <div className="mb-8 text-center">
-            <div className="inline-flex items-center gap-2 mb-4">
-              <div className="bg-indigo-600 p-1.5">
-                <ShieldCheck className="text-white" size={24} />
-              </div>
-              <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <div className="mb-8 flex items-center justify-between gap-4">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 lg:hidden"
+            >
+              <ArrowLeft size={16} /> Back
+            </Link>
+            <div className="inline-flex items-center gap-2 lg:ml-auto">
+              <span className="flex h-8 w-8 items-center justify-center bg-indigo-600 text-white">
+                <ShieldCheck size={19} />
+              </span>
+              <span className="text-base font-bold tracking-tight text-slate-900 dark:text-white">
                 CertiChain AI
               </span>
             </div>
+            <ThemeToggle />
           </div>
 
-          <div className="mb-10">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-              System Admin Login
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400">
-              Sign in to access the platform administration panel.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  placeholder="admin@certichain.ai"
-                  required
-                  className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-900 border rounded-lg border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
-                />
-              </div>
+          <section className="border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+            <div className="mb-7">
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+                System administration
+              </p>
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                Sign in
+              </h1>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                Sign in to access the platform administration panel.
+              </p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
-                <input
-                  type={showPass ? "text" : "password"}
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  placeholder="••••••••"
-                  required
-                  className="w-full pl-12 pr-12 py-3.5 bg-slate-50 dark:bg-slate-900 border rounded-lg border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPass(!showPass)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-                >
-                  {showPass ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label htmlFor="system-admin-email" className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <input
+                    id="system-admin-email"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    placeholder="admin@certichain.ai"
+                    required
+                    className="w-full border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                  />
+                </div>
               </div>
-            </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 rounded-lg disabled:bg-indigo-800 text-white font-bold shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 mt-8"
+              <div>
+                <label htmlFor="system-admin-password" className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <input
+                    id="system-admin-password"
+                    type={showPass ? "text" : "password"}
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    placeholder="••••••••"
+                    required
+                    className="w-full border border-slate-200 bg-slate-50 py-3 pl-10 pr-12 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPass(!showPass)}
+                    aria-label={showPass ? "Hide password" : "Show password"}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:hover:text-indigo-400"
+                  >
+                    {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="mt-2 inline-flex w-full items-center justify-center gap-2 bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-indigo-800 dark:focus-visible:ring-offset-slate-900"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Authenticating...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
+              </button>
+            </form>
+          </section>
+
+          <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+            Need a user account?{" "}
+            <Link
+              to="/login"
+              className="font-semibold text-indigo-600 transition-colors hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
             >
-              {loading ? (
-                <>
-                  <Loader2 size={20} className="animate-spin" />
-                  Authenticating...
-                </>
-              ) : (
-                "Sign In"
-              )}
-            </button>
-          </form>
-
-          <p className="mt-8 text-center text-slate-600 dark:text-slate-400 text-sm">
-            <Link to="/login" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:text-indigo-500 dark:hover:text-indigo-300 underline underline-offset-4 transition-colors">
               Back to user login
             </Link>
           </p>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

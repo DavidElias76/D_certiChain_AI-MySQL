@@ -15,8 +15,8 @@ export interface ICertificateRegistry$Type {
   readonly deployedLinkReferences: {};
   readonly immutableReferences: {};
   readonly inputSourceName: "project/contracts/interfaces/ICertificateRegistry.sol";
-  readonly buildInfoId: "solc-0_8_24-7d587356f4a4ad0ce17c9f5582557b715ca12d87";
-}
+  readonly buildInfoId: "solc-0_8_24-e10a5b09a0935f4d5cc2a8949326e5c1f886152c";
+};
 
 import "hardhat/types/artifacts";
 declare module "hardhat/types/artifacts" {

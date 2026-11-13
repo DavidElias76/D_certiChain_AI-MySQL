@@ -2,12 +2,15 @@ import api, { setApiToken } from "../services/api";
 import { useContext, useState, createContext, useEffect, type ReactNode, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import  type { AxiosRequestConfig, AxiosError } from "axios"
+// import { useUsers } from "./UsersContext";
 
 export interface User {
   id: number;
   username: string;
   role: string;
   email?: string;
+  institution_name: string | null
+  institution_id: number | null
 }
 
 export interface LoginData {
@@ -20,7 +23,7 @@ export interface RegisterData {
   email: string;
   password: string;
   role: string;
-  institution_name?: string;
+  institution_name: string;
 }
 
 // interface VerifyResponse {
@@ -56,13 +59,18 @@ export interface AuthContextType {
   token: string | null;
   sendOtpCode: (email: string) => Promise<SendOtpCodeType>;
   verfiyOtpCode: (OtpCode: number, email: string) => Promise<SendOtpCodeType>;
-  resetPassword: (password: string, email: string) => Promise<SendOtpCodeType>;
-  updateWalletAddress: (wallet_address: string) => Promise<void>;
+  resetPassword: (email: string, password: string) => Promise<SendOtpCodeType>;
+  // updateWalletAddress: (wallet_address: string) => Promise<void>;
 }
 
 interface Props {
   children: ReactNode;
 }
+
+// const allowedRoles: Partial<Record<string, string[]>> = {
+//       main_admin: ["student", "admin"],
+//       admin: ["student"],
+// };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -72,6 +80,7 @@ export function AuthProvider({ children }: Props) {
   const [error, setError] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [token, setToken] = useState<string | null>(null);
+  // const { getUsersById } = useUsers()
 
   const navigate = useNavigate();
 
@@ -111,11 +120,6 @@ export function AuthProvider({ children }: Props) {
         }
       } catch (err: any) {
         if (!isMounted) return;
-        const msg =
-          err.response?.data?.error ||
-          err.response?.data?.message ||
-          "Failed to authenticate the user";
-        setError(msg);
         setUser(null);
         setToken(null);
         setApiToken(null);
@@ -148,7 +152,8 @@ export function AuthProvider({ children }: Props) {
       async (error: AxiosError) => {
         const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
         const status = error.response?.status; 
-        const isAuthEndpoint = originalRequest.url?.includes("/auth/refresh");
+        const url = originalRequest.url ?? "";
+        const isAuthEndpoint = ["/auth/refresh", "/auth/login", "/auth/register"].some((p) => url.includes(p));
 
         if (status !== 401 || originalRequest._retry || isAuthEndpoint) {  
           return Promise.reject(error);
@@ -204,7 +209,6 @@ export function AuthProvider({ children }: Props) {
     };
   }, []);
 
-
   const logIn = async (data: LoginData): Promise<authResponse> => {
     try {
       setError("");
@@ -219,16 +223,27 @@ export function AuthProvider({ children }: Props) {
       }
       const userData = response?.data?.user || null;
       setUser(userData);
-      
-      if (userData?.role === "systemAdmin") {
+
+      const role = userData?.role;
+
+      if (role === "systemAdmin") {
         navigate("/system/admin/dashboard", { replace: true });
-      } else if (userData?.role === "admin") {
+      } else if (role === "admin" || role === "main_admin") {
         navigate("/admin/dashboard", { replace: true });
+      } else if (role === "employer" || role === "alumni") {
+        navigate("/employer/verify-certificate", { replace: true });
       } else {
         navigate("/dashboard", { replace: true });
       }
-      
+
+      // const roles = role ? allowedRoles[role] : undefined;
+
+      // if (userData?.institution_id != null && roles) {
+      //   await getUsersById(userData.institution_id, roles);
+      // }
       return response.data;
+
+      
     } catch (err: any) {
       const msg = err.response?.data?.error || err.response?.data?.message || "Login failed";
       setError(msg);
@@ -326,23 +341,24 @@ export function AuthProvider({ children }: Props) {
     }
   };
 
-  // This need to be institituon in the instituion and not the users - user do not get the wallet address
-  const updateWalletAddress = async (wallet_address: string): Promise<void> => {
-    if (!user) {
-      throw new Error("User is not authenticated");
-    }
-    try {
-      const response = await api.put(
-        `/auth/wallet/${user.id}`,
-        { wallet_address },
-        { withCredentials: true, headers: token ? { Authorization: `Bearer ${token}` } : {} }
-      );
-      setMessage(response.data.message || "Wallet updated");
-    } catch (err: any) {
-      const msg = err.response?.data?.error || "Failed to update wallet";
-      throw new Error(msg);
-    }
-  };
+  // This updates the walllet address to all users - the wallet address column to be rmoved 
+  // all the user will use the institution wallet address to issue certificates
+  // const updateWalletAddress = async (wallet_address: string): Promise<void> => {
+  //   if (!user) {
+  //     throw new Error("User is not authenticated");
+  //   }
+  //   try {
+  //     const response = await api.put(
+  //       `/auth/wallet/${user.id}`,
+  //       { wallet_address },
+  //       { withCredentials: true, headers: token ? { Authorization: `Bearer ${token}` } : {} }
+  //     );
+  //     setMessage(response.data.message || "Wallet updated");
+  //   } catch (err: any) {
+  //     const msg = err.response?.data?.error || "Failed to update wallet";
+  //     throw new Error(msg);
+  //   }
+  // };
 
   return (
     <AuthContext.Provider
@@ -358,7 +374,7 @@ export function AuthProvider({ children }: Props) {
         sendOtpCode,
         verfiyOtpCode,
         resetPassword,
-        updateWalletAddress,
+        // updateWalletAddress,
       }}
     >
       {children}

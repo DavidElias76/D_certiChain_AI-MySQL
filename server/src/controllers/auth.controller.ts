@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config()
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import type { AuthControllerResponse, UserRequest, IUserRequest } from "../types/auth.types";
+import type { AuthControllerResponse, UserRequest, IUserRequest, AuthResponseType } from "../types/auth.types";
 import type { CustomError } from "../types/error.types";
 import { signInService, signUpService, updateWalletAddressService} from "../services/auth.service";
 import { sendEmailOtp, sendWelcomeEmail } from "../email/authEmail";
@@ -10,6 +10,15 @@ import OptCode from "../utility/otpCode";
 import { UsersRepository } from "../repositories/users.repository";
 import { AuthRepository } from "../repositories/auth.repository";
 import bcrypt from "bcrypt"
+
+export interface TokenUser {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+  institution_name: string | null;
+  institution_id: number | null;
+}
 
 const REFRESH_TOKEN_EXPIRY_SECONDS = 15 * 24 * 60 * 60 * 1000;
 
@@ -37,7 +46,10 @@ export const signInController = async (
             user: {
                 id: user.id, 
                 username: user.username,
-                role: user.role
+                email: user.email,
+                role: user.role,
+                institution_name: user.institution_name,
+                institution_id: user.institution_id  
             },
         })
 
@@ -62,17 +74,17 @@ export const signUpController = async (
         }
 
         // find a way to make the institution name to null when the role is employer
-        const validRoles = ["student", "employer", "admin", "systemAdmin"];
+        const validRoles = ["student", "employer", "admin", "systemAdmin", "main_admin"];
         if(!validRoles.includes(role)) {
             return res.status(400).json({
-                error: "Invalid role. Must be student, employer or admin"
+                error: "Invalid role. Must be student, employer or admin or main_admin"
             });
         }
         
         let emailError: string = "";
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const studentEmailRegex = /^[a-zA-Z0-9._-]+@students\.[a-zA-Z0-9-]+\.ac\.ke$/;
-        // const adminRegex = !/^admin@[\w.-]+\.ac\.ke$/
+        const adminRegex = /^(?:admin@[\w.-]+\.ac\.ke|[\w.+-]+@admin\.[\w-]+\.ac\.ke)$/i;
 
         if (role === "student") {
             if (!institution_name) {
@@ -84,12 +96,12 @@ export const signUpController = async (
                 emailError = "Student email must be in the format username@students.institution.ac.ke"
                 return res.status(400).json({ error: emailError});
             }
-        } else if (role === "admin") {
-            if (!/^admin@[\w.-]+\.ac\.ke$/.test(email)) {
-                emailError = "Admin email must follow: admin@yourinstitution.ac.ke";
+        } else if (role === "admin" || role === "main_admin") {
+            if (!adminRegex.test(email.trim())) {
+                emailError = "Admin email must follow admin@institution.ac.ke or name@admin.institution.ac.ke";
                 res.status(400).json({ error: emailError})
             }
-        } else if (role === "employer") {
+        } else if (role === "employer" || role === "alumni") {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 emailError = "Please provide a valid email address";
@@ -125,7 +137,10 @@ export const signUpController = async (
             user: {
                 id: user.id,
                 username: user.username,
-                role: user.role
+                email: user.email,
+                role: user.role,
+                institution_name: user.institution_name,
+                institution_id: user.institution_id
             },
             accessToken
         })
@@ -136,8 +151,7 @@ export const signUpController = async (
     }
 }
 
-// This need to be tested with the real wallet address - This will be added when the sepolia and a connect button
-// The wallet address controller not working
+// all the users will use the institution wallet address and not the individual wallet address 
 export const updateWalletAddressController = async (
     req: Request<{}, unknown, { wallet_address: string }, {}>,
     res: Response<{ message: string} | { error: string}>
@@ -146,8 +160,6 @@ export const updateWalletAddressController = async (
         const user = (req as any).user as { id: number } | undefined; // get the user from the request instead of the wallet context
         const { wallet_address } = req.body;
 
-        console.log(wallet_address)
-        console.log(user)
         if (!wallet_address) {
             return res.status(400).json({
                 error: "Wallet address required."
@@ -186,6 +198,8 @@ export const verifyController = (
                 username: req.user?.username,
                 role: req.user?.role,
                 email: (req.user as any)?.email,
+                institution_id: req.user?.institution_id,
+                institution_name: req.user?.institution_name,
             }
     });
         
@@ -235,7 +249,14 @@ export const refreshController = async (
         }
         
         const accessToken = jwt.sign(
-            { id: user.id, username: user.username, role: user.role },
+             {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                institution_name: user.institution_name,
+                institution_id: user.institution_id,
+            },
             process.env.ACCESS_TOKEN_SECRET as string,
             { expiresIn: "15m" }
         );
@@ -358,3 +379,43 @@ export const UpdatePasswordController = async (
     });
 }
 }
+
+// add the use of otp code to send it to the user to verify the email before allowing te chnage of the password
+export const changePasswordController = async (
+    req: Request<{}, unknown, { currentPassword: string; newPassword: string }, {}>,
+    res: Response<{ message: string } | { error: string }>
+) => {
+    try {
+        const userId = req.user?.id;
+        const { currentPassword, newPassword } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ error: "Unauthorized." });
+        }
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ error: "Current and new passwords are required." });
+        }
+        if (newPassword.length < 8) {
+            return res.status(400).json({ error: "New password must be at least 8 characters." });
+        }
+
+        const storedPassword = await AuthRepository.findPasswordByUserId(userId);
+        if (!storedPassword) {
+            return res.status(404).json({ error: "User does not exist." });
+        }
+        if (!(await bcrypt.compare(currentPassword, storedPassword))) {
+            return res.status(400).json({ error: "Current password is incorrect." });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const updated = await AuthRepository.updatePasswordByUserId(userId, hashedPassword);
+        if (!updated) {
+            return res.status(404).json({ error: "User does not exist." });
+        }
+
+        return res.status(200).json({ message: "Password updated successfully." });
+    } catch (error) {
+        const err = error as CustomError;
+        return res.status(err.statusCode || 500).json({ error: err.message || "Failed to update password." });
+    }
+};

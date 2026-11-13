@@ -1,11 +1,12 @@
 {
   "_format": "hh3-sol-build-info-1",
-  "id": "solc-0_8_24-14e2b82b6c4274819330e719f78d07dad91888f3",
+  "id": "solc-0_8_24-e10a5b09a0935f4d5cc2a8949326e5c1f886152c",
   "solcVersion": "0.8.24",
   "solcLongVersion": "0.8.24+commit.e11b9ed9",
   "compilerType": "solc",
   "userSourceNameMap": {
-    "contracts/CertificateRegistry.sol": "project/contracts/CertificateRegistry.sol"
+    "contracts/CertificateRegistry.sol": "project/contracts/CertificateRegistry.sol",
+    "contracts/interfaces/ICertificateRegistry.sol": "project/contracts/interfaces/ICertificateRegistry.sol"
   },
   "input": {
     "language": "Solidity",

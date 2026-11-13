@@ -77,7 +77,6 @@
           "type": "bytes32"
         }
       ],
-
       "name": "getCertificateId",
       "outputs": [
         {
@@ -137,7 +136,6 @@
       "stateMutability": "nonpayable",
       "type": "function"
     },
-
     {
       "inputs": [
         {
@@ -151,7 +149,6 @@
           "type": "address"
         }
       ],
-
       "name": "registerInstitution",
       "outputs": [],
       "stateMutability": "nonpayable",
@@ -248,5 +245,5 @@
   "deployedLinkReferences": {},
   "immutableReferences": {},
   "inputSourceName": "project/contracts/interfaces/ICertificateRegistry.sol",
-  "buildInfoId": "solc-0_8_24-7d587356f4a4ad0ce17c9f5582557b715ca12d87"
+  "buildInfoId": "solc-0_8_24-e10a5b09a0935f4d5cc2a8949326e5c1f886152c"
 }

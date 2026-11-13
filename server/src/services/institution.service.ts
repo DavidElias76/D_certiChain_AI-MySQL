@@ -1,85 +1,103 @@
 import { InstitutionRepository } from "../repositories/institution.repository";
 import type { CustomError } from "../types/error.types";
+import { encryptPrivateKey } from "../blockchain/keys";
+import { ethers } from "ethers";
 import { registerInstitutionOnChain } from "../blockchain/contracts";
+import { platformWallet } from "../blockchain/blockchainConnection"; 
+
+const httpError = (message: string, statusCode: number): CustomError => {
+  const error = new Error(message) as CustomError;
+  error.statusCode = statusCode
+  return error;
+}
+
 // Get All Active Institutions 
 export const getInstitutionsService = async () => {
   return InstitutionRepository.findAll();
 };
 
-//  Get Institution by ID - not needed at this time - do not delete
-// export const getInstitutionByIdService = async (id: number) => {
-//   const institution = await InstitutionRepository.findById(id);
-//   if (!institution) {
-//     const error = new Error("Institution not found") as CustomError;
-//     error.statusCode = 404;
-//     throw error;
-//   }
-//   return institution;
-// };
-
-// Add Institution 
-export const addInstitutionsService = async (data: {
-  name: string;
-  short_code: string;
-  domain: string;
-  wallet_address: string;
-  description?: string;
-  is_active?: boolean;
-}) => {
-  const existingByDomain = await InstitutionRepository.findByDomain(data.domain);
-  if (existingByDomain) {
-    const error = new Error("An institution with this domain already exists") as CustomError;
-    error.statusCode = 409;
-    throw error;
-  }
-
-  const existingByCode = await InstitutionRepository.findByShortCode(data.short_code);
-  if (existingByCode) {
-    const error = new Error("An institution with this short code already exists") as CustomError;
-    error.statusCode = 409;
-    throw error;
-  }
-
-  const { txHash } = await registerInstitutionOnChain(data.name, data.wallet_address);
-
-  const newId = await InstitutionRepository.create({
-    name: data.name.trim(),
-    short_code: data.short_code,
-    domain: data.domain,
-    wallet_address: data.wallet_address,
-    description: data.description,
-    is_active: data.is_active ?? true,
-    blockchain_inst_tx_hash: txHash ?? null
-  });
-  
-  return InstitutionRepository.findById(newId);
-};
-
-// Update Institution 
-export const updateInstitutionService = async (
-  id: number,
-  updates: Partial<{
-    name: string;
-    short_code: string;
-    domain: string;
-    wallet_address: string;
-    description: string;
-    is_active: boolean;
-  }>
-) => {
-  const updated = await InstitutionRepository.update(id, updates);
-  if (!updated) {
+// thos is returning to much data that is unnecessary- update the institution repository to remove some vales
+export const getInstitutionByIdService = async (id: number) => {
+  const institution = await InstitutionRepository.findById(id);
+  if (!institution) {
     const error = new Error("Institution not found") as CustomError;
     error.statusCode = 404;
     throw error;
   }
-  
-  return updated;
+  return institution;
+};
+
+// Add Institution 
+// Add Institution — NO blockchain call here anymore
+export const addInstitutionsService = async (data: {
+    name: string;
+    short_code: string;
+    domain: string;
+    description?: string;
+    is_active: boolean;
+}) => {
+    const shortCode = data.short_code.trim().toLowerCase();
+    const domain = data.domain.trim().toLowerCase();
+
+   const existingByDomain = await InstitutionRepository.findByDomain(domain);
+    if (existingByDomain) {
+      const error = new Error("An institution with this domain already exists") as CustomError;
+      error.statusCode = 409;
+      throw error;
+    }
+
+    const existingByCode = await InstitutionRepository.findByShortCode(shortCode);
+    if (existingByCode) {
+      const error = new Error("An institution with this short code already exists") as CustomError;
+      error.statusCode = 409;
+      throw error;
+    }
+
+    /// No blockchain call. The wallet is set up later by the main admin.
+    const newId = await InstitutionRepository.create({
+        name: data.name.trim(),
+        short_code: shortCode,
+        domain,
+        wallet_address: null,
+        description: data.description,
+        is_active: data.is_active ?? false,
+    });
+
+    return InstitutionRepository.findById(newId);
+  };
+
+  // Update Institution 
+  export const updateInstitutionService = async (
+    id: number,
+    updates: Partial<{
+    name: string;
+    short_code: string;
+    domain: string;
+    description: string | null;
+    is_active: boolean;
+  }>
+) => {
+  const clean = { ...updates };
+  if (clean.short_code !== undefined) clean.short_code = clean.short_code.trim().toLowerCase();
+  if (clean.domain !== undefined) clean.domain = clean.domain.trim().toLowerCase();
+
+  let updated: boolean;
+  try {
+    updated = await InstitutionRepository.update(id, clean);
+  } catch (err) {
+    if ((err as { code?: string }).code === "ER_DUP_ENTRY") {
+      throw httpError("An institution with this domain or short code already exists", 409);
+    }
+    throw err;
+  }
+
+  if (!updated) throw httpError("Institution not found or nothing to update", 404);
+  return InstitutionRepository.findById(id);
 };
 
 // Soft-Delete Institution 
 export const deleteInstitutionService = async (id: number) => {
-  const deleted = await InstitutionRepository.softDelete(id);
+  const deleted = await InstitutionRepository.deleteInstitution(id);
   if (!deleted) {
     const error = new Error("Institution not found") as CustomError;
     error.statusCode = 404;
@@ -87,4 +105,62 @@ export const deleteInstitutionService = async (id: number) => {
   }
 
   return deleted;
+};
+
+export const setupWalletService = async (
+  institutionId: number, 
+  rawPrivateKey: string
+) => {
+
+    const privateKey = rawPrivateKey.startsWith("0x") ? rawPrivateKey : `0x${rawPrivateKey}`;
+
+    let walletAddress: string;
+    try {
+      // this creates the wallet address from te private key for comparison
+      walletAddress = new ethers.Wallet(privateKey).address.toLowerCase(); // This gets the address from the private key 
+    } catch {
+      throw httpError("Invalid private key", 400);
+    }
+
+    if (walletAddress === platformWallet.address.toLowerCase()) {
+      throw httpError("The institution wallet must be different from the platform wallet", 400);
+    }
+
+    const institution = await InstitutionRepository.findById(institutionId);
+    if (!institution) throw httpError("Institution not found", 404);
+    if (institution.wallet_address) throw httpError("A wallet is already set up for this institution", 409);
+
+    const usedBy = await InstitutionRepository.findByWalletAddress(walletAddress);
+    if (usedBy) throw httpError("This wallet is already used by an institution", 409);
+
+    let encryptedKey: string;
+    try {
+      encryptedKey = encryptPrivateKey(privateKey);
+    } catch (err) {
+      console.error("encryptPrivateKey failed:", (err as Error).message);
+      throw httpError("Server encryption is not configured correctly", 500);
+    }
+
+    let registration;
+    try {
+      registration = await registerInstitutionOnChain(institutionId, walletAddress);
+    } catch (err) {
+      console.error("registerInstitution failed:", (err as Error).message);
+      throw httpError("Could not register the institution on the blockchain. Please try again.", 502);
+    }
+
+    const saved = await InstitutionRepository.saveWalletSetup(institutionId, {
+      walletAddress,
+      encryptedKey,
+      txHash: registration.txHash,
+      chainId: registration.institution_Id,
+      is_active: true
+    });
+    if (!saved) {
+      // The chain is registered but the DB row was not updated. Log it so it can be reconciled.
+      console.error(`Wallet setup race: institution ${institutionId} registered on-chain (${registration.txHash}) but DB save was rejected`);
+      throw httpError("A wallet was already set up for this institution", 409);
+    }
+
+  return { walletAddress, txHash: registration.txHash };
 };

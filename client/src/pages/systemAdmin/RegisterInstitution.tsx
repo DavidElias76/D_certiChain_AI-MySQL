@@ -1,95 +1,90 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Loader2,
-  Building2,
-  Wallet,
-  Globe,
-  Hash,
-  FileText,
-  ArrowLeft,
-  ShieldCheck,
-} from "lucide-react";
+import { Loader2, Building2, Globe, Hash, FileText, ArrowLeft, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { useWallet } from "../../context/WalletContext";
+// import { useWallet } from "../../context/WalletContext";
 import { useInstitution } from "../../context/InstitutionContext";
 
-type InstitutionForm = {
-  name: string;
-  short_code: string;
-  domain: string;
-  wallet_address: string;
-  description: string;
-};
+ type InstitutionForm = {
+     name: string;
+     short_code: string;
+     domain: string;
+     description: string;
+   };
 
 export default function RegisterInstitution() {
   const navigate = useNavigate();
-  const { account } = useWallet()
+  // const { account } = useWallet()
   const { registerInstitution, loading } = useInstitution()
   
   const [form, setForm] = useState<InstitutionForm>({
-    name: "",
-    short_code: "",
-    domain: "",
-    wallet_address: account ?? "",
-    description: "",
-  });
+     name: "",
+     short_code: "",
+     domain: "",
+     description: "",
+   });
+
+  // const [addWalletAddress] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await registerInstitution(form);
       toast.success(`${form.name} has been registered successfully`);
-      navigate("/system/admin/dashboard", { replace: true });
+      navigate("/admin/register-admin", { replace: true });
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Failed to register institution");
       throw err;
     }
   };
 
-  const isValid =
-    form.name.trim() &&
-    form.short_code.trim() &&
-    form.domain.trim() &&
-    form.wallet_address.trim() &&
-    /^0x[a-fA-F0-9]{40}$/.test(form.wallet_address);
+    const isValid =
+     form.name.trim() &&
+     /^[A-Za-z0-9]{2,10}$/.test(form.short_code.trim()) &&
+     form.domain.trim();
 
   return (
-    <div className="space-y-8 pb-12">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
+    <div className="w-full space-y-6 pb-8">
+      <section className="px-1 py-3">
+        <div className="max-w-2xl">
           <Link
             to="/system/admin/dashboard"
-            className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-2">
+            className="mb-4 inline-flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400">
             <ArrowLeft size={16} /> Back to Dashboard
           </Link>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-            <Building2 className="text-indigo-600 dark:text-indigo-400" size={28} />
+          <div className="mb-2 flex items-center gap-3">
+            <Building2 className="text-indigo-600 dark:text-indigo-400" size={24} />
+            <p className="text-[11px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+              Institution setup
+            </p>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
             Register New Institution
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
             Add a university or organization to the CertiChain AI platform. They will be able to issue
             and manage certificates on-chain.
           </p>
         </div>
-      </div>
+      </section>
 
       {/* Form Card */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-w-3xl">
-        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-            <ShieldCheck size={16} className="text-indigo-600" /> Institution Details
+      <section className="w-full border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-800 sm:px-6">
+          <h2 className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
+            <ShieldCheck size={18} className="text-indigo-600 dark:text-indigo-400" />
+            Institution Details
           </h2>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 p-5 sm:p-8 rounded-md">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
               Institution Name <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -104,14 +99,14 @@ export default function RegisterInstitution() {
                 onChange={handleChange}
                 placeholder="e.g. KCA University"
                 required
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                className="w-full border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm rounded-md text-slate-900 transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Short Code <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -121,20 +116,20 @@ export default function RegisterInstitution() {
                 />
                 <input
                   type="text"
-                  name="shortCode"
+                  name="short_code"
                   value={form.short_code}
                   onChange={handleChange}
-                  placeholder="e.g. KCAU"
+                  placeholder="e.g. KCAU, USIU, KU, UON"
                   maxLength={10}
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all uppercase"
+                  className="w-full border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 rounded-md text-sm uppercase text-slate-900 transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 />
               </div>
-              <p className="text-xs text-slate-400 mt-1">Used in certificate numbers. 2–10 uppercase alphanumeric chars.</p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Used in certificate numbers. 2–10 uppercase alphanumeric chars.</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Domain <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -149,42 +144,21 @@ export default function RegisterInstitution() {
                   onChange={handleChange}
                   placeholder="e.g. kcau.ac.ke"
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="w-full border border-slate-200 bg-slate-50 py-3 rounded-md pl-10 pr-4 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 />
               </div>
-              <p className="text-xs text-slate-400 mt-1">Used to auto-assign students by email domain.</p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Used to auto-assign students by email domain.</p>
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Issuing Wallet Address <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <Wallet
-                size={18}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-              <input
-                type="text"
-                name="walletAddress"
-                value={account ?? form.wallet_address}
-                onChange={handleChange}
-                placeholder="0x..."
-                required
-                readOnly
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono"
-              />
-            </div>
-            <p className="text-xs text-slate-400 mt-1">
-              Ethereum address authorized to issue certificates on-chain. Must be a valid{" "}
-              <span className="font-mono">0x...</span> address.
+             <p className="border border-indigo-100 bg-indigo-50/70 px-4 py-3 text-sm leading-relaxed text-slate-600 dark:border-indigo-950 dark:bg-indigo-950/20 dark:text-slate-400">
+              The blockchain wallet is not set here. After the institution's main admin signs in,
+              they connect their wallet and register the institution on-chain themselves.
             </p>
-          </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
               Description
             </label>
             <div className="relative">
@@ -198,17 +172,17 @@ export default function RegisterInstitution() {
                 onChange={handleChange}
                 placeholder="Brief description, motto, or vision of the institution..."
                 rows={3}
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all resize-none"
+                className="w-full resize-none border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 rounded-md text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
               />
             </div>
           </div>
 
           {/* Submit */}
-          <div className="pt-2 flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-5 dark:border-slate-800">
             <button
               type="submit"
               disabled={loading || !isValid}
-              className="inline-flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 text-white font-semibold transition-colors text-sm"
+              className="inline-flex items-center gap-2 bg-indigo-600 px-5 py-3 rounded-md text-sm font-semibold text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-indigo-800 dark:focus-visible:ring-offset-slate-900"
             >
               {loading ? (
                 <>
@@ -224,13 +198,13 @@ export default function RegisterInstitution() {
             </button>
             <Link
               to="/system/admin/dashboard"
-              className="px-5 py-3 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors text-sm"
+              className="border border-slate-200 px-5 py-3 rounded-md text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
             >
               Cancel
             </Link>
           </div>
         </form>
-      </div>
+      </section>
     </div>
   );
 }

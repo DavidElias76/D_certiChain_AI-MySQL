@@ -11,7 +11,8 @@ import {
     refreshController,
     forgotPasswordController,
     verifyPasswordController,
-    UpdatePasswordController
+    UpdatePasswordController,
+    changePasswordController
 } from "../controllers/auth.controller"
 
 import { authMiddleware } from "../middlewares/auth.middleware"
@@ -31,6 +32,7 @@ authRoutes.post("/register", authRateLimiter,signUpController)
 authRoutes.get('/verify', authMiddleware, verifyController)
 authRoutes.post('/logout', authMiddleware, signOutController)
 authRoutes.put('/wallet/:id', authMiddleware, updateWalletAddressController)
+authRoutes.post('/change-password', authMiddleware, changePasswordController)
 authRoutes.post('/refresh',  refreshController) // we will add the auth middleware in the later date but not needed
 
 authRoutes.post('/forgot-password', forgotPasswordController)

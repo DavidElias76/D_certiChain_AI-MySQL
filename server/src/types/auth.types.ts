@@ -4,7 +4,10 @@ import type { Request } from "express"
 export type UserResponseService = {
     id: number
     username: string,
+    email: string,
     role: string | undefined
+    institution_id: number | null
+    institution_name: string | null,
 }
 
 export type AuthControllerResponse = {
@@ -13,7 +16,15 @@ export type AuthControllerResponse = {
     accessToken: string
 }
 
-export type UserRole = "admin" | "student" | "employer";
+export interface AuthResponseType {
+    id: string
+    username: string,
+    role: string,
+    institution_name: string,
+    institution_id: number | null
+}
+
+export type UserRole = "admin" | "student" | "employer" | "main_admin";
 
 export type IUserRequest =  {
   username: string;
@@ -36,6 +47,8 @@ export interface DecodedToken {
     role: string
     username: string
     email: string
+    institution_name: string
+    institution_id: number
 }
 
 // export interface AuthenticatedRequest extends Request {
@@ -63,7 +76,7 @@ export type UserRequestUpdate = {
     email?: string
     password?: string
     role?: UserRole,
-    institutionName?: string;
+    institution_name?: string;
 }
 
 export type findUserByIdOtpType = {

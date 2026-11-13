@@ -4,6 +4,8 @@ dotenv.config()
 
 import jwt from "jsonwebtoken";
 
+// you need to add the instituion_id and the institution_name properties
+
 interface JwtPayload {
   id: number;
   username: string;
@@ -28,3 +30,4 @@ export async function generateRefreshToken(userId: number) {
     }
   );
 };
+

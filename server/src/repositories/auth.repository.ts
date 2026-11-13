@@ -1,23 +1,39 @@
 import { pool, DbRow, DbResult } from "../config/db";
-import { User, UserCreateInput, UserRole, OmitPasswordUser } from "../types/index.types";
+import { User, UserCreateInput, UserRole, OmitPasswordUser, QueryResponse } from "../types/index.types";
 import { findUserByIdOtpType } from "../types/auth.types";
 
 export const AuthRepository = {
 
-    async signIn(email: string): Promise<User | null> {
+    // this will be chnaged to prevent the queries of the other values
+    async signIn(email: string): Promise<QueryResponse | null> {
         const [rows] = await pool.execute<DbRow[]>(
-                `SELECT * FROM users WHERE email = ?`,
+                `SELECT 
+                    id, 
+                    username, 
+                    email,
+                    password, 
+                    role, 
+                    institution_id, 
+                    institution_name 
+                FROM users WHERE email = ?`,
                 [email.toLowerCase()]
         );
-        return rows.length ? (rows[0] as User) : null;
+        return rows.length ? (rows[0] as QueryResponse) : null;
     },
 
-    async findByEmailOrUsername(email: string, username: string): Promise<OmitPasswordUser | null> {
+    async findByEmailOrUsername(email: string, username: string): Promise<QueryResponse | null> {
         const [rows] = await pool.execute<DbRow[]>(
-            "SELECT * FROM users WHERE email = ? OR username = ?",
+            `SELECT 
+                id, 
+                username,
+                password,
+                role, 
+                institution_id, 
+                institution_name 
+            FROM users WHERE email = ? OR username = ?`,
             [email.toLowerCase(), username]
         );
-        return rows.length ? (rows[0] as OmitPasswordUser) : null;
+        return rows.length ? (rows[0] as QueryResponse) : null;
   },
 
   async findByEmail(email: string): Promise<findUserByIdOtpType | null> {
@@ -67,6 +83,22 @@ export const AuthRepository = {
         `, [hashedPassword, email])
 
          return result.affectedRows > 0;
+    },
+
+    async findPasswordByUserId(id: number): Promise<string | null> {
+        const [rows] = await pool.execute<DbRow[]>(
+            "SELECT password FROM users WHERE id = ?",
+            [id]
+        );
+        return rows.length ? String(rows[0].password) : null;
+    },
+
+    async updatePasswordByUserId(id: number, hashedPassword: string): Promise<boolean> {
+        const [result] = await pool.execute<DbResult>(
+            "UPDATE users SET password = ? WHERE id = ?",
+            [hashedPassword, id]
+        );
+        return result.affectedRows > 0;
     },
 
     // create a function that update the is_verfied property to true - Thsi will be used for the email verifcation 
