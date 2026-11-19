@@ -36,7 +36,7 @@ npm install --save-dev @nomicfoundation/hardhat-ethers @nomicfoundation/hardhat-
 
 ## Hardhat Version Note
 - This workspace is aligned to Hardhat 3.
-- The config uses the Hardhat 3 network format, including `edr-simulated` for `hardhat` and `http` for `localhost` and `sepolia`.
+- The config uses the Hardhat 3 network format, including `edr-simulated` for `hardhat` and `http` for `localhost` and `sepolia` and " `anvil on docker`.
 - Sepolia deployment stays at the end of the project after local compilation and tests are stable.
 
 ## Test File Setup

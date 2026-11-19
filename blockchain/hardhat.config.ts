@@ -3,6 +3,7 @@ import hardhatEthers from "@nomicfoundation/hardhat-ethers";
 import hardhatEthersChaiMatchers from "@nomicfoundation/hardhat-ethers-chai-matchers";
 import hardhatMocha from "@nomicfoundation/hardhat-mocha";
 import hardhatNetworkHelpers from "@nomicfoundation/hardhat-network-helpers";
+import { network } from "hardhat";
 
 const config = defineConfig({
   plugins: [hardhatEthers, hardhatEthersChaiMatchers, hardhatMocha, hardhatNetworkHelpers],
@@ -25,6 +26,7 @@ const config = defineConfig({
     hardhat: {
       type: "edr-simulated",
     },
+    // this will run both the local blockchain and the anvil network running on docker
     localhost: {
       type: "http",
       url: "http://127.0.0.1:8545",

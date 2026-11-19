@@ -16,21 +16,16 @@ contract CertificateRegistry is ICertificateRegistry {
 
     address public owner; // who is the owner of this function
 
-    /// institutionId → authorized issuer wallet address
     mapping(bytes32 => address) public institutionIssuers;
 
-    /// (certificateHash, institutionId) → CertificateRecord - this is an object that has the property certificate hash and institutionid -> used to link the institution  
     mapping(bytes32 => mapping(bytes32 => CertificateRecord)) private certificates;
 
-    /// institutionId → sequential counter - The number of certificate each instutution has
     mapping(bytes32 => uint256) private institutionCertCount;
 
-    /// (certificateHash, institutionId) → numeric certificateId - This is an object that has the institution id and certificate hash property
     mapping(bytes32 => mapping(bytes32 => uint256)) private certificateIds;
 
-    uint256 public totalIssued; // overall platform counter
+    uint256 public totalIssued; 
 
-    // ── Events - also called console.logg in javascript and other languages
     event CertificateIssued(
         bytes32 indexed certificateHash,
         bytes32 indexed institutionId,
@@ -57,16 +52,12 @@ contract CertificateRegistry is ICertificateRegistry {
     error InvalidCertificateHash();
     error InvalidInstitutionId();
 
-    // Modifiers - for the owner of the contract
     modifier onlyOwner() {
         if (msg.sender != owner) revert NotOwner();
         _;
     }
 
-    /**
-     * Ensures the caller is the registered issuer for the given institution
-     - This checks if the institution is registred in blockchain .
-     */
+    
     modifier onlyAuthorizedIssuer(bytes32 institutionId) {
         if (institutionIssuers[institutionId] == address(0)) {
             revert InstitutionNotRegistered(institutionId); // if 0 not registered
@@ -77,21 +68,14 @@ contract CertificateRegistry is ICertificateRegistry {
         _;
     }
 
-    // ── Constructor - who called this function - it will be runned only once 
     constructor() {
         owner = msg.sender;
     }
 
-    //  Owner: Institution Management 
-    /**
-     * Registers an institution with its authorized issuer wallet.
-     * Can only be called by the contract owner (you, the CertiChain platform).
-     */
     function registerInstitution(bytes32 institutionId, address issuerWallet)
         external
         onlyOwner
     {
-        // check if the instution id exist in blockchain
         if (institutionId == bytes32(0)) revert InvalidInstitutionId();
         if (issuerWallet == address(0)) revert NotAuthorizedIssuer(institutionId, issuerWallet);
 
@@ -100,12 +84,7 @@ contract CertificateRegistry is ICertificateRegistry {
         emit InstitutionRegistered(institutionId, issuerWallet);
     }
 
-    // Authorized Issuer: Certificate Operations 
-
-    /**
-     * Issues a certificate on-chain.
-     * Rejects empty hashes and prevents duplicate issuance. - Only the institution can issue certificate
-     */
+  
     function issueCertificate(bytes32 certificateHash, bytes32 institutionId)
         external
         onlyAuthorizedIssuer(institutionId)
@@ -138,9 +117,6 @@ contract CertificateRegistry is ICertificateRegistry {
         emit CertificateIssued(certificateHash, institutionId, certificateId, msg.sender);
     }
 
-    /**
-     * Revokes a certificate. Cannot be revoked twice.
-     */
     function revokeCertificate(bytes32 certificateHash, bytes32 institutionId)
         external
         onlyAuthorizedIssuer(institutionId)
@@ -164,12 +140,6 @@ contract CertificateRegistry is ICertificateRegistry {
         );
     }
 
-    // Public Read-Only 
-
-    /**
-     * Returns the full certificate record. Reverts if not found.
-     * Open to anyone — verification is permissionless.
-     */
     function getCertificate(bytes32 certificateHash, bytes32 institutionId)
         external
         view
@@ -181,10 +151,6 @@ contract CertificateRegistry is ICertificateRegistry {
         }
     }
 
-    /**
-     * Verifies if a certificate is valid (exists and not revoked).
-     * Open to anyone — the core verification entrypoint for employers/students.
-     */
     function verifyCertificate(bytes32 certificateHash, bytes32 institutionId)
         external
         view
@@ -194,9 +160,7 @@ contract CertificateRegistry is ICertificateRegistry {
         valid = record.exists && !record.revoked;
     }
 
-    /**
-     * Checks if a wallet is authorized to issue/revoke for an institution.
-     */
+   
     function isAuthorizedIssuer(bytes32 institutionId, address issuer)
         external
         view
@@ -205,9 +169,6 @@ contract CertificateRegistry is ICertificateRegistry {
         return institutionIssuers[institutionId] == issuer;
     }
 
-    /**
-     * Returns the numeric certificateId for a given hash + institution.
-     */
     function getCertificateId(bytes32 certificateHash, bytes32 institutionId)
         external
         view
@@ -219,5 +180,4 @@ contract CertificateRegistry is ICertificateRegistry {
         }
     }
 
-    // Add a delete institution at the end of the project - it delete from the blockchain
 }
