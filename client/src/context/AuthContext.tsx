@@ -2,7 +2,6 @@ import api, { setApiToken } from "../services/api";
 import { useContext, useState, createContext, useEffect, type ReactNode, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import  type { AxiosRequestConfig, AxiosError } from "axios"
-// import { useUsers } from "./UsersContext";
 
 export interface User {
   id: number;
@@ -25,10 +24,6 @@ export interface RegisterData {
   role: string;
   institution_name: string;
 }
-
-// interface VerifyResponse {
-//   user: User;
-// }
 
 interface SendOtpCodeType {
   message: string;
@@ -60,17 +55,11 @@ export interface AuthContextType {
   sendOtpCode: (email: string) => Promise<SendOtpCodeType>;
   verfiyOtpCode: (OtpCode: number, email: string) => Promise<SendOtpCodeType>;
   resetPassword: (email: string, password: string) => Promise<SendOtpCodeType>;
-  // updateWalletAddress: (wallet_address: string) => Promise<void>;
 }
 
 interface Props {
   children: ReactNode;
 }
-
-// const allowedRoles: Partial<Record<string, string[]>> = {
-//       main_admin: ["student", "admin"],
-//       admin: ["student"],
-// };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -80,7 +69,6 @@ export function AuthProvider({ children }: Props) {
   const [error, setError] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [token, setToken] = useState<string | null>(null);
-  // const { getUsersById } = useUsers()
 
   const navigate = useNavigate();
 
@@ -235,12 +223,6 @@ export function AuthProvider({ children }: Props) {
       } else {
         navigate("/dashboard", { replace: true });
       }
-
-      // const roles = role ? allowedRoles[role] : undefined;
-
-      // if (userData?.institution_id != null && roles) {
-      //   await getUsersById(userData.institution_id, roles);
-      // }
       return response.data;
 
       
@@ -341,25 +323,6 @@ export function AuthProvider({ children }: Props) {
     }
   };
 
-  // This updates the walllet address to all users - the wallet address column to be rmoved 
-  // all the user will use the institution wallet address to issue certificates
-  // const updateWalletAddress = async (wallet_address: string): Promise<void> => {
-  //   if (!user) {
-  //     throw new Error("User is not authenticated");
-  //   }
-  //   try {
-  //     const response = await api.put(
-  //       `/auth/wallet/${user.id}`,
-  //       { wallet_address },
-  //       { withCredentials: true, headers: token ? { Authorization: `Bearer ${token}` } : {} }
-  //     );
-  //     setMessage(response.data.message || "Wallet updated");
-  //   } catch (err: any) {
-  //     const msg = err.response?.data?.error || "Failed to update wallet";
-  //     throw new Error(msg);
-  //   }
-  // };
-
   return (
     <AuthContext.Provider
       value={{
@@ -374,7 +337,6 @@ export function AuthProvider({ children }: Props) {
         sendOtpCode,
         verfiyOtpCode,
         resetPassword,
-        // updateWalletAddress,
       }}
     >
       {children}

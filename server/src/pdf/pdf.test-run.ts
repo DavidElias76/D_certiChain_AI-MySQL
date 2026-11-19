@@ -1,7 +1,6 @@
 import { generateCertificatePdf } from "./pdf.generator";
 import { savePdf } from "./pdf.storage";
 
-// used to check if the saving works - it doesnot need to be runned just it check if the storage works
 (async () => {
   const buf = await generateCertificatePdf({
     certificate_number: "JKU-2026-A1B2C3D4",

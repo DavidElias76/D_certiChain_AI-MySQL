@@ -1,36 +1,23 @@
 
 import type { Request, Response} from "express"
 import type { CustomError } from "../types/error.types";
-import { getUsersByIdService, getUsersByRoleService, addUsersService, updateUsersService, updateAdminStatusService, deleteUserService } from "../services/users.service";
-import { OmitPasswordUser, User, UserRole } from "../types/index.types";
+import { 
+  getUsersByIdService, 
+  getUsersByRoleService, 
+  addUsersService, 
+  updateUsersService, 
+  updateAdminStatusService, 
+  deleteUserService 
+} from "../services/users.service";
+import { OmitPasswordUser, UserRole } from "../types/index.types";
 import { UserCreateInput } from "../types/index.types"
 import {
   CREATABLE_ROLES,
   assertCanManage,
   emailErrorForRole,
   parseUserId,
-  MANAGEABLE_ROLES
 } from "../services/permissions/users.permissions";
 import { UsersRepository } from "../repositories/users.repository";
-import { ResponseException } from "pdf-parse";
-import { error } from "node:console";
-
-// implement caching that will get all the user and we will update the value of the user and everything from it
-// learn about caching - using reddis
-
-// get the user from the request and filter the users based on the role
-// export const getUsersController = async (
-//     req: Request<{}, unknown, User, {}>, 
-//     res: Response<OmitPasswordUser[] | { error: string }>
-// ) => {
-//     try {
-//         const users = await getUsersService();
-//         return res.status(200).json(users)
-//     } catch (err) {
-//         const error = err as CustomError
-//         return res.status(error.statusCode || 500).json({ error: error.message })
-//     }
-// }
 
 const ALLOWED_ROLES = ["systemAdmin", "main_admin", "admin"];
 
@@ -50,13 +37,11 @@ export const getUsersByRoleController = async (
       return;
     }
 
-    // main_admin and admin are limited to their own institution.
     if (user.role !== "systemAdmin" && !user.institution_id) {
       res.status(403).json({ error: "Your account is not linked to an institution." });
       return;
     }
 
-    // The role and institution come from the token, never from the request.
     const users = await getUsersByRoleService({
       role: user.role,
       institutionId: user.institution_id,
@@ -69,7 +54,6 @@ export const getUsersByRoleController = async (
   }
 };
 
-// this is not used
 export const getUsersByIdController = async (
   req: Request<{ institutionId: string }, unknown, {}, { roles?: string[] }>,
   res: Response<{ message: string; users: OmitPasswordUser[] } | { error: string }>
@@ -166,7 +150,6 @@ export const addUsersController = async (
       const emailError = emailErrorForRole(role, email);
       if (emailError) return res.status(400).json({ error: emailError });
 
-      // The institution always comes from the token, never from the request body.
       const { user } = await addUsersService(
         username.trim(),
         email.trim(),
@@ -196,7 +179,6 @@ export const updateUsersController = async (
     const targetId = parseUserId(req.params.id);
     const target = await assertCanManage(actor, targetId);
 
-    // institution_id / institution_name from the body are deliberately ignored.
     const { username, email, password, role } = req.body ?? {};
 
     if (role !== undefined) {
@@ -242,7 +224,7 @@ export const updateAdminStatusController = async(
     const actor = req.user;
     if (!actor) return res.status(401).json({ error: "Not authenticated" });
 
-    const role = req.user?.role; // only the main_admin and the systemAdmin can change the status of is_verified
+    const role = req.user?.role; 
     if(role !== 'main_admin' && role !== 'systemAdmin') {
        return res.status(404).json({ error: 'Not authorized to update the admin status'})
     }
@@ -250,7 +232,6 @@ export const updateAdminStatusController = async(
     const targetId = parseUserId(req.params.id)
     const isVerfied = req?.body?.is_verified
 
-    // check if this is a boolean
     if(typeof isVerfied !== 'boolean') {
       res.status(500).json({ error: 'The statsu must be a boolean value'})
     } 
@@ -273,7 +254,7 @@ export const deleteUsersController = async (
     if (!actor) return res.status(401).json({ error: "Not authenticated" });
 
     const targetId = parseUserId(req.params.id);
-    await assertCanManage(actor, targetId); // this need to be called by the systemAdmin, main_admin and the admin
+    await assertCanManage(actor, targetId);
 
     await deleteUserService(targetId);
     return res.status(200).json({ message: "User deleted successfully" });

@@ -32,7 +32,7 @@ export type IUserRequest =  {
   password: string;
   role: UserRole;
   wallet_address?: string;
-  institution_name?: string | ""; // This let the employer logs in without the institution name
+  institution_name?: string | "";
   isVerified?: boolean;
 }
 
@@ -50,14 +50,6 @@ export interface DecodedToken {
     institution_name: string
     institution_id: number
 }
-
-// export interface AuthenticatedRequest extends Request {
-//     user: {
-//         id: number;
-//         username?: string;
-//         role: string;
-//     };
-// }
 
 export type UserType = {
     id: number,

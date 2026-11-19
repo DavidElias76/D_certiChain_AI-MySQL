@@ -51,9 +51,6 @@ export interface VerifyCertDetails {
   degree: string
 }
 
-// Explicit columns for anything sent to the browser. graduation_date is returned as
-// "YYYY-MM-DD" so timezones can't shift tshe day. certificate_pdf_hash is internal.
-// NOTE: This need to bee fixed since selecting all if this may cause the db to be slow - just access only the values needed
 const LIST_COLUMNS = `
   id, student_name, registration_number, student_email, institution_id, institution_name,
   course, degree, DATE_FORMAT(graduation_date, '%Y-%m-%d') AS graduation_date,
@@ -92,7 +89,6 @@ export const CertificateRepository = {
     return rows.length ? (rows[0] as CertificateRecord) : null;
   },
 
-  // FIXED: was reading from `users`
   async findCertificateById(certId: number): Promise<VerifyCertDetails | null> {
     const [rows] = await pool.execute<DbRow[]>(
       `SELECT course, degree, institution_id FROM certificates WHERE id = ?`,
@@ -109,7 +105,6 @@ export const CertificateRepository = {
     return rows.length ? (rows[0] as CertificateRecord) : null;
   },
 
-    // Explicit columns only. student_email is used for the owner check and never returned.
   async findForVerificationByNumber(certificateNumber: string) {
     const [rows]: any = await pool.execute(
       `SELECT id, institution_id, institution_name, student_name, student_email, registration_number,
@@ -199,7 +194,6 @@ export const CertificateRepository = {
     return rows as CertificateRecord[];
   },
 
-  // this is used by the public for verification
     async findForVerificationByNumberUpload(certificateNumber: string) {
     const [rows]: any = await pool.execute(
       `SELECT ${VERIFY_COLUMNS} FROM certificates WHERE certificate_number = ? LIMIT 1`,
@@ -208,7 +202,6 @@ export const CertificateRepository = {
     return rows[0] ?? null;
   },
 
-  // The uploaded file is the exact PDF we issued.
   async findForVerificationByPdfHash(pdfHash: string) {
     const [rows]: any = await pool.execute(
       `SELECT ${VERIFY_COLUMNS} FROM certificates WHERE certificate_pdf_hash = ? LIMIT 1`,
@@ -217,7 +210,6 @@ export const CertificateRepository = {
     return rows[0] ?? null;
   },
 
-  // create a certificate inside blockchain
   async createWithDatabase(data: CertificateCreateInput & {
     blockchain_tx_hash?: string;
     blockchain_certificate_id?: string;

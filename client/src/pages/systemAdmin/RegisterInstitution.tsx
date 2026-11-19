@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, Building2, Globe, Hash, FileText, ArrowLeft, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
-// import { useWallet } from "../../context/WalletContext";
 import { useInstitution } from "../../context/InstitutionContext";
 
  type InstitutionForm = {
@@ -15,7 +14,6 @@ import { useInstitution } from "../../context/InstitutionContext";
 
 export default function RegisterInstitution() {
   const navigate = useNavigate();
-  // const { account } = useWallet()
   const { registerInstitution, loading } = useInstitution()
   
   const [form, setForm] = useState<InstitutionForm>({
@@ -24,8 +22,6 @@ export default function RegisterInstitution() {
      domain: "",
      description: "",
    });
-
-  // const [addWalletAddress] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -37,7 +33,7 @@ export default function RegisterInstitution() {
     try {
       await registerInstitution(form);
       toast.success(`${form.name} has been registered successfully`);
-      navigate("/admin/register-admin", { replace: true });
+      navigate("/system/admin/register-main-admin", { replace: true });
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Failed to register institution");
       throw err;
@@ -74,12 +70,11 @@ export default function RegisterInstitution() {
         </div>
       </section>
 
-      {/* Form Card */}
       <section className="w-full border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-800 sm:px-6">
           <h2 className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
             <ShieldCheck size={18} className="text-indigo-600 dark:text-indigo-400" />
-            Institution Details
+            INSTITUTION DETAILS
           </h2>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6 p-5 sm:p-8 rounded-md">
@@ -125,7 +120,6 @@ export default function RegisterInstitution() {
                   className="w-full border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 rounded-md text-sm uppercase text-slate-900 transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 />
               </div>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Used in certificate numbers. 2–10 uppercase alphanumeric chars.</p>
             </div>
 
             <div>
@@ -142,21 +136,14 @@ export default function RegisterInstitution() {
                   name="domain"
                   value={form.domain}
                   onChange={handleChange}
-                  placeholder="e.g. kcau.ac.ke"
+                  placeholder="e.g. kcau.ac.ke, uon.ac.ke"
                   required
                   className="w-full border border-slate-200 bg-slate-50 py-3 rounded-md pl-10 pr-4 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 />
               </div>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Used to auto-assign students by email domain.</p>
             </div>
           </div>
 
-             <p className="border border-indigo-100 bg-indigo-50/70 px-4 py-3 text-sm leading-relaxed text-slate-600 dark:border-indigo-950 dark:bg-indigo-950/20 dark:text-slate-400">
-              The blockchain wallet is not set here. After the institution's main admin signs in,
-              they connect their wallet and register the institution on-chain themselves.
-            </p>
-
-          {/* Description */}
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
               Description
@@ -177,7 +164,6 @@ export default function RegisterInstitution() {
             </div>
           </div>
 
-          {/* Submit */}
           <div className="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-5 dark:border-slate-800">
             <button
               type="submit"

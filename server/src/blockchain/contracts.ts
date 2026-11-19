@@ -1,7 +1,6 @@
 import { ethers } from "ethers";
-import { contract, platformWallet, provider } from "./blockchainConnection";
+import { contract, platformWallet } from "./blockchainConnection";
 
-// Single place to convert a name/short code into the on-chain bytes32 id.
 export const toInstitutionId = (shortCode: string): string =>
     ethers.id(shortCode.toLowerCase().trim());
 
@@ -11,10 +10,8 @@ const assertBytes32 = (value: string, label: string) => {
     }
 };
 
-// Returns a contract instance that signs with the given signer
 const withSigner = (signer: ethers.Signer) => contract.connect(signer) as typeof contract;
 
-// Reads the certificateId out of the CertificateIssued event
 const parseCertificateId = (receipt: ethers.ContractTransactionReceipt | null): string => {
     if (!receipt) return "";
     for (const log of receipt.logs) {
@@ -30,11 +27,10 @@ const parseCertificateId = (receipt: ethers.ContractTransactionReceipt | null): 
     return "";
 };
 
-// Accepts a DB id (7, "7", a UUID...) or an id that is already bytes32
 export const toInstitutionBytes32 = (institutionId: string | number | bigint): string => {
     const value = String(institutionId).trim();
-    if (ethers.isHexString(value, 32)) return value; // already 0x + 64 hex chars
-    return ethers.id(value);                         // hash anything else
+    if (ethers.isHexString(value, 32)) return value;
+    return ethers.id(value);                      
 };
 
 export const registerInstitutionOnChain = async (
@@ -64,16 +60,15 @@ export const registerInstitutionOnChain = async (
 
 type InstitutionRef = string | number | bigint;
 
-// ── Issue certificate (must be signed by the institution's issuer wallet) ──
 export const issueCertificateOnChain = async (
     certificateHash: string,
     institutionId: InstitutionRef,
-    issuerSigner: ethers.Signer // private key is being passed 
+    issuerSigner: ethers.Signer
 ) => {
     assertBytes32(certificateHash, "certificateHash");
     const institutionKey = toInstitutionBytes32(institutionId);
 
-    const issuerAddress = await issuerSigner.getAddress(); // get the wallet address from the signer - pass the private key and thsi function gets the wallet address from the private key
+    const issuerAddress = await issuerSigner.getAddress(); 
     const isAuthorized: boolean = await contract.isAuthorizedIssuer(institutionKey, issuerAddress);
     if (!isAuthorized) throw new Error("Issuer wallet is not authorized for this institution");
 
@@ -82,7 +77,6 @@ export const issueCertificateOnChain = async (
     return { txHash: receipt?.hash ?? "", certificateId: parseCertificateId(receipt) };
 };
 
-// ── Revoke certificate (issuer wallet signs) 
 export const revokeCertificateOnChain = async (
     certificateHash: string,
     institutionId: InstitutionRef,
@@ -100,7 +94,6 @@ export const revokeCertificateOnChain = async (
     return { txHash: receipt?.hash ?? "" };
 };
 
-// ── Verify (read-only, anyone) 
 export const verifyCertificateOnChain = async (
     certificateHash: string,
     institutionId: InstitutionRef
@@ -123,7 +116,6 @@ export const verifyCertificateOnChain = async (
     };
 };
 
-// ── Get certificate (reverts on-chain if it doesn't exist)
 export const getCertificateFromChain = async (
     certificateHash: string,
     institutionId: InstitutionRef

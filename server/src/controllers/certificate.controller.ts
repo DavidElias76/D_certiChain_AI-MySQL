@@ -2,7 +2,6 @@ import type { Request, Response } from "express";
 import { CertificateService } from "../services/certificate.service";
 import type { CustomError } from "../types/error.types";
 
-// Letters, digits, dot, dash, underscore. Adjust if your short codes can contain anything else.
 const CERT_NUMBER_RE = /^[A-Za-z0-9._-]{3,100}$/;
 
 interface AuthUser {
@@ -44,8 +43,6 @@ const getAuthUser = (req: Request<any, any, any, any>): AuthUser | undefined =>
 const text = (value: unknown): string => (typeof value === "string" ? value.trim() : "");
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Errors we throws on purpose carry a statusCode and a safe message.
-// Anything else is unexpected: log it, don't leak it.
 const sendError = (res: Response, error: unknown) => {
   const err = error as CustomError;
   if (err?.statusCode) {
@@ -56,7 +53,6 @@ const sendError = (res: Response, error: unknown) => {
   res.status(500).json({ error: "Something went wrong. Please try again." });
 };
 
-// Only admin / main_admin of an institution. Returns null after sending the error response.
 const requireInstitutionAdmin = (req: Request, res: Response) => {
   const user = getAuthUser(req);
   if (!user?.id) {
@@ -135,13 +131,12 @@ export const issueCertificateController = async (req: Request, res: Response) =>
   }
 };
 
-// Platform-wide list: system admin only.
 export const getAllCertificatesCountController = async (
   req: Request, 
   res: Response<{ count: number} | {error: string }>
 ) => {
   try {
-    const user = getAuthUser(req) // get the user from the request;
+    const user = getAuthUser(req) 
     if (!user?.id) {
       res.status(401).json({ error: "Unauthorized user" });
       return;
@@ -157,7 +152,6 @@ export const getAllCertificatesCountController = async (
   }
 };
 
-// All certificates of the admin's institution, whoever issued them.
 export const getCertificatesByInstitutionController = async (req: Request, res: Response) => {
   try {
     const admin = requireInstitutionAdmin(req, res);
@@ -184,18 +178,6 @@ export const getMyCertificatesController = async (req: Request, res: Response) =
   }
 };
 
-// this is being handled by the email and we can add this as a fail safe
-// export const getMyCertificatesByIdController = async(
-//   req: Request,
-//   res: Response
-// ) => {
-//   try {
-    
-//   } catch (error) {
-    
-//   }
-// }
-
 export const verifyCertificateController = async (
   req: Request<{ certificateNumber: string }>,
   res: Response<any>
@@ -217,7 +199,6 @@ export const verifyCertificateController = async (
       userAgent: req.get("user-agent") ?? null,
     });
 
-    // The answer can change when a certificate is revoked, so never cache it.
     res.set("Cache-Control", "no-store");
     res.status(200).json(outcome);
   } catch (error) {
@@ -243,7 +224,6 @@ export const verifyCertificateUploadController = async (req: Request, res: Respo
   }
 };
 
-// get the reason to revoke te certificate
 export const revokeCertificateController = async (
   req: Request<{ id: string }>,
   res: Response
@@ -308,7 +288,6 @@ export const getCarrerRecommendationsController = async (
   }
 };
 
-// the generate pdf controller
 export const getCertificatePdfController = async (req: Request, res: Response) => {
   try {
     const user = getAuthUser(req);

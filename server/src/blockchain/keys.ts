@@ -23,31 +23,28 @@ const encryptPrivateKey = (plaintextPrivateKey: string): string => {
     const iv = randomBytes(IV_LENGTH);
     const cipher = createCipheriv(ALGORITHM, masterKey, iv, { authTagLength: AUTH_TAG_LENGTH }); // encrypt the key
 
-    // take the cipler text and combine them with thr privatekey
     const encrypted = Buffer.concat([
         cipher.update(plaintextPrivateKey, "utf8"),
         cipher.final(),
     ])
 
-    const authTag = cipher.getAuthTag(); // produces the authentication tag after the encryption - The figerprint of the encrypted data and prevents tampering
+    const authTag = cipher.getAuthTag(); 
     return [
         iv.toString("hex"),
         authTag.toString("hex"),
         encrypted.toString("hex"),
-    ].join(":"); // joins them together to prevent tampering
+    ].join(":");
 }
 
-// DECRYPT: takes the encrypted blob, returns the plaintext private key - change the name to the decrytAddress
 const decryptPrivateKey = (encryptedBlob: string) => {
     const masterKey = getMasterKey()
-    const parts = encryptedBlob.split(":"); // this return an array of three values
+    const parts = encryptedBlob.split(":");
 
     if (parts.length !== 3) {
         throw new Error("Invalid encrypted blob format");
     }
 
-    // get the seperate parts of the string
-    const [ivHex, authTagHex, ciphertextHex] = parts; // array destructuring of the parts
+    const [ivHex, authTagHex, ciphertextHex] = parts;
     const iv = Buffer.from(ivHex, "hex");
     const authTag = Buffer.from(authTagHex, "hex");
     const ciphertext = Buffer.from(ciphertextHex, "hex");
@@ -57,21 +54,20 @@ const decryptPrivateKey = (encryptedBlob: string) => {
 
     const decrypted = Buffer.concat([
         decipher.update(ciphertext),
-        decipher.final(), // throws if auth tag doesn't match (tampered)
+        decipher.final(),
     ]);
 
     return decrypted.toString("utf8");
 }
 
-// GENERATE A NEW WALLET: takes no inputs, returns a fresh private key + address
 const generateInstitutionWallet = (): {
     privateKey: string;
     address: string;
 } => {
     const wallet = ethers.Wallet.createRandom();
     return {
-        privateKey: wallet.privateKey, // hex string starting with "0x"
-        address: wallet.address,        // hex string starting with "0x"
+        privateKey: wallet.privateKey,
+        address: wallet.address,      
     };
 }
 

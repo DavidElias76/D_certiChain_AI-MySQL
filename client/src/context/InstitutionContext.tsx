@@ -11,7 +11,7 @@ type InstitutionInput = {
     wallet_address?: string | null;
     description?: string | null;
     is_active?: boolean | null;
-    main_admin_name?: string | null; // this may couse an error since the property is not returned by the server(backend)
+    main_admin_name?: string | null; 
 };
 
 interface InstitutionContextType { 
@@ -25,11 +25,9 @@ interface InstitutionContextType {
     getMyInstitution: (silent?: boolean) => Promise<void>
     registerInstitution: (data: InstitutionInput) => Promise<void>
     updateInstitution: (institution_id: string, data: Partial<InstitutionInput>) => Promise<void>
-    // updateInstitutionWalletAddress: (institution_id: string, wallet_address:string) => Promise<void>
     toggleInstitutionStatus: (institution_id: string, is_active: boolean) => Promise<void>
     deleteInstitution: (institution_id: string) => Promise<void>
     setUpWallet: (private_key: string) => Promise<void>
-    // setUpWallet: (wallet_address: string) => Promise<void>
 }
 
 interface Props {
@@ -47,7 +45,6 @@ export function InstitutionProvider({ children }: Props) {
     const [message, setMessage] = useState<string>('');
     const [refresh, setRefresh] = useState<number>(0);
     
-    // Fetch all institutions — re-runs when refresh counter changes
     const getInstitutions = useCallback(async () => {
         try {
             setLoading(true);
@@ -91,7 +88,6 @@ export function InstitutionProvider({ children }: Props) {
         }
     }, []);
 
-    // the get me request is not being sent by the backend - this need to be fixed
     const getMyInstitution = useCallback(async (silent = false) => {
         try {
             if (!silent) setLoading(true);
@@ -135,7 +131,7 @@ export function InstitutionProvider({ children }: Props) {
                 { withCredentials: true }
             );
             setMessage(response.data.message || "Institution updated successfully");
-            setRefresh(prev => prev + 1); // triggers re-fetch after updating
+            setRefresh(prev => prev + 1);
         } catch (err: any) {
             setError(err.response?.data?.error || "Failed to update institution");
             console.error(err);
@@ -145,26 +141,6 @@ export function InstitutionProvider({ children }: Props) {
         }
     };
 
-    // to be determined if needed - update the wallet address - the register institution does this automatically - not needed the setupwallet code handles the updating
-    // const updateInstitutionWalletAddress = async (institution_id: string, wallet_address:string) => {
-    //     try {
-    //         setLoading(true)
-    //         setError('')
-    //         const response = await api.put(`institution/${institution_id}`,
-    //             { wallet_address },
-    //             { withCredentials: true }
-    //         )
-    //         setMessage(response.data.message || "Insttituion's wallet address updated successfully")
-    //         setRefresh(prev => prev + 1)
-    //     } catch (err: any) {
-    //         setError(err.response?.data?.error || "Failed to update institution");
-    //         console.error(err);
-    //         throw err;
-    //     }finally {
-    //         setLoading(false)
-    //     }
-    // }
-
     const toggleInstitutionStatus = async (institution_id: string, is_active: boolean) => {
         try {
             setLoading(true)
@@ -173,7 +149,7 @@ export function InstitutionProvider({ children }: Props) {
                 { is_active },
                 { withCredentials: true})
                 setMessage(response.data.message || " Institution status updated successfully")
-                setRefresh(prev => prev + 1); // triggers re-fetch after updating
+                setRefresh(prev => prev + 1);
         } catch (err: any) {
             setError(err.response?.data?.error || "Failed to update institution status");
             console.error(err);
@@ -191,7 +167,7 @@ export function InstitutionProvider({ children }: Props) {
                 { withCredentials: true }
             );
             setMessage(response.data.message || "Institution deleted successfully");
-            setRefresh(prev => prev + 1); // triggers re-fetch after deleting
+            setRefresh(prev => prev + 1); 
         } catch (err: any) {
             setError(err.response?.data?.error || "Failed to delete institution");
             console.error(err);
@@ -201,8 +177,6 @@ export function InstitutionProvider({ children }: Props) {
         }
     };
 
-    // we are sending the private key and the wallet address to the backend
-        // Sends only the private key. The backend derives the address, registers on-chain and stores the key encrypted.
     const setUpWallet = async (private_key: string) => {
         try {
             setError("");
@@ -214,10 +188,9 @@ export function InstitutionProvider({ children }: Props) {
         } catch (err: any) {
             const msg = err.response?.data?.error || "Failed to set up the institution wallet";
             setError(msg);
-            throw new Error(msg); // never rethrow err: it contains the request body
+            throw new Error(msg); 
         }
 
-        // The wallet is set up at this point. A failed refresh must not look like a failed setup.
         try {
             await getMyInstitution(true);
         } catch(err: any) {
@@ -226,9 +199,6 @@ export function InstitutionProvider({ children }: Props) {
             throw new Error(msg);
         }
     };
-    // The wallet is set up at this point. A failed refresh must not look like a failed setup.
-    // const id = user?.institution_id ?? institution?.id;
-
     return (
         <InstitutionContext.Provider value={{
             institutions,
@@ -241,7 +211,6 @@ export function InstitutionProvider({ children }: Props) {
             getMyInstitution,
             registerInstitution,
             updateInstitution,
-            // updateInstitutionWalletAddress,
             toggleInstitutionStatus,
             deleteInstitution,
             setUpWallet

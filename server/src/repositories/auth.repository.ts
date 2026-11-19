@@ -4,7 +4,6 @@ import { findUserByIdOtpType } from "../types/auth.types";
 
 export const AuthRepository = {
 
-    // this will be chnaged to prevent the queries of the other values
     async signIn(email: string): Promise<QueryResponse | null> {
         const [rows] = await pool.execute<DbRow[]>(
                 `SELECT 
@@ -76,7 +75,6 @@ export const AuthRepository = {
         return result.affectedRows > 0;
     },
 
-    // create a function that updates the password when the user forgot the password
     async UpdatePassword(hashedPassword: string, email: string) {
         const [result] = await pool.execute<DbResult>(`
             UPDATE users SET password = ? WHERE email = ?    
@@ -100,8 +98,6 @@ export const AuthRepository = {
         );
         return result.affectedRows > 0;
     },
-
-    // create a function that update the is_verfied property to true - Thsi will be used for the email verifcation 
 
      async updateWalletAddress(id: number, wallet_address: string): Promise<boolean> {
         const [result] = await pool.execute<DbResult>(

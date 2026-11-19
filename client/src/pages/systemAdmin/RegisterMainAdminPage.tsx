@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-// import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Building2,
@@ -9,12 +8,12 @@ import {
   Mail,
   ShieldCheck,
   UserPlus,
-  // Wallet,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 import { useUsers } from "../../context/UsersContext";
+import { useNavigate } from "react-router-dom";
 
 type AdminForm = {
   username: string;
@@ -26,7 +25,7 @@ type AdminForm = {
 };
 
 export default function RegisterMainAdminPage() {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { addUsers } = useUsers()
 
@@ -38,13 +37,12 @@ export default function RegisterMainAdminPage() {
     password: "",
     confirmPassword: "",
     role: user?.role === "systemAdmin" ? "main_admin" : "admin",
-    institution_name: "" // update the instituion name based on the user.institution_name - check first
+    institution_name: ""
   });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Auto-fill wallet address from connected wallet - This needs to be deleted
   useEffect(() => {
     const stored = localStorage.getItem("walletAddress");
     if (stored) {
@@ -70,11 +68,11 @@ export default function RegisterMainAdminPage() {
     }
 
     try {
-      await addUsers(form); // the request is not being sent to the user route - error adding the user because of the admin email differes
+      await addUsers(form);
       toast.success(`Main_admin ${form.username} registered successfully`);
-      // navigate("/system/admin/manage-admins", {
-      //   replace: true,
-      // });
+      navigate("/system/admin/manage-admins", {
+        replace: true,
+      });
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Failed to register admin");
     } finally {
@@ -214,32 +212,6 @@ export default function RegisterMainAdminPage() {
               </div>
             </div>
           </div>
-
-          {/* <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Ethereum Wallet Address <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <Wallet
-                size={18}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-              <input
-                type="text"
-                name="walletAddress"
-                value={form.walletAddress}
-                onChange={handleChange}
-                placeholder="0x... (auto-filled from connected wallet)"
-                required
-                className="w-full pl-10 pr-4 py-3.5.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm font-mono focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
-              />
-            </div>
-            <p className="text-xs text-slate-400 mt-2">
-              Connect your wallet to auto-fill this field.
-            </p>
-          </div> */}
-
-          {/* This is not needed the systemadmin has this page and the main_admin has its own page */}
 
           {isSystemAdmin && (
             <div>

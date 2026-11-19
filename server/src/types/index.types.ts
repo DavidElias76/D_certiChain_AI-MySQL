@@ -44,7 +44,7 @@ export type UserProfile = {
     email: string;
     role: UserRole;
     wallet_address?: string;
-    institutionName?: string | ""; // This let the employer logs in without the institution name
+    institutionName?: string | ""; 
     isVerified?: boolean;
 }
 
@@ -56,7 +56,7 @@ export interface UserCreateInput {
   registration_number?: string | null
   institution_id?: number | null;
   institution_name?: string;
-  is_verified?: boolean; // This wil use the Otp code that will be sent to the line
+  is_verified?: boolean;
 }
 
 export interface Institution {
@@ -78,12 +78,11 @@ export interface InstitutionCreateInput {
   name: string;
   short_code: string;
   domain: string;
-  wallet_address?: string | null; // always null at creation, set later by the wallet setup
+  wallet_address?: string | null;
   description?: string | null;
   is_active?: boolean;
 }
 
-// certificate
 export type CertificateStatus = "issued" | "revoked";
 
 export interface Certificate {
@@ -113,7 +112,6 @@ export interface Certificate {
   updated_at: Date;
 }
 
-// the os the input
 export interface CertificateCreateInput {
   student_name: string;
   registration_number: string;
@@ -124,7 +122,6 @@ export interface CertificateCreateInput {
   graduation_date: Date;
   gpa?: string;
   classification?: string;
-  // skills?: string[]; // this will be removed and be generated the AI recommendation
   certificate_number: string;
   certificate_hash: string;
   blockchain_tx_hash?: string;
@@ -143,7 +140,6 @@ export interface CertificateResult {
   status: string;
 }
 
-// verifications logs
 export type VerifierType = "student" | "employer" | "alumni" | "public";
 export type VerificationResult = "verified" | "invalid" | "revoked";
 
@@ -177,7 +173,6 @@ export interface VerificationLogCreateInput {
   user_agent?: string;
 }
 
-//  Recommendation types 
 export interface SourceProfile {
   degree: string;
   course: string;

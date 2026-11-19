@@ -31,7 +31,6 @@ export default function ForgotPasswordModal({ showModal, onClose, onReset }: For
 
   const { sendOtpCode, verfiyOtpCode, resetPassword } = useAuth();
 
-  // Reset internal state every time the modal closes
   const handleClose = () => {
     setStep("email");
     setEmail("");
@@ -45,7 +44,6 @@ export default function ForgotPasswordModal({ showModal, onClose, onReset }: For
     onClose();
   };
 
-  // Step 1: request OTP 
   const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -72,7 +70,6 @@ export default function ForgotPasswordModal({ showModal, onClose, onReset }: For
     }
   };
 
-  // ── Step 2: verify OTP 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -90,7 +87,6 @@ export default function ForgotPasswordModal({ showModal, onClose, onReset }: For
       const data = await verfiyOtpCode(Number(otp), email);
       if (data?.success) {
         toast.success(data?.message || "OTP verified successfully");
-        // Move to password reset step instead of closing the modal
         setStep("reset");
         setOtp("");
       } else {
@@ -107,12 +103,10 @@ export default function ForgotPasswordModal({ showModal, onClose, onReset }: For
     }
   };
 
-  // Step 3: enter new password 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    // Client-side validation — confirm password is for local comparison only
     if (!password) {
       setError("Please enter a new password.");
       return;
@@ -143,7 +137,6 @@ export default function ForgotPasswordModal({ showModal, onClose, onReset }: For
     }
   };
 
-  // Convenience: keep the OTP input numeric and capped at OTP_LENGTH
   const handleOtpChange = (value: string) => {
     const cleaned = value.replace(/\D/g, "").slice(0, OTP_LENGTH);
     setOtp(cleaned);
@@ -216,7 +209,6 @@ export default function ForgotPasswordModal({ showModal, onClose, onReset }: For
             </div>
           )}
 
-          {/* Step 1: email  */}
           {step === "email" && (
             <form onSubmit={handleRequestOtp} className="space-y-4">
               <div>
@@ -267,7 +259,6 @@ export default function ForgotPasswordModal({ showModal, onClose, onReset }: For
             </form>
           )}
 
-          {/* Step 2: OTP */}
           {step === "otp" && (
             <form onSubmit={handleVerifyOtp} className="space-y-4">
               <div>
@@ -351,7 +342,6 @@ export default function ForgotPasswordModal({ showModal, onClose, onReset }: For
             </form>
           )}
 
-          {/*  Step 3: set new password  */}
           {step === "reset" && (
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
@@ -387,7 +377,6 @@ export default function ForgotPasswordModal({ showModal, onClose, onReset }: For
                 </div>
               </div>
 
-              {/* Confirm password — local comparison only, never sent */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Confirm new password

@@ -1,7 +1,4 @@
-// Used to connect to the blockchain platform
 import { ethers } from "ethers";
-// import { abi } from "../contracts/CertificateRegistry.json"; // you can use this importataion closest to the contracts folder
-// const abi = artifact.abi;
 import { abi } from "../../../blockchain/artifacts/contracts/CertificateRegistry.sol/CertificateRegistry.json"
 import dotenv from "dotenv";
 
@@ -24,7 +21,6 @@ const normalizePrivateKey = (raw: string): string => {
     return prefixed;
 };
 
-// The connection to the blockchain
 const provider: ethers.JsonRpcProvider = new ethers.JsonRpcProvider(rpcUrl);
 
 const getPlatformWallet = (key: string | undefined, rpc: ethers.JsonRpcProvider) => {
@@ -35,7 +31,6 @@ const getPlatformWallet = (key: string | undefined, rpc: ethers.JsonRpcProvider)
 const getContract = (address: string | undefined, rpc: ethers.JsonRpcProvider) => {
     if (!address) throw new Error("CONTRACT_ADDRESS not set. Run the deployment script first.");
     if (!ethers.isAddress(address)) throw new Error(`CONTRACT_ADDRESS is not a valid address: ${address}`);
-    // Read-only instance. For writes, use contract.connect(signer)
     return new ethers.Contract(address, abi, rpc);
 };
 

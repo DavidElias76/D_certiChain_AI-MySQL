@@ -61,7 +61,6 @@ export default function RegisterPage() {
       await register(registrationData);
       toast.success("Account created successfully!");
       navigate(form.role === "admin" ? "/admin/dashboard" : "/dashboard");
-      // navigate(form.role === 'alumni')
     } catch (err: unknown) {
       const message = isAxiosError<{ message?: string }>(err)
         ? err.response?.data?.message
@@ -72,7 +71,6 @@ export default function RegisterPage() {
     }
   };
 
-  // Placeholder for the future Google OAuth integration
   const handleGoogleRegister = () => {
     toast("Google sign-up is coming soon.", { icon: "🔜" });
   };
@@ -127,7 +125,6 @@ export default function RegisterPage() {
 
       </div>
 
-      {/* Right Side - Form */}
       <div className="relative flex flex-1 items-center justify-center px-5 py-12 sm:px-10 sm:py-16 lg:px-12">
         <div className="absolute right-5 top-5 sm:right-8 sm:top-8">
           <ThemeToggle />
@@ -278,7 +275,6 @@ export default function RegisterPage() {
               )}
             </button>
 
-            {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-200 dark:border-slate-700" />
@@ -295,7 +291,6 @@ export default function RegisterPage() {
               onClick={handleGoogleRegister}
               className="flex w-full items-center justify-center gap-3 border border-slate-200 bg-white py-3 rounded-md text-sm font-semibold text-slate-700 transition-colors hover:border-indigo-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:border-indigo-800 dark:hover:bg-slate-800"
             >
-              {/* Inline Google "G" logo — official brand colors */}
               <svg
                 className="w-5 h-5"
                 viewBox="0 0 24 24"

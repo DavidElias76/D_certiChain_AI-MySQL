@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import {
   Award,
   Building2,
-  // CheckCircle2,
   Download,
   Eye,
   FileText,
@@ -29,7 +28,7 @@ interface Certificate {
   institution_name: string;
   course: string;
   degree: string;
-  graduation_date: string; // "YYYY-MM-DD"
+  graduation_date: string;
   gpa: string | null;
   classification: string | null;
   certificate_number: string;
@@ -39,7 +38,6 @@ interface Certificate {
   issued_at: string;
 }
 
-// graduation_date is a calendar date, so format it in UTC to avoid a one-day shift.
 const formatDate = (value: string) =>
   new Date(value).toLocaleDateString("en-GB", {
     day: "2-digit",
@@ -76,7 +74,6 @@ export default function MyCertificates() {
     void fetchMyCertificates();
   }, []);
 
-  // Free the blob URL when the modal closes, when another PDF replaces it, or on unmount.
   useEffect(() => {
     if (!pdfView) return;
     return () => URL.revokeObjectURL(pdfView.url);
@@ -108,9 +105,7 @@ export default function MyCertificates() {
     }
   };
 
-  // const verifiedCount = certificates.filter((certificate) => certificate.status === "issued").length;
   const origin = typeof window === "undefined" ? "" : window.location.origin;
-
   return (
     <div className="mx-auto max-w-6xl space-y-7 pb-10">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

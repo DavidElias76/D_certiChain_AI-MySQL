@@ -42,7 +42,6 @@ export const UsersRepository = {
     },
 
     async findUsersById(id: number): Promise<OmitPasswordUser[] | null> {
-      // this need to be rediced to prevent overfetching of data
         const [rows] = await pool.execute<DbRow[]>(
         `SELECT id, 
                 username, 
@@ -107,7 +106,6 @@ export const UsersRepository = {
         return rows.length ? (rows[0] as User) : null;
   },
 
-  // find the user by id - by emai and the institution name
   async findUserIdByEmail(email: string): Promise<number | null> {
     const [rows] = await pool.execute<DbRow[]>(
       `SELECT id FROM users WHERE email = ? LIMIT 1`,
@@ -144,7 +142,6 @@ export const UsersRepository = {
     return rows[0].institution_name
   },
 
-  // this update the insitution when te user certificate is active
   async updateUserStatus(institutionId: number, is_active: boolean) {
     const [result] = await pool.execute<DbResult>(
             `UPDATE users SET is_verified = ? WHERE id = ?`,
@@ -183,7 +180,6 @@ export const UsersRepository = {
             username: data.username.trim(),
             email: data.email.toLowerCase().trim(),
             role: data.role,
-            // wallet_address: null,
             institution_name: data.institution_name?.trim() ?? null,
             institution_id: data.institution_id ?? null,
             is_verified: data.is_verified ?? false,
@@ -228,7 +224,6 @@ export const UsersRepository = {
     return result.affectedRows > 0;
   },
 
-  /** Find user by email OR username (for signup uniqueness check) - This will be added if needed by the user */
   async findByEmailOrUsername(email: string, username: string): Promise<User | null> {
     const [rows] = await pool.execute<DbRow[]>(
       "SELECT * FROM users WHERE email = ? OR username = ?",

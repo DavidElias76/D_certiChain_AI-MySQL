@@ -1,4 +1,9 @@
-import mysql, { Pool, PoolConnection, RowDataPacket, ResultSetHeader } from "mysql2/promise";
+import mysql, { 
+  Pool, 
+  PoolConnection, 
+  RowDataPacket, 
+  ResultSetHeader 
+} from "mysql2/promise";
 import dotenv from "dotenv";
 
 dotenv.config();

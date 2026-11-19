@@ -50,7 +50,6 @@ export default function ManageCertificates() {
   const [revokeReason, setRevokeReason] = useState("");
   const [revoking, setRevoking] = useState(false);
 
-  // Load certificates
   useEffect(() => {
     const fetchCertificates = async () => {
       try {
@@ -75,7 +74,6 @@ export default function ManageCertificates() {
     };
   }, [certificates]);
 
-  // Filter
   const filtered = useMemo(() => {
     return certificates.filter((cert) => {
       const matchStatus = statusFilter === "all" || cert.status === statusFilter;
@@ -91,7 +89,6 @@ export default function ManageCertificates() {
     });
   }, [certificates, search, statusFilter]);
 
-  // Revoke
   const handleRevoke = async () => {
     if (!revokeTarget) return;
     if (!revokeReason.trim()) {
@@ -131,7 +128,6 @@ export default function ManageCertificates() {
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <Link
@@ -156,7 +152,6 @@ export default function ManageCertificates() {
         </Link>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
           <div className="flex items-center gap-3">
@@ -195,7 +190,6 @@ export default function ManageCertificates() {
         </div>
       </div>
 
-      {/* Search + Filter Bar */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
@@ -223,7 +217,6 @@ export default function ManageCertificates() {
         </div>
       </div>
 
-      {/* Table */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider">
@@ -333,7 +326,6 @@ export default function ManageCertificates() {
         )}
       </div>
 
-      {/* View Detail Modal */}
       {selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -394,9 +386,8 @@ export default function ManageCertificates() {
         </div>
       )}
 
-      {/* Revoke Confirmation Modal */}
       {revokeTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center rounded-md bg-slate-900/60 backdrop-blur-sm p-4">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-md">
             <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
               <div className="w-10 h-10 bg-red-100 dark:bg-red-950/40 flex items-center justify-center">
@@ -419,7 +410,7 @@ export default function ManageCertificates() {
                   onChange={(e) => setRevokeReason(e.target.value)}
                   rows={3}
                   placeholder="e.g. Issued in error, fraud detected, etc."
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all resize-none"
+                  className="w-full px-4 py-3 rounded-md bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all resize-none"
                 />
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -433,14 +424,14 @@ export default function ManageCertificates() {
                   setRevokeReason("");
                 }}
                 disabled={revoking}
-                className="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold transition-colors text-sm disabled:opacity-50"
+                className="px-5 py-2.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold transition-colors text-sm disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRevoke}
                 disabled={revoking || !revokeReason.trim()}
-                className="px-5 py-2.5 bg-red-600 hover:bg-red-500 disabled:bg-red-800 text-white font-semibold transition-colors text-sm flex items-center gap-2"
+                className="px-5 py-2.5 rounded-md bg-red-600 hover:bg-red-500 disabled:bg-red-800 text-white font-semibold transition-colors text-sm flex items-center gap-2"
               >
                 {revoking ? (
                   <>
@@ -460,7 +451,6 @@ export default function ManageCertificates() {
   );
 }
 
-// Detail Row Helper
 function DetailRow({
   icon: Icon,
   label,

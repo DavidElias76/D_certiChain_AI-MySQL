@@ -88,7 +88,6 @@ export default function DashboardAdminPage() {
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
           <Activity className="text-indigo-600 dark:text-indigo-400" size={28} />
@@ -99,9 +98,7 @@ export default function DashboardAdminPage() {
         </p>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {/* Total Certificates */}
         <div className="flex items-center gap-4 border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
             <FileText size={20} />
@@ -114,7 +111,6 @@ export default function DashboardAdminPage() {
           </div>
         </div>
 
-        {/* Active */}
         <div className="flex items-center gap-4 border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
             <CheckCircle2 size={20} />
@@ -127,7 +123,6 @@ export default function DashboardAdminPage() {
           </div>
         </div>
 
-        {/* Revoked */}
         <div className="flex items-center gap-4 border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400">
             <XCircle size={20} />
@@ -140,7 +135,6 @@ export default function DashboardAdminPage() {
           </div>
         </div>
 
-        {/* This Month */}
         <div className="flex items-center gap-4 border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
             <Clock size={20} />
@@ -154,9 +148,7 @@ export default function DashboardAdminPage() {
         </div>
       </div>
 
-      {/* Recent Activity + Quick Actions */}
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Recent Activity — spans 2 columns */}
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
           <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
@@ -226,7 +218,6 @@ export default function DashboardAdminPage() {
           )}
         </div>
 
-        {/* Quick Actions */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6">
           <h3 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2 mb-5">
             <ShieldCheck size={16} className="text-indigo-600" /> Quick Actions

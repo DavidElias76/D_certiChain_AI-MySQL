@@ -19,9 +19,6 @@ const parseCertificateId = (value: unknown): number => {
   return id;
 };
 
-// Errors we created on purpose (they carry a statusCode) are answered here,
-// so they always reach the client with the right status. Anything else is
-// unexpected and goes to the global error handler.
 const handleError = (error: unknown, res: Response, next: NextFunction) => {
   const status = (error as CustomError)?.statusCode;
   if (typeof status === "number" && status >= 400 && status < 500) {

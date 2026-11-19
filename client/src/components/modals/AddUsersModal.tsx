@@ -47,8 +47,6 @@ interface UsersModalProps {
 export default function UsersModal(props: UsersModalProps) {
   const { user } = props;
   const key = user ? `${user.id ?? ""}:${user.username}:${user.email}` : "new";
-    // const { user } = useAuth()
-
   return <UsersModalContent key={key} {...props} />;
 }
 
@@ -70,7 +68,6 @@ function UsersModalContent({ showAddModal, user, setShowAddModal, authUser, onUs
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string>("");
-  // const [userMode, setUserMode] = useState<string>("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,7 +78,6 @@ function UsersModalContent({ showAddModal, user, setShowAddModal, authUser, onUs
       return;
     }
 
-    // Password validation (only when password is provided)
     if (userData.password || !isEditing) {
       if (userData.password !== confirmPassword) {
         setError("Passwords do not match.");
@@ -131,7 +127,6 @@ function UsersModalContent({ showAddModal, user, setShowAddModal, authUser, onUs
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left Column */}
             <div className="space-y-5">
               <div>
                 <label className="block text-sm text-slate-600 mb-1">
@@ -171,7 +166,6 @@ function UsersModalContent({ showAddModal, user, setShowAddModal, authUser, onUs
                       setUserData({
                         ...userData,
                         role,
-                        // Switching to admin closes the field, so drop any number that was typed.
                         registration_number: role === "student" ? userData.registration_number : "",
                       });
                     }}
@@ -200,7 +194,6 @@ function UsersModalContent({ showAddModal, user, setShowAddModal, authUser, onUs
               )}
             </div>
 
-            {/* Right Column */}
             <div className="space-y-5">
               {(userData.role === "student" || userData.role === "admin") && getloggedInUser && (
                 <div>
@@ -215,7 +208,6 @@ function UsersModalContent({ showAddModal, user, setShowAddModal, authUser, onUs
                 </div>
               )}
 
-              {/* Password Fields - Always visible */}
               <div>
                 <label className="block text-sm text-slate-600 mb-1">
                   {isEditing ? "New Password (leave blank to keep current)" : "Password"}

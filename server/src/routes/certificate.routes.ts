@@ -13,7 +13,6 @@ import {
 } from "../controllers/certificate.controller";
 import { authMiddleware, optionalAuthMiddleware, requireRole, requireVerified } from "../middlewares/auth.middleware";
 import { singleFileUpload } from "../middlewares/upload.middleware";
-import { roleMiddleware } from "../middlewares/role.middleware";
 
 const router: Router = Router();
 
@@ -33,11 +32,9 @@ const uploadLimiter = rateLimit({
   message: { error: "Too many uploads. Please wait a minute and try again." },
 });
 
-// you can add the role middleware to prevent the unauthorized users and check if the user exist in the db
 
 router.get("/", authMiddleware,requireRole("main_admin", "admin"), getCertificatesByInstitutionController);
 router.get("/my", authMiddleware, requireRole('student'), getMyCertificatesController);
-// router.get("/count", authMiddleware, requireRole('systemAdmin'), getAllCertificatesCountController);
 router.get("/count", authMiddleware, (req, _res, next) => { console.log("[count]", req.user); next(); }, requireRole("systemAdmin"), getAllCertificatesCountController);
 router.get("/verify/:certificateNumber", verifyLimiter, optionalAuthMiddleware, verifyCertificateController);
 router.get("/:id/pdf", authMiddleware, getCertificatePdfController);

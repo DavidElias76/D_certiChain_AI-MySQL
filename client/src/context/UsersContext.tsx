@@ -27,7 +27,6 @@ export type AddUserData = {
   role: UserRole;
   registration_number?: string
   institution_name?: string;
-  // wallet_address?: string;
 };
 
 export interface UsersContextType {
@@ -69,7 +68,7 @@ export function UsersProvider({ children }: Props) {
     try {
       setLoading(true);
       const response = await api.get("/users/", { withCredentials: true });
-      if (requestId !== requestRef.current) return; // a newer request replaced this one
+      if (requestId !== requestRef.current) return;
 
       const data = response.data;
       setUsers(Array.isArray(data) ? data : data?.users ?? []);
@@ -85,7 +84,7 @@ export function UsersProvider({ children }: Props) {
 
    useEffect(() => {
     if (!user) {
-      requestRef.current++; // cancel any in-flight response
+      requestRef.current++;
       setUsers([]);
       setLoading(false);
       return;
@@ -108,7 +107,6 @@ export function UsersProvider({ children }: Props) {
     [getUsers]
   );
 
-  // this is not needed at the moment
     const getUsersById = async (institutionId: number, roles: string[]): Promise<IUser[] | null> => {
       try {
         const response = await api.get(`/users/${institutionId}`,

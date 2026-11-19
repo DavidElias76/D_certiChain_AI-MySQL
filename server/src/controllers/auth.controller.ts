@@ -20,8 +20,6 @@ export interface TokenUser {
   institution_id: number | null;
 }
 
-const REFRESH_TOKEN_EXPIRY_SECONDS = 15 * 24 * 60 * 60 * 1000;
-
 export const signInController = async (
     req: Request<{}, unknown, UserRequest, {}>, 
     res: Response<AuthControllerResponse | { message: string} | { error: string }>
@@ -66,14 +64,10 @@ export const signUpController = async (
     try {
         const { username, email, password, role, institution_name } = req.body;
 
-        // The employers wil also be allowed to fill the institution_name - get know who verified you credentials 
-        // it can also be removed to make the verification anonymous
-
          if (!username || !email || !password || !institution_name) {
             return res.status(400).json({ message: "Fill out all the fields" });
         }
 
-        // find a way to make the institution name to null when the role is employer
         const validRoles = ["student", "employer", "admin", "systemAdmin", "main_admin"];
         if(!validRoles.includes(role)) {
             return res.status(400).json({
@@ -130,7 +124,7 @@ export const signUpController = async (
             path: "/",
         });
 
-        await sendWelcomeEmail(email); // This will be sent when the user is created successfully
+        await sendWelcomeEmail(email);
 
         res.status(201).json({
             message: "User added successfully",
@@ -151,13 +145,12 @@ export const signUpController = async (
     }
 }
 
-// all the users will use the institution wallet address and not the individual wallet address 
 export const updateWalletAddressController = async (
     req: Request<{}, unknown, { wallet_address: string }, {}>,
     res: Response<{ message: string} | { error: string}>
 ) => {
     try {
-        const user = (req as any).user as { id: number } | undefined; // get the user from the request instead of the wallet context
+        const user = (req as any).user as { id: number } | undefined;
         const { wallet_address } = req.body;
 
         if (!wallet_address) {
@@ -184,7 +177,6 @@ export const updateWalletAddressController = async (
     }
 };
 
-// verify token - the isVerfied value will be sent to true and proceed with the login
 export const verifyController = (
     req: any, 
     res: any
@@ -303,7 +295,6 @@ export const forgotPasswordController = async (
     }
 }
 
-// verify the email and set the value of the is_verified to true - this will have the modal
 export const verifyPasswordController = async (
     req: Request<{}, unknown, { OptCode: number; email: string }, {}>,
     res: Response<{ message: string} | { error: string} | { success: boolean}>
@@ -331,14 +322,12 @@ export const verifyPasswordController = async (
             });
         }
 
-        // Invalid OTP - compare the opt code
         if (Number(existingUser.verifyOtp) !== Number(OptCode)) {
             return res.status(400).json({
                 message: "Invalid OTP code!"
             });
         }
 
-        // OTP verified successfully
         existingUser.verifyOtp = null;
         existingUser.verifyOtpExpiryAt = null;
 
@@ -351,7 +340,6 @@ export const verifyPasswordController = async (
     }
 };
 
-// update the password after verification
 export const UpdatePasswordController = async (
     req: Request<{}, unknown, {email: string; password: string}, {}>,
     res: Response<{ message: string} | { error: string}>
@@ -380,7 +368,6 @@ export const UpdatePasswordController = async (
 }
 }
 
-// add the use of otp code to send it to the user to verify the email before allowing te chnage of the password
 export const changePasswordController = async (
     req: Request<{}, unknown, { currentPassword: string; newPassword: string }, {}>,
     res: Response<{ message: string } | { error: string }>

@@ -1,6 +1,5 @@
 import api from "./api";
 
-// For blob requests the error body is a Blob too, so parse the JSON out of it.
 export const readApiError = async (err: any, fallback: string): Promise<string> => {
   const data = err?.response?.data;
   try {
@@ -14,7 +13,6 @@ export const readApiError = async (err: any, fallback: string): Promise<string> 
   return data?.error || data?.message || fallback;
 };
 
-// this already exist in the certificate context and not neeed - get the pdf from te context page 
 export const fetchCertificatePdf = async (certId: number | string): Promise<Blob> => {
   try {
     const response = await api.get(`/certificate/${certId}/pdf`, {

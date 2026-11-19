@@ -28,7 +28,6 @@ export interface NewRecommendation extends CareerRecommendation {
   source_profile: Record<string, unknown>;
 }
 
-// mysql2 returns JSON columns already parsed; MariaDB returns text. Handle both.
 const parseJson = <T>(value: unknown, fallback: T): T => {
   if (value === null || value === undefined) return fallback;
   if (typeof value === "string") {
@@ -54,7 +53,6 @@ const toRecord = (row: DbRow): RecommendationRecord => ({
 });
 
 export const RecommendationsRepository = {
-  // the certificate, only if it belongs to this user
   async findOwnedCertificate(
     certificateId: number,
     userId: number
@@ -84,7 +82,6 @@ export const RecommendationsRepository = {
     };
   },
 
-  // the saved recommendation for this certificate, if any
   async findByCertificateAndUser(
     certificateId: number,
     userId: number
@@ -100,7 +97,6 @@ export const RecommendationsRepository = {
     return rows.length ? toRecord(rows[0]) : null;
   },
 
-  // true = saved, false = one already existed (nothing changed)
   async create(data: NewRecommendation): Promise<boolean> {
     const [result] = await pool.execute<ResultSetHeader>(
       `INSERT INTO recommendations

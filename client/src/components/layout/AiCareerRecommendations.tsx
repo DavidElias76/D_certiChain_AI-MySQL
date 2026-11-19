@@ -19,7 +19,6 @@ export default function AiCareerRecommendations({
   const { getEntry, fetchRecommendation, generateRecommendation } = useRecommendations();
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  // keep a valid selection as the certificate list loads or changes
   useEffect(() => {
     if (!certificates.length) {
       setSelectedId(null);
@@ -32,7 +31,6 @@ export default function AiCareerRecommendations({
     );
   }, [certificates]);
 
-  // load the saved recommendation (if any) for the selected certificate
   useEffect(() => {
     if (selectedId !== null) void fetchRecommendation(selectedId);
   }, [selectedId, fetchRecommendation]);

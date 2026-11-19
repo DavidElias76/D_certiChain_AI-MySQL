@@ -11,8 +11,8 @@ import {
 import axios from "axios";
 import toast from "react-hot-toast";
 
-import api from "../services/api";         // adjust: your configured axios instance
-import { useAuth } from "./AuthContext"; // adjust: hook that exposes the logged-in user
+import api from "../services/api";        
+import { useAuth } from "./AuthContext"; 
 
 export interface CareerRole {
   title: string;
@@ -82,8 +82,6 @@ export const RecommendationsProvider = ({ children }: { children: ReactNode }) =
   const entriesRef = useRef(entries);
   entriesRef.current = entries;
 
-  // Bumped whenever the signed-in user changes, so a response that arrives
-  // after sign-out (or for a different user) is thrown away.
   const sessionRef = useRef(0);
   const busyRef = useRef(new Set<string>());
 
@@ -106,7 +104,7 @@ export const RecommendationsProvider = ({ children }: { children: ReactNode }) =
     async (certificateId: number) => {
       const current = entriesRef.current[certificateId]?.status;
       if (current === "ready" || current === "empty" || current === "loading" || current === "generating") {
-        return; // already known or in progress: no request
+        return; 
       }
 
       const key = `get:${certificateId}`;
@@ -123,7 +121,7 @@ export const RecommendationsProvider = ({ children }: { children: ReactNode }) =
       } catch (error) {
         if (session !== sessionRef.current) return;
         if (axios.isAxiosError(error) && error.response?.status === 404) {
-          setEntry(certificateId, { status: "empty" }); // nothing generated yet
+          setEntry(certificateId, { status: "empty" });
         } else {
           setEntry(certificateId, {
             status: "error",
@@ -140,7 +138,7 @@ export const RecommendationsProvider = ({ children }: { children: ReactNode }) =
   const generateRecommendation = useCallback(
     async (certificateId: number): Promise<Recommendation | null> => {
       const existing = entriesRef.current[certificateId];
-      if (existing?.status === "ready" && existing.data) return existing.data; // never ask twice
+      if (existing?.status === "ready" && existing.data) return existing.data;
       if (existing?.status === "generating") return null;
 
       const key = `gen:${certificateId}`;

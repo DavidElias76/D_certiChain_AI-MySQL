@@ -10,14 +10,12 @@ export const httpError = (message: string, statusCode: number): CustomError => {
   return err;
 };
 
-// Roles each caller may see, edit and delete.
 export const MANAGEABLE_ROLES: Record<string, string[]> = {
   systemAdmin: ["main_admin"],
   main_admin: ["admin", "student"],
   admin: ["student"],
 };
 
-// Roles each caller may create or assign.
 export const CREATABLE_ROLES: Record<string, string[]> = {
   systemAdmin: ["main_admin"],
   main_admin: ["admin", "student"],
@@ -32,8 +30,6 @@ export const parseUserId = (value: unknown): number => {
   return id;
 };
 
-// Loads the target and confirms the caller may manage it - this is only called by the system admin only
-// Out-of-scope users get the same 404 as missing ones, so ids can't be probed.
 export const assertCanManage = async (actor: Actor, targetId: number) => {
   const target = await UsersRepository.findUserById(targetId);
   const allowed = MANAGEABLE_ROLES[actor.role] ?? [];
@@ -52,7 +48,6 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const adminRegex = /^(?:admin@[\w.-]+\.ac\.ke|[\w.+-]+@admin\.[\w-]+\.ac\.ke)$/i;
 const studentEmailRegex = /^[a-zA-Z0-9._-]+@students\.[a-zA-Z0-9-]+\.ac\.ke$/;
 
-// Returns an error message, or null when the email is fine for that role.
 export const emailErrorForRole = (role: string, email: string): string | null => {
   const value = email.trim();
   if (role === "student") {

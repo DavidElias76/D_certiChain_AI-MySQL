@@ -4,7 +4,6 @@ import type { CustomError } from "../types/error.types";
 import bcrypt from "bcrypt";
 import { OmitPasswordUser } from "../types/index.types";
 import { UserCreateInput } from "../models_sequelize_typescript";
-import { AuthRepository } from "../repositories/auth.repository";
 import { InstitutionRepository } from "../repositories/institution.repository";
 
 const INSTITUTION_EMAIL_RE = /^[^\s@]+@(?:[a-z0-9-]+\.)*([a-z0-9-]+)\.ac\.ke$/i;
@@ -24,15 +23,6 @@ const getShortCodeFromEmail = (email: string): string | null => {
   const match = email.trim().toLowerCase().match(INSTITUTION_EMAIL_RE);
   return match ? match[1] : null;
 };
-
-// export const getUsersService = async (): Promise<OmitPasswordUser[]> => {
-//     try {
-//       return await UsersRepository.findAllUsers();
-//     } catch (error) {
-//       console.error("Error getting the users", error);
-//       throw error;
-//     }
-// };
 
 export const getUsersByRoleService = async ({
   role,
@@ -116,7 +106,6 @@ export const addUsersService = async (
           throw error;
         }
 
-        // need to add a find by institution name to update ths intitution_id
         const salt: string = await bcrypt.genSalt(10)
         const hashedPassword: string = await bcrypt.hash(password, salt) 
 

@@ -5,14 +5,14 @@ import {
 } from "../repositories/recommendations.repository";
 
 // google gemini 
-// import {
-//   generateCareerRecommendations,
-//   type CareerProfile
-// } from "../agent/generateRecommendations";
+import {
+  generateCareerRecommendations,
+  type CareerProfile
+} from "../agent/generateRecommendations";
 
 //   openAi 
 
-import { generateCareerRecommendations, CareerProfile } from "../agent/OpenAI_carrerRecommendations";
+// import { generateCareerRecommendations, CareerProfile } from "../agent/OpenAI_carrerRecommendations";
 // export interface CareerProfile {
 //   course: string;
 //   degree: string;

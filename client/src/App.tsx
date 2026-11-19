@@ -27,12 +27,12 @@ import VerifyCertificates from './pages/student/VerifyCertificates';
 import CareerRecommendations from './pages/student/CareerRecommendations';
 import VerifyCertificateDashboard from './pages/employer/VerifyCertificateDashboard';
 
-// Admin Pages (create these later)
+// Admin Pages
 import DashboardAdminPage from './pages/admin/DashboardAdminPage';
-import IssueCertificates from './pages/admin/IssueCertificates'; // to issue certificate
-import CertificatePreview from './pages/admin/CertificatePreview'; // full cert preview before issuing
-import ManageCertificates from './pages/admin/ManageCertificates'; // to manage and see all the certificates
-import ManageUsers from './pages/admin/ManageUsers';// managee all the users
+import IssueCertificates from './pages/admin/IssueCertificates'; 
+import CertificatePreview from './pages/admin/CertificatePreview';
+import ManageCertificates from './pages/admin/ManageCertificates';
+import ManageUsers from './pages/admin/ManageUsers';
 import Analytics from './pages/admin/Analytics';
 import RegisterAdmin from './pages/admin/RegisterAdmin';
 
@@ -44,8 +44,6 @@ import SystemAdminLoginPage from './pages/systemAdmin/SystemAdminLoginPage';
 import AdminAnalytics from './pages/systemAdmin/AdminAnalytics';
 import ManageInstitutionsPage from './pages/systemAdmin/ManageInstitutionsPage';
 import ManageAdmins from './pages/systemAdmin/ManageAdmins';
-
-// There will be also a system admin page that will register institution with the instituionId and the issue wallet address
 
 function RefreshAuthenticatedData() {
   const { user } = useAuth();
@@ -76,16 +74,14 @@ function App() {
             <CertificateProvider>
                 <RefreshAuthenticatedData />
                   <Routes>
-                    {/* Public Routes */}
+
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/verify" element={<VerifyCertificates standalone />} />
 
-                    {/* system login page - This will be used to log in the system admin */}
                     <Route path="/system/admin/login" element={<SystemAdminLoginPage />} />
 
-                    {/* Protected Student/User Routes - Restricted to 'student' role */}
                     <Route element={<ProtectedRoute allowedRoles={['student']} />}>
                       <Route element={<DashboardLayout />}>
                         <Route path="/dashboard" element={<DashboardPage />} />
@@ -95,16 +91,12 @@ function App() {
                       </Route>
                     </Route>
 
-                    {/* Employer certificate verification */}
                     <Route element={<ProtectedRoute allowedRoles={['employer', "alumni"]} />}>
                       <Route element={<DashboardLayout />}>
-                      {/* The dashboad not need and removed */}
-                        {/* <Route path="/employer/dashboard" element={<Navigate to="/employer/verify-certificate" replace />} /> */}
                         <Route path="/employer/verify-certificate" element={<VerifyCertificateDashboard />} />
                       </Route>
                     </Route>
 
-                    {/* Protected institution admin routes */}
                     <Route element={<ProtectedRoute allowedRoles={['admin', 'main_admin']} />}>
                       <Route element={<DashboardLayout />}>
                         <Route path="/admin/dashboard" element={<DashboardAdminPage />} />
@@ -116,7 +108,6 @@ function App() {
                       </Route>
                     </Route>
 
-                    {/* system admin routes */}
                     <Route element = {<ProtectedRoute allowedRoles={["systemAdmin"]}/>}>
                       <Route element = {<DashboardLayout/>}>
                         <Route path='/system/admin/dashboard' element = {<SystemDashboardPage/>}/>
@@ -140,7 +131,6 @@ function App() {
                       </Route>
                     </Route>
 
-                    {/* Fallback for undefined routes */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
           </CertificateProvider>

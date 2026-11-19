@@ -20,14 +20,14 @@ export default function InstitutionWalletStatus() {
 
   const closeModal = () => {
     if (settingUp) return;
-    setPrivateKey(""); // never keep the key around
+    setPrivateKey("");
     setModalOpen(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const ok = await setupInstitutionWallet(privateKey);
-    setPrivateKey(""); // cleared on success and on failure
+    setPrivateKey(""); 
     if (ok) setModalOpen(false);
   };
 
@@ -35,7 +35,6 @@ export default function InstitutionWalletStatus() {
     <span className="text-sm font-medium text-slate-600 dark:text-slate-300">Institution Wallet:</span>
   );
 
-  // 1. Wallet exists: the registration is read-only for every institution admin
   if (hasInstitutionWallet && institutionWalletAddress) {
     return (
       <div className="flex items-center gap-3">
@@ -46,7 +45,6 @@ export default function InstitutionWalletStatus() {
           <span className="text-xs opacity-70">Registered on-chain</span>
         </div>
 
-        {/* Browser wallet session: only shown while a wallet is connected */}
         {account && (
           <>
             <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm rounded-xs">
@@ -66,7 +64,6 @@ export default function InstitutionWalletStatus() {
     );
   }
 
-  // Still loading the institution
   if (!institutionLoaded) {
     return (
       <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -75,7 +72,6 @@ export default function InstitutionWalletStatus() {
     );
   }
 
-  // 3. Regular admin: nothing to do
   if (!canSetUpWallet || user?.role !== "main_admin") {
     return (
       <div className="flex items-center gap-3">
@@ -87,7 +83,6 @@ export default function InstitutionWalletStatus() {
     );
   }
 
-  // 2. Main admin, no wallet yet
   return (
     <div className="flex items-center gap-3">
       {label}

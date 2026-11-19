@@ -33,7 +33,7 @@ authRoutes.get('/verify', authMiddleware, verifyController)
 authRoutes.post('/logout', authMiddleware, signOutController)
 authRoutes.put('/wallet/:id', authMiddleware, updateWalletAddressController)
 authRoutes.post('/change-password', authMiddleware, changePasswordController)
-authRoutes.post('/refresh',  refreshController) // we will add the auth middleware in the later date but not needed
+authRoutes.post('/refresh',  refreshController)
 
 authRoutes.post('/forgot-password', forgotPasswordController)
 authRoutes.post('/verfiy-forgot-password-otp', verifyPasswordController)

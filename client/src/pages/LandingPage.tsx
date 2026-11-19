@@ -47,7 +47,6 @@ const LandingPage = () => {
   return (
     <>
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-indigo-200 dark:bg-slate-950 dark:text-slate-200">
-      {/* Header */}
       <header className="fixed top-0 z-50 w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 sm:px-8">
           <Link to="/" className="flex items-center gap-3">
@@ -74,7 +73,6 @@ const LandingPage = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
       <section className="relative overflow-hidden border-b border-slate-200 bg-white pt-28 dark:border-slate-800 dark:bg-slate-950 sm:pt-32 lg:pt-36">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_75%_30%,rgba(99,102,241,0.12),transparent_42%)] dark:bg-[radial-gradient(ellipse_at_75%_30%,rgba(79,70,229,0.18),transparent_42%)]" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 pb-16 sm:px-8 sm:pb-20 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:pb-24">
@@ -144,7 +142,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Features Section */}
       <section id="features" className="scroll-mt-20 bg-slate-50 py-20 dark:bg-slate-950">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="mx-auto mb-12 max-w-2xl text-center">
@@ -174,7 +171,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* How It Works Section */}
       <section id="how-it-works" className="scroll-mt-20 border-y border-slate-200 bg-white py-20 dark:border-slate-800 dark:bg-slate-900/40">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="mb-12 text-center">
@@ -212,7 +208,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Use Cases Section */}
       <section id="use-cases" className="scroll-mt-20 bg-slate-50 py-20 dark:bg-slate-950">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="mx-auto mb-12 max-w-2xl text-center">
@@ -257,7 +252,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
       <section id="faq" className="scroll-mt-20 border-t border-slate-200 bg-white py-20 dark:border-slate-800 dark:bg-slate-900/40">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
@@ -303,7 +297,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="bg-slate-50 py-16 dark:bg-slate-950 sm:py-20">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="relative overflow-hidden border border-slate-800 bg-slate-950 px-6 py-12 text-center text-white dark:border-slate-800 sm:px-10 lg:py-16">
@@ -327,7 +320,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t border-slate-200 bg-white py-12 dark:border-slate-800 dark:bg-slate-950">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="mb-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">

@@ -8,20 +8,14 @@ import { LayoutDashboard, ShieldCheck, FileText,
   Award,
   Search,
   Building2,
-  // Wallet,
   LandmarkIcon,
   UserPlus,
   UserRound,
-  // BriefcaseBusiness,
-  // Info,
-  // Mail,
-  // Lightbulb
 } from "lucide-react";
 import { useState } from "react";
 
-// import { useWallet } from "../../context/WalletContext";
 import InstitutionWalletStatus from "./InstitutionWalletStatus";
-// import { useWallet } from "../../context/WalletContext";
+
 function NavItem({
   to,
   icon: Icon,
@@ -54,17 +48,12 @@ export default function DashboardLayout() {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  // const [walletPickerOpen, setWalletPickerOpen] = useState(false);
-  // const { disconnectWallet, connectWallet, connecting, account, availableWallets, activeWalletLabel } = useWallet();
-  // const { disconnectWallet, account }= useWallet()
 
   const isStudent = user?.role === "student";
-  // you can use one name to make it simple
   const isEmployer = user?.role === "employer";
   const isAlumni = user?.role === "alumni";
   const isEmployerOrAlumni = isEmployer || isAlumni;
   const isAdmin = user?.role === "admin" || user?.role === "main_admin";
-  // const isMainAdmin = user?.role === "main_admin";
   const isSystemAdmin = user?.role === "systemAdmin";
 
   const handleLogout = async () => {
@@ -95,7 +84,6 @@ export default function DashboardLayout() {
           </div>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 px-3 py-7 space-y-1 overflow-y-auto">
           {isSystemAdmin && (
             <>
@@ -144,14 +132,11 @@ export default function DashboardLayout() {
               <p className="px-4 text-xs font-medium text-slate-500 uppercase tracking-wider mb-4">
                 Employer Portal
               </p>
-              {/* not needed at the moment */}
-              {/* <NavItem to="/employer/dashboard" icon={LayoutDashboard} label="Dashboard" /> */}
               <NavItem to="/employer/verify-certificate" icon={ShieldCheck} label="Verify Certificate" end/>
             </>
           )}
         </nav>
 
-        {/* User dropdown */}
         <div className="p-4 border-t border-slate-200 dark:border-slate-800">
           <div className="relative">
             <button
@@ -192,7 +177,6 @@ export default function DashboardLayout() {
         </div>
       </aside>
 
-      {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top header */}
         <header className="h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-8 flex items-center justify-between shrink-0">
@@ -209,7 +193,6 @@ export default function DashboardLayout() {
           {isAdmin && <InstitutionWalletStatus />}
             
           </header>
-        {/* Page content */}
         <main className="flex-1 overflow-auto bg-slate-50 p-4 dark:bg-slate-950 sm:p-6">
           <Outlet />
         </main>

@@ -5,11 +5,6 @@ import { useAuth } from '../../context/AuthContext';
 import { Award } from 'lucide-react';
 import { COURSE_TO_DEGREE, COURSE_OPTIONS, CLASSIFICATION_OPTIONS } from '../../data/certificateData'
 import { useUsers } from '../../context/UsersContext';
-// import toast from 'react-hot-toast';
-// import { formatDateForInput } from '../../utils/formatDateForInput';
-// import { useInstitution } from '../../context/InstitutionContext';
-
-// type InstitutionKey = { id?: number | null; name?: string | null };
 
 type CertificateForm = {
   student_name: string;
@@ -52,9 +47,9 @@ const formatDateForDisplay = (value: Date | string | null) => {
 
 const IssueCertificates = () => {
   const { hasInstitutionWallet} = useWallet()
-  const { user } = useAuth(); // insttituion id and the institution name = the logged in user
+  const { user } = useAuth(); 
   const navigate = useNavigate();
-  const { users, loading: usersLoading } = useUsers(); // get the users
+  const { users, loading: usersLoading } = useUsers();
   const [selectedStudentId, setSelectedStudentId] = useState("");
 
   const [form, setForm] = useState<CertificateForm>({
@@ -70,7 +65,6 @@ const IssueCertificates = () => {
     issued_by: user?.id ? Number(user.id) : 0,
   });
 
-  // const [txHash, setTxHash] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -106,7 +100,7 @@ const handleChange = (
       ...prev,
       student_name: student?.username ?? "",
       student_email: student?.email ?? "",
-      registration_number: student?.email.split("@")[0] ?? "", // "2612345@students.ku.ac.ke" -> "2612345" (only if your numbers follow this pattern)
+      registration_number: student?.email.split("@")[0] ?? "", 
     }));
     return;
   }
@@ -151,7 +145,6 @@ const handleChange = (
 
     setSubmitting(true);
     setMessage(null);
-    // setTxHash(account);
     try {
       navigate('/admin/issue-certificates/preview', {
         state: { form },
@@ -187,12 +180,6 @@ const handleChange = (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          {/* <Link
-            to="/admin/dashboard"
-            className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-2"
-          >
-            <ArrowLeft size={16} /> Back to Dashboard
-          </Link> */}
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
             <Award className="text-indigo-600 dark:text-indigo-400" size={28} />
             Issue Digital Certificate
@@ -203,9 +190,7 @@ const handleChange = (
         </div>
       </div>
 
-      {/* Wallet + form row */}
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-        {/* Issue Form — takes 3 cols */}
         <div className="xl:col-span-3 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700">
           <div className="p-5 border-b border-gray-200 dark:border-slate-700">
             <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
@@ -217,7 +202,6 @@ const handleChange = (
           </div>
 
           <form onSubmit={handleSubmit} className="p-5 space-y-5">
-            {/* Student Name */}
             <div>
               <label
                 htmlFor="student_select"
@@ -253,7 +237,6 @@ const handleChange = (
               )}
             </div>
 
-            {/* Student Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                 Student Email <span className="text-red-500">*</span>
@@ -268,7 +251,6 @@ const handleChange = (
               />
             </div>
 
-            {/* Registration Number + Institution Name */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
@@ -295,7 +277,7 @@ const handleChange = (
                 />
               </div>
             </div>
-            {/* Course Dropdown */}
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                 Course / Program <span className="text-red-500">*</span>
@@ -315,7 +297,6 @@ const handleChange = (
               </select>
             </div>
 
-            {/* Degree + GPA */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
@@ -343,7 +324,6 @@ const handleChange = (
               </div>
             </div>
 
-            {/* Classification Dropdown */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                 Classification <span className="text-red-500">*</span>
@@ -363,7 +343,6 @@ const handleChange = (
               </select>
             </div>
 
-            {/* Graduation Date */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                 Graduation Date <span className="text-red-500">*</span>
@@ -377,7 +356,6 @@ const handleChange = (
               />
             </div>
 
-            {/* Message */}
             {message && (
               <div
                 className={`p-3 text-sm rounded-sm border ${
@@ -390,7 +368,6 @@ const handleChange = (
               </div>
             )}
 
-            {/* Actions */}
             <div className="flex gap-3 pt-2">
               <button
                 type="submit"
@@ -418,7 +395,6 @@ const handleChange = (
           </form>
         </div>
 
-           {/* Certificate Preview — takes 2 cols */}
       <div className="xl:col-span-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700">
         <div className="p-4 border-b border-gray-200 dark:border-slate-700">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
@@ -476,7 +452,6 @@ const handleChange = (
             </div>
           </div>
 
-          {/* Hint */}
           <div className="mt-3 text-center">
             <p className="text-xs text-gray-400 dark:text-gray-500">
               The certificate number and QR code are generated when the certificate is issued.

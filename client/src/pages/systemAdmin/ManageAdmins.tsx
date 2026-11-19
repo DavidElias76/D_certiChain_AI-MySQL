@@ -18,7 +18,6 @@ import {
 import toast from "react-hot-toast";
 import { useUsers, type IUser } from "../../context/UsersContext";
 
-// you can add the role to alow the system admin to update the role but not needed
 type AdminForm = {
   username: string;
   email: string;
@@ -279,8 +278,6 @@ export default function ManageAdmins() {
                         <ShieldCheck size={12} /> Main Admin
                       </span>
                     </td>
-
-                    {/* status */}
                     <td className="px-5 py-4">
                       <span
                         className={`inline-flex items-center gap-1.5 border px-2.5 py-1 text-xs font-semibold ${
@@ -302,7 +299,6 @@ export default function ManageAdmins() {
                         >
                           <Edit2 size={14} /> Edit
                         </button>
-                        {/* activate button */}
                         <button
                           onClick={() => handleToggleStatus(admin)}
                           disabled={togglingId === admin.id}

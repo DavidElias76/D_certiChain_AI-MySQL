@@ -14,7 +14,6 @@ interface WalletOption {
 }
 
 interface WalletContextValue {
-  // browser wallet (MetaMask / Rabby)
   account: string | null;
   connecting: boolean;
   availableWallets: WalletOption[];
@@ -70,7 +69,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     return wallets;
   }, []);
 
-  // Connects the browser wallet only. Nothing is sent to the backend here.
   const connectWallet = useCallback(
     async (selectedProvider?: EthereumProvider) => {
       const wallets = getAvailableWallets();
@@ -100,7 +98,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         setInjectedProvider(targetProvider);
         setAccount(address);
 
-        // get the provider of the wallet - rabby wallet or metamask
         const label = wallets.find((w) => w.provider === targetProvider)?.label ?? "Unknown Wallet";
         setActiveWalletLabel(label);
 
@@ -125,28 +122,18 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     [getAvailableWallets]
   );
 
-  // const disconnectWallet = useCallback(() => {
-  //   setAccount(null);
-  //   setInjectedProvider(null);
-  //   setActiveWalletLabel(null);
-  //   toast.success("Wallet disconnected");
-  // }, []);
-
   const disconnectWallet = useCallback(() => {
     const provider = injectedProvider;
-    // Clear the app state first so nothing re-reads the account
     setAccount(null);
     setInjectedProvider(null);
     setActiveWalletLabel(null);
     toast.success("Wallet disconnected");
 
-  // Then ask the wallet to drop this site's permission. Not every wallet supports it.
   void provider
     ?.request({ method: "wallet_revokePermissions", params: [{ eth_accounts: {} }] })
     .catch(() => {});
 }, [injectedProvider]);
 
-  // Keep the connected account in sync. No backend calls here.
   useEffect(() => {
     if (!injectedProvider || !account) return;
 
@@ -172,7 +159,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     };
   }, [injectedProvider, account, disconnectWallet]);
 
-  // ── Institution wallet: every institution admin loads it, so all of them see the address
   const refreshInstitution = useCallback(async () => {
     if (!institutionId) return;
     try {
@@ -186,7 +172,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     if (isInstitutionUser) void refreshInstitution();
   }, [isInstitutionUser, refreshInstitution]);
 
-  // While no wallet exists yet, re-check on a timer and when the tab regains focus
   useEffect(() => {
     if (!isInstitutionUser || hasInstitutionWallet) return;
 
@@ -199,7 +184,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     };
   }, [isInstitutionUser, hasInstitutionWallet, refreshInstitution]);
 
-    // Called by the setup form with the pasted private key
   const setupInstitutionWallet = useCallback(
     async (privateKey: string): Promise<boolean> => {
       if (settingUp) return false;
@@ -217,13 +201,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
       let derivedAddress: string;
       try {
-        derivedAddress = new ethers.Wallet(key).address; // get the address from the derived key
+        derivedAddress = new ethers.Wallet(key).address; 
       } catch {
         toast.error("That is not a valid private key.");
         return false;
       }
 
-      // this checks if the key is not equal to the derivedkey
       if (derivedAddress.toLowerCase() !== account.toLowerCase()) {
         toast.error("The private key does not belong to the connected account.");
         return false;

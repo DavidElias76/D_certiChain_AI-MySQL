@@ -22,12 +22,12 @@ type Outcome = "verified" | "revoked" | "invalid";
 
 interface VerifiedCertificate {
   student_name: string;
-  registration_number?: string;   // only sent to the owner and the institution's staff
+  registration_number?: string;  
   institution_name: string;
   course: string;
   degree: string;
-  graduation_date: string;        // "YYYY-MM-DD"
-  gpa?: string | null;            // only sent to the owner and the institution's staff
+  graduation_date: string;       
+  gpa?: string | null;            
   classification: string | null;
   certificate_number: string;
   certificate_hash: string;
@@ -53,7 +53,6 @@ interface VerificationResponse {
   };
 }
 
-// Tailwind needs full class names, so every tone is spelled out.
 const OUTCOMES: Record<
   Outcome,
   {
@@ -115,19 +114,15 @@ const OUTCOMES: Record<
   },
 };
 
-// A moment in time (timestamps, unix seconds * 1000): local date.
 const formatDate = (value: string | number) =>
   new Date(value).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
-// A calendar date ("YYYY-MM-DD"): UTC, so the day never shifts with the viewer's timezone.
 const formatCalendarDate = (value: string) =>
   new Date(value).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" });
 
 export default function VerifyCertificates({ standalone = false }: { standalone?: boolean }) {
   const [searchParams] = useSearchParams();
-  // `loading` is the auth context's "still restoring the session" flag.
-  // If yours is named differently, rename it here.
-    const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const certificateNumber = searchParams.get("certId") || "";
   const [result, setResult] = useState<VerificationResponse | null>(null);
   const [notFound, setNotFound] = useState(false);
@@ -148,7 +143,6 @@ export default function VerifyCertificates({ standalone = false }: { standalone?
       setNoCertificate(false);
       setErrorMessage("");
 
-      // Wait until we know whether someone is logged in, so we verify once, as the right person.
       if (authLoading || redirectToDashboard) return;
       if (!certificateNumber && (!isOwnerRole || standalone)) return;
 

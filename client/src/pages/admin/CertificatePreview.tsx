@@ -43,7 +43,6 @@ interface CertificatePreviewProps {
 const CertificatePreview = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  // const { form, account } = location.state as CertificatePreviewProps;
   const { issueCertificate } = useCertificates()
   const  { user } = useAuth()
    const { hasInstitutionWallet } = useWallet()
@@ -62,7 +61,6 @@ const CertificatePreview = () => {
   const { form } = state;
 
   const handleBack = () => {
-    // Navigate back preserving state so form stays filled
     navigate('/admin/issue-certificates', { state: { form } });
   };
 
@@ -120,7 +118,6 @@ const CertificatePreview = () => {
         </div>
       </div>
 
-      {/* Full certificate preview */}
       <div className="mx-auto w-full max-w-xl">
         <div className="aspect-[1.44/1] min-h-105 border-[6px] border-double border-[#1e3a8a] bg-[#fdfaf2] p-1.5 shadow-xl sm:min-h-0">
           <div className="flex h-full flex-col border border-[#1e3a8a]/70 px-4 py-5 text-center text-slate-800 sm:px-8 sm:py-6">
@@ -169,7 +166,6 @@ const CertificatePreview = () => {
         </div>
       </div>
 
-          {/* Message */}
           {message && (
             <div
               className={`mt-4 p-3 text-sm border ${
@@ -182,7 +178,6 @@ const CertificatePreview = () => {
             </div>
           )}
 
-          {/* Action buttons */}
           <div className="mt-6 flex gap-4">
             <button
               onClick={handleBack}
@@ -199,7 +194,6 @@ const CertificatePreview = () => {
             </button>
           </div>
 
-          {/* Wallet warning */}
           {!hasInstitutionWallet && (
             <div className="mt-4 p-3 border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20">
               <p className="text-xs text-amber-600 dark:text-amber-400 text-center">

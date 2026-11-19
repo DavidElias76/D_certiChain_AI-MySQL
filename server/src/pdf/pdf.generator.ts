@@ -24,13 +24,11 @@ const formatDate = (value: Date | string): string => {
   });
 };
 
-// build the pdf using the client url link
 export const buildVerifyUrl = (certificateNumber: string): string => {
   const base = (process.env.CLIENT_URL ?? "http://localhost:5173").replace(/\/+$/, "");
     return `${base}/verify?certId=${encodeURIComponent(certificateNumber)}`;
 };
 
-// generate the pdf using the client data 
 export const generateCertificatePdf = async (data: CertificatePdfData): Promise<Buffer> => {
   const qr = await QRCode.toBuffer(buildVerifyUrl(data.certificate_number), {
     margin: 1,
@@ -57,13 +55,12 @@ export const generateCertificatePdf = async (data: CertificatePdfData): Promise<
     doc.on("error", reject);
   });
 
-  const W = doc.page.width;  // 841.89
-  const H = doc.page.height; // 595.28
+  const W = doc.page.width; 
+  const H = doc.page.height;
   const INK = "#1f2937";
   const MUTED = "#6b7280";
   const ACCENT = "#1e3a8a";
 
-  // Border
   doc.lineWidth(3).strokeColor(ACCENT).rect(24, 24, W - 48, H - 48).stroke();
   doc.lineWidth(0.75).strokeColor(ACCENT).rect(32, 32, W - 64, H - 64).stroke();
 
@@ -87,7 +84,6 @@ export const generateCertificatePdf = async (data: CertificatePdfData): Promise<
 
   center(`Graduation date: ${formatDate(data.graduation_date)}`, 362, 13, "Helvetica", INK);
 
-  // Footer: number on the left, QR on the right
   doc.font("Helvetica").fontSize(10).fillColor(MUTED);
   doc.text("Certificate No.", 60, 470, { width: 400, align: "left" });
   doc.font("Helvetica-Bold").fontSize(14).fillColor(INK);

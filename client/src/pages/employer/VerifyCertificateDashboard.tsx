@@ -1,4 +1,3 @@
-// import { Fragment, useRef, useState, type ChangeEvent, type DragEvent, type FormEvent } from "react";
 import { Fragment, useEffect, useRef, useState, type ChangeEvent, type DragEvent, type FormEvent } from "react";
 import {
   AlertCircle,
@@ -21,8 +20,6 @@ import {
   QrCode
 } from "lucide-react";
 import api from "../../services/api";
-// import CertificateArtwork from "../../components/layout/CertificateArtwork";
-// import { Link, Navigate, useSearchParams } from "react-router-dom";
 
 type VerificationMethod = "upload" | "certificate";
 type VerificationOutcome = "verified" | "revoked" | "invalid";
@@ -49,15 +46,6 @@ type VerificationResponse = {
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png"];
 
-// const sampleCertificate = {
-//   student_name: "Jane Doe",
-//   institution_name: "Example University",
-//   course: "Bachelor of Business Information Technology",
-//   degree: "Bachelor of Business Information Technology",
-//   graduation_date: "2026-07-15",
-//   certificate_number: "EXU-2026-A1B2C3D4",
-// };
-
 const OUTCOME_STYLES: Record<VerificationOutcome, { box: string; title: string }> = {
   verified: {
     box: "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300",
@@ -73,7 +61,6 @@ const OUTCOME_STYLES: Record<VerificationOutcome, { box: string; title: string }
   },
 };
 
-// How the document was matched. Shown only for a verified result.
 const MATCH_NOTES: Partial<Record<MatchSource, { icon: typeof BadgeCheck; text: string }>> = {
   exact_file: { icon: BadgeCheck, text: "This is the original document issued by the institution." },
   pdf_text: {
@@ -105,7 +92,7 @@ export default function VerifyCertificateDashboard() {
   const [message, setMessage] = useState("");
   
   const fileInput = useRef<HTMLInputElement>(null);
-  const requestId = useRef(0);   // lets us ignore a response that arrives after the user moved on
+  const requestId = useRef(0);  
   const autoRan = useRef(false);
 
   const resetState = () => {
@@ -157,7 +144,6 @@ export default function VerifyCertificateDashboard() {
     acceptFile(event.dataTransfer.files[0]);
   };
 
-  // Shared by both methods so loading, errors and results behave the same way
   const runVerification = async (
     request: () => Promise<{ data: VerificationResponse }>,
     notFoundMessage: string
@@ -208,7 +194,6 @@ export default function VerifyCertificateDashboard() {
 
   const verifyUploadedFile = () => {
     if (!file || loading) return;
-    // Don't set Content-Type yourself: the browser adds the multipart boundary
     const formData = new FormData();
     formData.append("file", file);
     void runVerification(
@@ -218,14 +203,13 @@ export default function VerifyCertificateDashboard() {
   };
 
   useEffect(() => {
-    if (autoRan.current) return;   // React StrictMode runs effects twice in development
+    if (autoRan.current) return; 
     autoRan.current = true;
     const certId = new URLSearchParams(window.location.search).get("certId")?.trim().slice(0, 100);
     if (!certId) return;
     setMethod("certificate");
     setCertificateNumber(certId);
     void verifyNumber(certId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const selectedMethodLabel = method === "upload" ? "certificate document" : "certificate number";
@@ -347,7 +331,6 @@ export default function VerifyCertificateDashboard() {
               </>
             )}
 
-            {/* method of verification */}
             {method === "certificate" && (
               <form onSubmit={verifyByCertificateNumber} className="border border-indigo-100 bg-indigo-50/70 p-4 dark:border-indigo-950 dark:bg-indigo-950/20">
                 <label htmlFor="certificate-number" className="block text-sm font-semibold text-slate-800 dark:text-slate-200">
@@ -444,9 +427,6 @@ export default function VerifyCertificateDashboard() {
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">What You'll See</h3>
               </div>
               <div className="grid grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)] items-center gap-3">
-                {/* <div className="border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-950">
-                  <CertificateArtwork certificate={sampleCertificate} />
-                </div> */}
                 <ul className="space-y-2">
                   {[
                     "Student details",

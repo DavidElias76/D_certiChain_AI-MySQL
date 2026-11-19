@@ -16,7 +16,6 @@ import {
   TrendingUp,
   Hash,
   Activity,
-  // Eye,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
@@ -114,7 +113,6 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 pb-8">
-      {/* Header */}
       <section className="relative flex min-h-32 items-center overflow-hidden px-1 py-3">
         <div className="relative z-10 max-w-2xl">
           <div className="mb-2 flex items-center gap-3">
@@ -141,7 +139,6 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Welcome Banner */}
       <section className="flex flex-col gap-5 border border-indigo-100 bg-indigo-50/70 p-5 dark:border-indigo-950 dark:bg-indigo-950/20 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div className="flex w-full flex-col items-start justify-between gap-6 md:flex-row md:items-center">
           <div>
@@ -168,7 +165,6 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Stat Cards */}
       <section aria-label="Certificate overview" className="grid gap-3 sm:grid-cols-3">
         <div className="flex items-center gap-4 border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
@@ -204,7 +200,6 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Quick Actions */}
       <div>
         <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
           <Sparkles size={18} className="text-indigo-600 dark:text-indigo-400" /> Quick Actions
@@ -234,9 +229,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Recent Certificates + AI Insights */}
       <div className="grid gap-4 lg:grid-cols-3">
-        {/* Recent Certificates */}
         <div className="border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 lg:col-span-2">
           <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-800 sm:px-6">
             <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
@@ -304,7 +297,6 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* AI Career Insights */}
         <div className="border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6">
           <div className="flex items-center gap-2 mb-5">
             <Star className="text-indigo-600 dark:text-indigo-400" size={18} />

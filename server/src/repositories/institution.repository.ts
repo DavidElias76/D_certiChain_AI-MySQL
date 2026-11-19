@@ -15,8 +15,6 @@ const toInstitution = (row: DbRow) => ({
   is_active: Boolean(row.is_active),
 });
 
-// Never includes wallet_private_key_encrypted.
-// Compare with your table and remove any column that doesn't exist (e.g. created_at).
 const INSTITUTION_COLUMNS = `
     institutions.id,
     institutions.name,
@@ -51,7 +49,6 @@ export const InstitutionRepository = {
         FROM institutions`
     );
 
-    // MySQL returns TINYINT(1) as 1/0, so convert is_active to a real boolean.
     return rows.map((row) => ({
         ...row,
         is_active: Boolean(row.is_active),
@@ -66,7 +63,6 @@ export const InstitutionRepository = {
         return rows.length ? (rows[0] as Institution) : null;
     },
 
-    // this is used by the wallet setup
     async updateStatus(institutionId: number, is_active: boolean): Promise<boolean> {
         const [result] = await pool.execute<DbResult>(
             `UPDATE institutions SET is_active = ? WHERE id = ?`,
@@ -91,7 +87,6 @@ export const InstitutionRepository = {
         return rows.length > 0;
     },
 
-    // change the name to findwalletaddressbyid
     async findByShortCodeWalletAddress(id: number): Promise<string | null> {
         const [rows] = await pool.execute<DbRow[]>(
             `SELECT wallet_private_key_encrypted FROM institutions WHERE id = ?`,
@@ -117,7 +112,6 @@ export const InstitutionRepository = {
     },
     
 
-    // Only for the certificate issuing flow. Never send this to the client.
     async findWalletById(id: number): Promise<{ wallet_address: string | null; wallet_private_key_encrypted: string | null } | null> {
         const [rows] = await pool.execute<DbRow[]>(
             `SELECT wallet_address, wallet_private_key_encrypted FROM institutions WHERE id = ?`,
@@ -172,7 +166,6 @@ export const InstitutionRepository = {
         return result.insertId;
     },
 
-    // Profile fields only. Wallet fields are written by saveWalletSetup.
     async update(
         id: number,
         updates: Partial<Pick<InstitutionCreateInput, "name" | "domain" | "short_code" | "description" | "is_active">>

@@ -14,7 +14,6 @@ const normalizeSkills = (skills: string[] | undefined): string[] => {
     .sort();
 };
 
-// The certificate input is an object that is passed to the function from the service
 export const buildCertificateFingerprint = (certificate: CertificateInput): string => {
   const normalizedPayload = {
     institutionId: normalizeText(certificate.institutionId),
@@ -29,14 +28,13 @@ export const buildCertificateFingerprint = (certificate: CertificateInput): stri
     skills: normalizeSkills(certificate.skills),
   };
 
-  return JSON.stringify(normalizedPayload); // this is going to be used to generate the pdf certiccate - i will return object a json string
+  return JSON.stringify(normalizedPayload); 
 };
 
-// This creates a fingerprint nd builds the hash that is going to be stored on the blochchain 
 export const createCertificateHash = (certificate: CertificateInput): CertificateHashPayload => {
   const fingerprint = buildCertificateFingerprint(certificate);
   const certificateHash = `0x${createHash("sha256").update(fingerprint).digest("hex")}`;
 
-  return { fingerprint, certificateHash }; // this is going to be passed on the blockchain smart contracts and stored in blockchain 
+  return { fingerprint, certificateHash };
 };
 

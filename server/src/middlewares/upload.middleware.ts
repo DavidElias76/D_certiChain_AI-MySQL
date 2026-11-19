@@ -3,13 +3,11 @@ import multer from "multer";
 
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
-// Memory storage: the file is never written to disk.
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_UPLOAD_BYTES, files: 1, fields: 2, parts: 4 },
 });
 
-/** One file in the "file" field. Upload problems become clean JSON errors. */
 export const singleFileUpload: RequestHandler = (req, res, next) => {
   upload.single("file")(req, res, (err: unknown) => {
     if (!err) {

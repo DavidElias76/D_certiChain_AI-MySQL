@@ -11,7 +11,6 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(() => {
-    // Check local storage or system preference
     const saved = localStorage.getItem('theme') as Theme;
     if (saved) return saved;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -19,7 +18,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     const root = window.document.documentElement;
-    // For Tailwind CSS 4.0, we just toggle the 'dark' class on the html element
     if (theme === 'dark') {
       root.classList.add('dark');
     } else {

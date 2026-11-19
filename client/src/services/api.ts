@@ -14,16 +14,12 @@ const api: AxiosInstance = axios.create({
   headers: { "Content-Type": "application/json" }
 });
 
-// Global response interceptor
 api.interceptors.response.use(
     (response: AxiosResponse) => response,
     (error: AxiosError) => {
         return Promise.reject(error);
     }
 );
-
-// Request interceptor to attach in-memory JWT token - This runs and check if the token is available and being sent to the server
-// This runs every time there is a request that is being sent to the server so that the auth middleware gets to know the user
 
 api.interceptors.request.use((config) => {
   if ( !(config as any)._retry && inMemoryToken && config.headers) {
@@ -33,8 +29,5 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
-
-
-
 
 export default api;

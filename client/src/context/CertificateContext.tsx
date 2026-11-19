@@ -8,7 +8,7 @@ export type VerifyOutcome = {
   result: "verified" | "revoked" | "invalid";
   match?: "number" | "exact_file" | "pdf_text" | "qr_code";
   reason?: "document_mismatch";
-  certificate?: ICertificate;   // or a narrower type, since private fields are only sent to staff and the owner
+  certificate?: ICertificate;  
 };
 
 export interface ICertificate {
@@ -20,7 +20,7 @@ export interface ICertificate {
   institution_name: string;
   course: string;
   degree: string;
-  graduation_date: Date | string | null;            // "YYYY-MM-DD"
+  graduation_date: Date | string | null;          
   gpa: string | null;
   classification: string | null;
   skills?: string | null;
@@ -38,7 +38,6 @@ export interface ICertificate {
   updated_at: string;
 }
 
-// institution_name and issued_by are not sent: the server takes both from the logged-in admin.
 export interface IssueCertificateData {
   student_name: string;
   registration_number: string;
@@ -62,12 +61,11 @@ export interface CertificateContextType {
   totalCount: number | null
   countLoading: boolean
 
-  getCertificates: () => Promise<void>;     // admins: certificates of their institution
-  getMyCertificates: () => Promise<void>;   // students: their own certificates
-  getAllCertificatesCount: () => Promise<void> // systemAdmin:  get all the certificates
+  getCertificates: () => Promise<void>;     
+  getMyCertificates: () => Promise<void>;   
+  getAllCertificatesCount: () => Promise<void> 
   getCertificatePdfBlob: (certId: string | number) => Promise<Blob>;
   downloadCertificatePdf: (certId: string | number, fileName?: string) => Promise<void>;
-  //   verfycertificateByUpload: () => Promise<void> - this is already done by the component- it will be moved later on 
   verifyCertificate: (certificateNumber: string) => Promise<VerifyOutcome | null>;
   issueCertificate: (data: IssueCertificateData) => Promise<string>;
   revokeCertificate: (certId: string, data?: RevokeCertificateData) => Promise<void>;
@@ -79,7 +77,6 @@ interface Props {
 
 const CertificateContext = createContext<CertificateContextType | null>(null);
 
-// The server answers { error }. For blob requests the error body is a Blob, so parse it first.
 const extractError = async (err: any, fallback: string): Promise<string> => {
   const data = err?.response?.data;
   try {
@@ -109,7 +106,7 @@ export function CertificateProvider({ children }: Props) {
         setLoading(true);
         setError("");
         const response = await api.get(url);
-        if (requestId !== listRequestRef.current) return; // a newer request replaced this one
+        if (requestId !== listRequestRef.current) return;
         const data = response.data;
         setCertificates(Array.isArray(data) ? data : data?.certificates || []);
       } catch (err) {
@@ -124,8 +121,6 @@ export function CertificateProvider({ children }: Props) {
   const getCertificates = useCallback(() => loadList("/certificate"), [loadList]);
   const getMyCertificates = useCallback(() => loadList("/certificate/my"), [loadList]);
 
-  // Returns the PDF as a Blob. The caller decides what to do with it (modal, download).
-  // Not tied to the global `loading`, so each button can show its own spinner.
   const getCertificatePdfBlob = useCallback(async (certId: string | number): Promise<Blob> => {
     try {
       const response = await api.get(`/certificate/${certId}/pdf`, { responseType: "blob" });
@@ -151,7 +146,6 @@ export function CertificateProvider({ children }: Props) {
     [getCertificatePdfBlob]
   );
 
-  // systemAdmin call
   const getAllCertificatesCount = useCallback(async (): Promise<void> => {
     try {
       setCountLoading(true);
@@ -170,7 +164,6 @@ export function CertificateProvider({ children }: Props) {
     }
   }, []);
 
-  // Kept for the student verification page; revisit when we build that flow.
   const verifyCertificate = useCallback(
     async (certificateNumber: string): Promise<VerifyOutcome | null> => {
       try {

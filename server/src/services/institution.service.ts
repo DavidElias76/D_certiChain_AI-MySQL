@@ -11,12 +11,10 @@ const httpError = (message: string, statusCode: number): CustomError => {
   return error;
 }
 
-// Get All Active Institutions 
 export const getInstitutionsService = async () => {
   return InstitutionRepository.findAll();
 };
 
-// thos is returning to much data that is unnecessary- update the institution repository to remove some vales
 export const getInstitutionByIdService = async (id: number) => {
   const institution = await InstitutionRepository.findById(id);
   if (!institution) {
@@ -27,8 +25,6 @@ export const getInstitutionByIdService = async (id: number) => {
   return institution;
 };
 
-// Add Institution 
-// Add Institution — NO blockchain call here anymore
 export const addInstitutionsService = async (data: {
     name: string;
     short_code: string;
@@ -53,7 +49,6 @@ export const addInstitutionsService = async (data: {
       throw error;
     }
 
-    /// No blockchain call. The wallet is set up later by the main admin.
     const newId = await InstitutionRepository.create({
         name: data.name.trim(),
         short_code: shortCode,
@@ -66,7 +61,6 @@ export const addInstitutionsService = async (data: {
     return InstitutionRepository.findById(newId);
   };
 
-  // Update Institution 
   export const updateInstitutionService = async (
     id: number,
     updates: Partial<{
@@ -95,7 +89,6 @@ export const addInstitutionsService = async (data: {
   return InstitutionRepository.findById(id);
 };
 
-// Soft-Delete Institution 
 export const deleteInstitutionService = async (id: number) => {
   const deleted = await InstitutionRepository.deleteInstitution(id);
   if (!deleted) {
@@ -116,8 +109,7 @@ export const setupWalletService = async (
 
     let walletAddress: string;
     try {
-      // this creates the wallet address from te private key for comparison
-      walletAddress = new ethers.Wallet(privateKey).address.toLowerCase(); // This gets the address from the private key 
+      walletAddress = new ethers.Wallet(privateKey).address.toLowerCase();
     } catch {
       throw httpError("Invalid private key", 400);
     }
@@ -157,7 +149,6 @@ export const setupWalletService = async (
       is_active: true
     });
     if (!saved) {
-      // The chain is registered but the DB row was not updated. Log it so it can be reconciled.
       console.error(`Wallet setup race: institution ${institutionId} registered on-chain (${registration.txHash}) but DB save was rejected`);
       throw httpError("A wallet was already set up for this institution", 409);
     }

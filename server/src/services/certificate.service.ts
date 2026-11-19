@@ -17,9 +17,6 @@ import {
 } from "../repositories/verification-log.repository";
 
 import { detectFileKind, extractCertificateNumbers, textMatchesRecord } from "../utility/certificate-extractor";
-import { UsersRepository } from "../repositories/users.repository";
-import { User } from "../models_sequelize_typescript";
-import { stringAt } from "pdfkit/js/data";
 
 export interface IssueCertificateInput {
   student_name: string;
@@ -42,11 +39,6 @@ interface PdfRequester {
   institution_id?: number | string | null;
 }
 
-interface GetUserIdType {
-  student_email?: string | null; // it will only use the email and not the other values
-  // short_code?: string | null;
-  // institution_name?: string | null;
-}
 
 type VerifyResult = "verified" | "invalid" | "revoked";
 type MatchSource = "number" | "exact_file" | "pdf_text" | "qr_code";
@@ -70,9 +62,7 @@ const logBase = (ctx: VerifyContext, a: Pick<Attempt, "method" | "submittedValue
   user_agent: ctx.userAgent ? ctx.userAgent.slice(0, 500) : null,
 });
 
-// Shared by number lookup and file upload: chain check, decision, log, response.
 async function checkOnChainAndLog(cert: any, ctx: VerifyContext, attempt: Attempt) {
-  // A chain outage must never look like an invalid certificate: 503, and no log row.
   let chain: any;
   try {
     chain = await verifyCertificateOnChain(cert.certificate_hash, cert.institution_id);
@@ -103,7 +93,6 @@ async function checkOnChainAndLog(cert: any, ctx: VerifyContext, attempt: Attemp
     blockchain_tx_hash: cert.blockchain_tx_hash ?? null,
   });
 
-  // Owner, the institution's admins and the system admin see the extra fields.
   const privateFields =
     ctx.user && canAccessPdf(ctx.user, cert)
       ? { registration_number: cert.registration_number, gpa: cert.gpa }
@@ -163,11 +152,9 @@ export interface VerifyContext {
   userAgent: string | null;
 }
 
-// Admins and system admins are logged as "public" (their verifier_id is still kept).
 const verifierTypeFor = (role?: string): VerifierType =>
   role === "student" || role === "employer" || role === "alumni" ? role : "public";
 
-// A logging failure must never break a verification.
 const logVerification = async (entry: VerificationLogInput): Promise<void> => {
   try {
     await VerificationLogRepository.create(entry);
@@ -182,7 +169,6 @@ const httpError = (message: string, statusCode: number): CustomError => {
   return error;
 };
 
-// ── Helpers (these can move to utils later)
 function generateCertificateHash(data: {
   student_name: string;
   registration_number: string;
@@ -207,7 +193,6 @@ function generateCertificateHash(data: {
   return "0x" + crypto.createHash("sha256").update(payload).digest("hex");
 }
 
-// save the pdf info suing the cert data 
 async function buildAndStorePdf(id: number, data: CertificatePdfData): Promise<boolean> {
   try {
     const buf = await generateCertificatePdf(data);
@@ -220,13 +205,11 @@ async function buildAndStorePdf(id: number, data: CertificatePdfData): Promise<b
   }
 }
 
-// generate the certificate number using the random bytes
 function generateCertificateNumber(shortCode: string, graduationDate: Date): string {
   const rand = crypto.randomBytes(4).toString("hex").toUpperCase();
   return `${shortCode.toUpperCase()}-${graduationDate.getUTCFullYear()}-${rand}`;
 }
 
-// One chain operation at a time per institution wallet (avoids nonce collisions). - this is a task queue
 const institutionQueues = new Map<number, Promise<unknown>>();
 const runExclusive = <T>(institutionId: number, task: () => Promise<T>): Promise<T> => {
   const previous = institutionQueues.get(institutionId) ?? Promise.resolve();
@@ -240,13 +223,11 @@ const runExclusive = <T>(institutionId: number, task: () => Promise<T>): Promise
   return next;
 };
 
-// check for the chain error
 const chainErrorInfo = (err: unknown) => {
   const e = err as { code?: string; revert?: { name?: string }; errorName?: string; message?: string };
   return { code: e?.code, name: e?.revert?.name ?? e?.errorName, message: e?.message ?? "" };
 };
 
-// checks the chain error
 const mapChainError = (err: unknown): CustomError => {
   const { code, name, message } = chainErrorInfo(err);
 
@@ -264,7 +245,6 @@ const mapChainError = (err: unknown): CustomError => {
   return httpError("The blockchain transaction failed. Please try again.", 502);
 };
 
-// Loads the institution, decrypts its key and returns a signer that is ready to send transactions.
 const getInstitutionSigner = async (institutionId: number) => {
   const institution = await InstitutionRepository.findById(institutionId);
   if (!institution) throw httpError("Institution not found", 404);
@@ -283,7 +263,6 @@ const getInstitutionSigner = async (institutionId: number) => {
     throw httpError("Could not access the institution wallet. Contact the system admin.", 500);
   }
 
-  // check if the addresses are the same
   if (signer.address.toLowerCase() !== wallet.wallet_address.toLowerCase()) {
     console.error(`Stored key does not match stored address for institution ${institutionId}`);
     throw httpError("Could not access the institution wallet. Contact the system admin.", 500);
@@ -291,7 +270,7 @@ const getInstitutionSigner = async (institutionId: number) => {
 
   let balance: bigint;
   try {
-    balance = await provider.getBalance(signer.address); // get the address
+    balance = await provider.getBalance(signer.address);
   } catch (err) {
     console.error("getBalance failed:", (err as Error).message);
     throw httpError("The blockchain network is unreachable. Please try again later.", 502);
@@ -310,7 +289,6 @@ const getInstitutionSigner = async (institutionId: number) => {
   return { institution, signer };
 };
 
-//  Service 
 
 export const CertificateService = {
 
@@ -329,7 +307,6 @@ export const CertificateService = {
         degree: input.degree,
       });
 
-      // check if the data exist to prevent the creating of a duplicate
       if (duplicate) {
         throw httpError("A certificate for this student, course and degree already exists", 409);
       }
@@ -387,10 +364,8 @@ export const CertificateService = {
           institution_id: institution.id,
         });
 
-        // add the is_active propery to true when certificate issed
         await InstitutionRepository.updateStatus(input.institution_id, true);
       } catch (err) {
-        // The chain succeeded but the DB did not: keep a trail so it can be reconciled. - to be deleted afterwards
         console.error(
           `Certificate ${certificate_hash} issued on-chain (tx ${txHash}) but the DB save failed:`,
           (err as Error).message
@@ -403,7 +378,6 @@ export const CertificateService = {
       return { id, certificate_number, certificate_hash, status: "issued" } as CertificateResult;
     })
     
-    // The lock is released here; the PDF does not need  
     await buildAndStorePdf(result.id, {
       certificate_number: result.certificate_number,
       student_name: input.student_name,
@@ -448,7 +422,6 @@ export const CertificateService = {
     if (!institution) throw httpError("Institution not found", 404);
 
     const cert = await CertificateRepository.findById(id);
-    // Same message for "missing" and "belongs to another institution"
     if (!cert || cert.institution_id !== institutionId) {
       throw httpError("Certificate not found", 404);
     }
@@ -460,7 +433,6 @@ export const CertificateService = {
       try {
         await revokeCertificateOnChain(cert.certificate_hash, institutionId, signer);
       } catch (err) {
-        // Already revoked on-chain (a previous attempt failed before the DB update): just sync the DB.
         if (chainErrorInfo(err).name !== "CertificateAlreadyRevoked") throw mapChainError(err);
       }
 
@@ -476,7 +448,6 @@ export const CertificateService = {
     return CertificateRepository.findById(id);
   },
 
-  // verify certificate by number
   async verifyCertificateByNumber(certificateNumber: string, ctx: VerifyContext) {
     const attempt: Attempt = {
       method: "certificate_number",
@@ -500,7 +471,6 @@ export const CertificateService = {
     return checkOnChainAndLog(cert, ctx, attempt);
   },
 
-  // get carrer recommendations - not completed
   async getCareerRecommendationsService (certiID: number) {
     const certificate = await CertificateRepository.findCertificateById(certiID)
     // compare it to the institution to know that this user be
@@ -508,7 +478,6 @@ export const CertificateService = {
 
   async getCertificatePdf(id: number, user: PdfRequester) {
     const cert = await CertificateRepository.findPdfSourceById(id);
-    // Same answer for "missing" and "not yours", so ids can't be probed.
     if (!cert || !canAccessPdf(user, cert)) {
       throw httpError("Certificate not found", 404);
     }
@@ -516,7 +485,6 @@ export const CertificateService = {
     let buffer = await readPdf(id);
 
     if (!buffer) {
-      // Lazy generation: issuance-time generation failed, or this is an older certificate.
       const ok = await buildAndStorePdf(id, {
         certificate_number: cert.certificate_number,
         student_name: cert.student_name,
@@ -533,7 +501,6 @@ export const CertificateService = {
         throw httpError("The PDF is not available right now. Please try again later.", 503);
       }
     } else if (cert.certificate_pdf_hash && sha256Hex(buffer) !== cert.certificate_pdf_hash) {
-      // The file on disk no longer matches what we recorded. Serve it, but leave a trail.
       console.warn(`PDF hash mismatch for certificate ${id}`);
     }
 
@@ -548,7 +515,6 @@ export const CertificateService = {
 
     const fileHash = sha256Hex(file);
 
-    // 1) Is this the exact PDF we issued?
     const exact = await CertificateRepository.findForVerificationByPdfHash(fileHash);
     if (exact) {
       return checkOnChainAndLog(exact, ctx, {
@@ -559,7 +525,6 @@ export const CertificateService = {
       });
     }
 
-    // 2) Otherwise read the certificate number from the document.
     const extracted = await extractCertificateNumbers(file, kind);
     if (extracted.numbers.length > 1) {
       throw httpError("This file contains more than one certificate number, so we can't tell which one to check.", 422);
@@ -594,7 +559,6 @@ export const CertificateService = {
       throw httpError("Certificate not found", 404);
     }
 
-    // For PDFs, the text must agree with the official record; images are only read for their QR.
     const documentMismatch = extracted.text !== null && !textMatchesRecord(extracted.text, cert);
     return checkOnChainAndLog(cert, ctx, { ...attempt, documentMismatch });
   },

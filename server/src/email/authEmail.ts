@@ -7,8 +7,8 @@ dotenv.config()
 let transporter = nodemailer.createTransport({
     host: process.env.GMAIL_HOST as string,
     port: 587,
-    service: 'gmail', // This is not needed when the host name and the port number is included
-    secure: false, // this need to be chnaged to tru after the completion of the project and chekc if the email is being sent
+    service: 'gmail',
+    secure: false, 
     auth: {
         user: process.env.GMAIL_USER as string,
         pass: process.env.GMAIL_PASS as string
@@ -16,7 +16,6 @@ let transporter = nodemailer.createTransport({
 
 })
 
-// send the email otp code
 const sendEmailOtp = async (email: string, otp: number) => {
     try {
         const mailOptions = {
@@ -53,7 +52,6 @@ const sendEmailOtp = async (email: string, otp: number) => {
     }
 }
 
-// send a welcome message when signing up
 const sendWelcomeEmail = async (email: string) => {
     try {
         const mailOptions = {

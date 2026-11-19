@@ -63,7 +63,6 @@ export default function ManageUsers() {
       .sort((a, b) => a.username.localeCompare(b.username))
   }, [users, main_admin])
 
-  // Stats
   const stats = useMemo(() => {
     return {
       total: users.length,
@@ -72,7 +71,6 @@ export default function ManageUsers() {
     };
   }, [users]);
 
-  // Filter
   const filtered = useMemo(() => {
     return users.filter((user) => {
       const matchStatus =
@@ -126,7 +124,6 @@ export default function ManageUsers() {
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <Link
@@ -151,7 +148,6 @@ export default function ManageUsers() {
         </button>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
           <div className="flex items-center gap-3">
@@ -190,7 +186,6 @@ export default function ManageUsers() {
         </div>
       </div>
 
-      {/* Search + Filter Bar */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
@@ -232,7 +227,6 @@ export default function ManageUsers() {
         </div>
       </div>
 
-      {/* Table */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider">
@@ -280,8 +274,6 @@ export default function ManageUsers() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-
-                {/* This dsisplays all the users i want to make the chnage and dispplay users based on the institution  */}
                 
                 {filteredUsers.map((user) => (
                   <tr
@@ -369,18 +361,15 @@ export default function ManageUsers() {
         )}
       </div>
 
-      {/* Add/Edit User Modal */}
       <UsersModal
         showAddModal={showAddModal}
         user={editingUser ? toModalUser(editingUser) : null}
         authUser={user}
         setShowAddModal={closeModal}
-        // filteredInstitutionUsers={filteredInstitutionUsers}
         onUserAdded={onUserAdded}
         onUserEdited={onUserEdited}
       />
 
-      {/* Delete Confirmation Modal */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-md">

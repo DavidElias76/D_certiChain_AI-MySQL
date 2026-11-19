@@ -15,17 +15,12 @@ export default function ProtectedRoute({ allowedRoles }: { allowedRoles?: string
     );
   }
 
-  //- To be changed -  if theuser is not found it will be deirected to the login page(/login) or the landing page (/) 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Role restriction logic
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    // If user doesn't have permission, send them to their specific dashboard
-    // This prevents the infinite loop by ensuring they land on a route they ARE allowed to see
 
-    // NB: The role of the employee needs to be added missing in the allowedRoles
     const roleToPath: Record<string, string> = {
       systemAdmin: "/system/admin/dashboard",
       admin: "/admin/dashboard",
@@ -36,8 +31,6 @@ export default function ProtectedRoute({ allowedRoles }: { allowedRoles?: string
     };
     const defaultPath = roleToPath[user.role] ?? "/";
     
-    // If they are already on their default path but somehow failed the check, 
-    // send to landing to break any potential loop
     if (location.pathname === defaultPath) {
       return <Navigate to="/" replace />;
     }

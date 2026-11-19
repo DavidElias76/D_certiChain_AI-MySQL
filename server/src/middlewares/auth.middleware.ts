@@ -34,9 +34,6 @@ export const authMiddleware: RequestHandler = (req, res, next) => {
   }
 };
 
-// For public endpoints that are better when we know who is asking.
-// No Authorization header: continue anonymously.
-// A header that is present but bad or expired: 401, so the client's refresh interceptor can retry.
 export const optionalAuthMiddleware: RequestHandler = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
@@ -66,9 +63,6 @@ export const requireRole =
     next();
   };
 
-  // you can add to check the role
-  //  is main_admin : contact system admin for verification
-  //  admin: contact main_admin for verification
   export const requireVerified: RequestHandler = async (req, res, next) => {
     try {
       const user = req.user;

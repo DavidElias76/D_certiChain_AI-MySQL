@@ -36,7 +36,6 @@ export default function ManageInstitutionsPage() {
   const [deleteTarget, setDeleteTarget] = useState<InstitutionInput | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Edit Modal State
   const [editingInst, setEditingInst] = useState<InstitutionInput | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
 
@@ -59,7 +58,6 @@ export default function ManageInstitutionsPage() {
     if (!editingInst?.id) return;
     setSavingEdit(true);
     try {
-      // Send only the editable fields, with is_active forced to a real boolean.
       await updateInstitution(String(editingInst.id), {
         name: editingInst.name.trim(),
         short_code: editingInst.short_code.trim().toUpperCase(),
@@ -255,7 +253,6 @@ export default function ManageInstitutionsPage() {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {filteredInstitutions.map((inst) => (
                   <tr key={inst.id || inst.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30">
-                    {/* Institution Name & Badge */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-indigo-100 text-sm font-bold text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
@@ -269,28 +266,20 @@ export default function ManageInstitutionsPage() {
                         </div>
                       </div>
                     </td>
-
-                    {/* Institution Main Admin */}
                     <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
                       {inst.main_admin_name || "—"}
                     </td>
-
-                    {/* Short Code */}
                     <td className="px-5 py-4">
                       <span className="inline-flex border border-slate-200 bg-slate-100 px-2.5 py-1 font-mono text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                         {inst.short_code}
                       </span>
                     </td>
-
-                    {/* Domain */}
                     <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
                       <div className="flex items-center gap-1.5">
                         <Globe size={14} className="text-slate-400" />
                         <span className="font-mono text-xs">{inst.domain}</span>
                       </div>
                     </td>
-
-                    {/* Wallet Address */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2 font-mono text-xs text-slate-600 dark:text-slate-400">
                         <Wallet size={14} className="text-slate-400 shrink-0" />
@@ -299,10 +288,8 @@ export default function ManageInstitutionsPage() {
                             ? `${inst.wallet_address.slice(0, 6)}...${inst.wallet_address.slice(-4)}`
                             : "Not Set"}
                         </span>
-
                       </div>
                     </td>
-                    {/* Status */}
                     <td className="px-5 py-4">
                       <span
                         className={`inline-flex items-center gap-1.5 border px-2.5 py-1 text-xs font-semibold ${
@@ -315,8 +302,6 @@ export default function ManageInstitutionsPage() {
                         {Boolean(inst.is_active) ? "Active" : "Inactive"}
                       </span>
                     </td>
-
-                    {/* Actions */}
                     <td className="px-5 py-4">
                       <div className="flex flex-nowrap items-center justify-between gap-3 whitespace-nowrap">
                         <button
@@ -364,7 +349,6 @@ export default function ManageInstitutionsPage() {
         )}
       </section>
 
-      {/* Edit Institution Modal */}
       {editingInst && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-lg space-y-6 overflow-hidden border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
@@ -422,22 +406,7 @@ export default function ManageInstitutionsPage() {
                   />
                 </div>
               </div>
-
-              {/* <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Issuing Wallet Address
-                </label>
-                <input
-                  type="text"
-                  value={editingInst.wallet_address ?? ""}
-                  onChange={(e) => setEditingInst({ ...editingInst, wallet_address: e.target.value })}
-                  required
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700  text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-indigo-500"
-                />
-              </div> */}
-
-              {/* To be deteermined if needed at all */}
-
+              
               <div className="flex items-center gap-3 pt-2">
                 <input
                   type="checkbox"

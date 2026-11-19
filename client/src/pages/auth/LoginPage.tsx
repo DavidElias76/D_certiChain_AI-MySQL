@@ -51,7 +51,6 @@ export default function LoginPage() {
     }
   };
 
-  // Placeholder for the future Google OAuth integration
   const handleGoogleLogin = () => {
     toast("Google sign-in is coming soon.", { icon: "🔜" });
   };
@@ -66,7 +65,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans transition-colors duration-300 dark:bg-slate-950 lg:flex">
-      {/* Left side — branding panel */}
       <div className="relative hidden min-h-screen overflow-hidden border-r border-slate-200 bg-white px-12 pb-12 pt-24 transition-colors dark:border-slate-800 dark:bg-slate-900 lg:flex lg:w-2/5 lg:items-center lg:justify-center">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_15%_85%,rgba(99,102,241,0.13),transparent_52%)] dark:bg-[radial-gradient(ellipse_at_15%_85%,rgba(79,70,229,0.2),transparent_52%)]" />
         <div className="absolute left-0 top-0 z-10 flex w-full items-center justify-between p-8">
@@ -115,14 +113,12 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right Side - Form */}
       <div className="relative flex flex-1 items-center justify-center px-5 py-12 sm:px-10 sm:py-16 lg:px-12">
         <div className="absolute right-5 top-5 sm:right-8 sm:top-8">
           <ThemeToggle />
         </div>
 
         <div className="w-full max-w-xl pt-8">
-          {/* Brand on small screens */}
           <div className="mb-7 text-center lg:hidden">
             <div className="mb-4 inline-flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center bg-indigo-600">
@@ -135,9 +131,6 @@ export default function LoginPage() {
           </div>
 
           <div className="mb-7">
-            {/* <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-400">
-              Welcome back
-            </span> */}
             <h1 className="mb-2 mt-2 text-3xl font-bold tracking-tight text-slate-950 dark:text-white">
               Welcome Back
             </h1>
@@ -176,7 +169,6 @@ export default function LoginPage() {
                     Password
                   </label>
 
-                  {/* this will open a modal that will allow the user to enter an email and get the otp code - display the create and confirm password */}
                   <a
                     href="#"
                     className="text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
@@ -184,7 +176,6 @@ export default function LoginPage() {
                   >
                     Forgot password?
 
-                    {/* This will open the forgot password modal */}
                   </a>
                     <ForgotPasswordModal
                       showModal={showForgot}
@@ -237,7 +228,6 @@ export default function LoginPage() {
               )}
             </button>
 
-            {/* Divider */}
             <div className="relative my-5">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-200 dark:border-slate-800" />
@@ -254,7 +244,6 @@ export default function LoginPage() {
               onClick={handleGoogleLogin}
               className="flex w-full items-center justify-center gap-3 border border-slate-200 bg-white py-3.5 text-sm font-semibold text-slate-700 transition-colors hover:border-indigo-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:border-indigo-800 dark:hover:bg-slate-800 rounded-md"
             >
-              {/* Inline Google "G" logo — official brand colors */}
               <svg
                 className="w-5 h-5"
                 viewBox="0 0 24 24"

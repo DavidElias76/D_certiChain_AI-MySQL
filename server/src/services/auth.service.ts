@@ -1,11 +1,8 @@
 import { AuthRepository } from "../repositories/auth.repository";
 import type { CustomError } from "../types/error.types";
-import type { UserResponseService } from "../types/auth.types";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { UsersRepository } from "../repositories/users.repository";
 import { generateAccessToken, generateRefreshToken } from "../utility/jwt"
-import { OmitPasswordUser } from "../types/index.types";
 import { UserRole } from "../types/auth.types";
 
 export const buildTokenPayload = (user: {
@@ -63,7 +60,6 @@ export const signInService = async (email: string, password: string) => {
   }
 };
 
-// Sign Up 
 export const signUpService = async (
   username: string,
   email: string,

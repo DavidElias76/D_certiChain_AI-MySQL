@@ -4,7 +4,6 @@ import {
   FileText,
   ShieldCheck,
   PlusCircle,
-  // ArrowRight,
   Globe,
   Hash,
   Activity,
@@ -74,16 +73,12 @@ export default function SystemDashboardPage() {
           </div>
         </div>
 
-        {/* delete this part or find a way to ocunt all the certificates - get the blockchain count of number of certificated 
-            to be removed if not neccessary
-        */}
         <div className="flex items-center gap-4 border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
             <FileText size={20} />
           </span>
           <div>
-            {/* This wil have the number of all certificates from the database and the blockchain - which will be the same */}
-            {/* te requeest couut is not bing sent to the backed */}
+           {/* this will coount the number of certificates in db - not working to be fixed */}
             <p className="text-xl font-bold text-slate-900 dark:text-white">{totalCount}</p>
             <p className="text-sm  text-slate-500 dark:text-slate-400">Certificates Issued</p>
           </div>
