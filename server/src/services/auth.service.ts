@@ -2,8 +2,11 @@ import { AuthRepository } from "../repositories/auth.repository";
 import type { CustomError } from "../types/error.types";
 import bcrypt from "bcrypt";
 import { UsersRepository } from "../repositories/users.repository";
+import { InstitutionRepository } from "../repositories/institution.repository";
 import { generateAccessToken, generateRefreshToken } from "../utility/jwt"
 import { UserRole } from "../types/auth.types";
+
+const INSTITUTION_EMAIL_RE = /^[^\s@]+@(?:[a-z0-9-]+\.)*([a-z0-9-]+)\.ac\.ke$/i;
 
 export const buildTokenPayload = (user: {
   id: number;
@@ -20,6 +23,16 @@ export const buildTokenPayload = (user: {
   institution_id: user.institution_id ?? null,
   institution_name: user.institution_name ?? null,
 });
+
+const getRegistrationNumber = (email: string): string | null => {
+  const match = email.trim().match(/^(\d+)@students\.[a-z0-9-]+\.ac\.ke$/i);
+  return match ? match[1] : null;
+};
+
+const getShortCodeFromEmail = (email: string): string | null => {
+  const match = email.trim().toLowerCase().match(INSTITUTION_EMAIL_RE);
+  return match ? match[1] : null;
+};
 
 export const signInService = async (email: string, password: string) => {
   try {
@@ -80,6 +93,27 @@ export const signUpService = async (
       throw error;
     }
 
+    const registration_number = getRegistrationNumber(email)
+    if (!registration_number && role === "student") {
+      const error = new Error("students require registration number") as CustomError;
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const shortCode = getShortCodeFromEmail(email);
+    if (!shortCode) {
+      const error = new Error("Use your institution email address") as CustomError;
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const institutionId = await InstitutionRepository.findInstitutionIdByShortCode(shortCode);
+    if (institutionId === null) {
+      const error = new Error("Institution is not registered") as CustomError;
+      error.statusCode = 404;
+      throw error;
+    }
+  
     const salt: string = await bcrypt.genSalt(10);
     const hashedPassword: string = await bcrypt.hash(password, salt);
 
@@ -88,6 +122,8 @@ export const signUpService = async (
       email,
       password: hashedPassword.trim(),
       role,
+      registration_number,
+      institution_id:institutionId,
       institution_name: institution_name,
     });
 
