@@ -8,6 +8,8 @@ interface QualificationOption {
   degree: string;
 }
 
+const list = <T,>(value: T[] | null | undefined): T[] => (Array.isArray(value) ? value : []);
+
 const LABEL =
   "text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400";
 
@@ -123,7 +125,7 @@ export default function AiCareerRecommendations({
           <div>
             <p className={LABEL}>Recommended roles</p>
             <div className="mt-3 grid gap-4 md:grid-cols-3">
-              {(data.recommended_roles ?? []).map((role) => (
+              {list(data.recommended_roles).map((role) => (
                 <article
                   key={role.title}
                   className="flex flex-col border border-slate-200 p-4 dark:border-slate-800"
@@ -134,7 +136,7 @@ export default function AiCareerRecommendations({
                   </p>
                   <p className={`${LABEL} mt-4`}>Next steps</p>
                   <ul className="mt-2 list-disc space-y-1 pl-4 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-                    {(role.next_steps ?? []).map((step, index) => (
+                    {list(role.next_steps ?? []).map((step, index) => (
                       <li key={index}>{step}</li>
                     ))}
                   </ul>
@@ -143,13 +145,13 @@ export default function AiCareerRecommendations({
             </div>
           </div>
 
-          {(data.suggested_skills ?? []).length > 0 && (
+          {list(data.suggested_skills).length > 0 && (
             <div>
               <p className={`${LABEL} flex items-center gap-2`}>
                 <Target size={13} /> Skills to improve
               </p>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                {data.suggested_skills.map((item) => (
+                {list(data.suggested_skills).map((item) => (
                   <div
                     key={item.skill}
                     className="border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-950"
@@ -164,31 +166,31 @@ export default function AiCareerRecommendations({
             </div>
           )}
 
-          {(data.market_insights ?? []).length > 0 && (
+          {list(data.market_insights).length > 0 && (
             <div>
               <p className={`${LABEL} flex items-center gap-2`}>
                 <TrendingUp size={13} /> General market observations
               </p>
               <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                {data.market_insights.map((insight, index) => (
+                {list(data.market_insights).map((insight, index) => (
                   <li key={index}>{insight}</li>
                 ))}
               </ul>
             </div>
           )}
 
-          {(data.job_matches ?? []).length > 0 && (
+          {list(data.job_matches).length > 0 && (
             <div>
               <p className={`${LABEL} flex items-center gap-2`}>
                 <Search size={13} /> Job search ideas
               </p>
               <div className="mt-3 space-y-3">
-                {data.job_matches.map((job) => (
+                {list(data.job_matches).map((job) => (
                   <div key={job.title} className="flex flex-wrap items-center gap-2">
                     <span className="text-sm font-semibold text-slate-900 dark:text-white">
                       {job.title}
                     </span>
-                    {(job.search_keywords ?? []).map((keyword) => (
+                    {list(job.search_keywords).map((keyword) => (
                       <span
                         key={keyword}
                         className="border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
