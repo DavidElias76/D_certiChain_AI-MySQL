@@ -3,7 +3,6 @@ import { CustomError } from "../types/error.types";
 import ai from "./GeminimodelConnection"
 import { Openai } from "./OpenAIConnection";
 import dotenv from 'dotenv'
-import { ContentProvenanceChecks } from "openai/resources";
 
 dotenv.config();
 
