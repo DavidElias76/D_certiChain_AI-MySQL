@@ -9,7 +9,8 @@ import {
   revokeCertificateController,
   verifyCertificateUploadController,
   getCarrerRecommendationsController,
-  getCertificatePdfController
+  getCertificatePdfController,
+  deleteCertificate
 } from "../controllers/certificate.controller";
 import { authMiddleware, optionalAuthMiddleware, requireRole, requireVerified } from "../middlewares/auth.middleware";
 import { singleFileUpload } from "../middlewares/upload.middleware";
@@ -42,5 +43,6 @@ router.post("/issue", authMiddleware, requireRole("main_admin", "admin"), requir
 router.post("/verify/upload", uploadLimiter, singleFileUpload,optionalAuthMiddleware, verifyCertificateUploadController)
 router.post("/career-recommendataions/:id", authMiddleware, getCarrerRecommendationsController)
 router.delete("/:id", authMiddleware, requireRole("main_admin", "admin"), revokeCertificateController);
+router.delete("/:id/permanent", authMiddleware, requireRole("main_admin", "admin"), deleteCertificate)
 
 export default router;

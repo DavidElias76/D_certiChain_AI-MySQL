@@ -1,6 +1,8 @@
 import type { Request, Response } from "express";
 import { CertificateService } from "../services/certificate.service";
 import type { CustomError } from "../types/error.types";
+import { UsersRepository } from "../repositories/users.repository";
+import { CertificateRepository } from "../repositories/certificate.repository";
 
 const CERT_NUMBER_RE = /^[A-Za-z0-9._-]{3,100}$/;
 
@@ -76,12 +78,21 @@ export const issueCertificateController = async (req: Request, res: Response) =>
     const admin = requireInstitutionAdmin(req, res);
     if (!admin) return;
 
+    // need to check the active state of the user when issuing the certificate
+    const isActive = await UsersRepository.isVerified(admin.id)
+    if(!isActive) {
+      res.status(403).json({ error: "You account need to be active to issue certificates" });
+      return null;
+    }
+
     const body = req.body ?? {};
     const student_name = text(body.student_name);
     const registration_number = text(body.registration_number);
     const student_email = text(body.student_email).toLowerCase();
     const course = text(body.course);
     const degree = text(body.degree);
+
+
     if (!student_name || !registration_number || !student_email || !course || !degree || !body.graduation_date) {
       res.status(400).json({ error: "All required fields must be provided" });
       return;
@@ -324,3 +335,23 @@ export const getCertificatePdfController = async (req: Request, res: Response) =
     sendError(res, error);
   }
 };
+
+export const deleteCertificate = async (req: Request, res: Response) => {
+  try {
+    const user = getAuthUser(req);
+    if (!user?.id) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      res.status(400).json({ error: "Invalid certificate id" });
+      return;
+    }
+    await CertificateRepository.deleteCertificate(id)
+    res.status(200).json({ message: "certificate deleted successfully"})
+  } catch (error) {
+    sendError(res, error);
+  }
+}

@@ -299,4 +299,13 @@ export const CertificateRepository = {
     );
     return rows.length > 0;
   },
+
+  async deleteCertificate(id: number): Promise<boolean> {
+    const [result] = await pool.execute<DbResult>(
+      "DELETE FROM certificates WHERE id = ?",
+      [id]
+    );
+    return result.affectedRows > 0;
+  },
+
 };
