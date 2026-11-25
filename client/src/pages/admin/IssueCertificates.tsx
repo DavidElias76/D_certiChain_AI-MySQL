@@ -88,6 +88,7 @@ const IssueCertificates = () => {
     [institutionUsers]
   );
 
+  // ** this need to be changed to get the course automatically
 const handleChange = (
   e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
 ) => {
@@ -318,7 +319,7 @@ const handleChange = (
                   name="gpa"
                   value={form.gpa}
                   onChange={handleChange}
-                  placeholder="e.g. 4.5 / 5.0"
+                  placeholder="e.g. 4.0"
                   className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white text-sm rounded-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 placeholder-gray-400 dark:placeholder-gray-500"
                 />
               </div>

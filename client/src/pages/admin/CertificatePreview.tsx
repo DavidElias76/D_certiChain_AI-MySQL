@@ -181,14 +181,14 @@ const CertificatePreview = () => {
           <div className="mt-6 flex gap-4">
             <button
               onClick={handleBack}
-              className="flex-1 px-4 py-3 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold border border-gray-200 dark:border-slate-700 transition-colors"
+              className="flex-1 px-4 py-3 rounded-md bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold border border-gray-200 dark:border-slate-700 transition-colors"
             >
               Back to Form
             </button>
             <button
               onClick={handleIssue}
               disabled={submitting || issued}
-              className="flex-1 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
+              className="flex-1 px-4 py-3 rounded-md bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
             >
               {submitting ? 'Issuing on Blockchain...' : issued ? 'Issued ✓' : 'Issue Certificate'}
             </button>
