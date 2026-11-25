@@ -212,7 +212,7 @@ export default function VerifyCertificateDashboard() {
     void verifyNumber(certId);
   }, []);
 
-  const selectedMethodLabel = method === "upload" ? "certificate document" : "certificate number";
+  const selectedMethodLabel = method === "upload" ? "certificate document" : "certificate ID";
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 pb-8">
@@ -259,7 +259,7 @@ export default function VerifyCertificateDashboard() {
             <MethodButton
               active={method === "certificate"}
               icon={Hash}
-              label="Enter Certificate Number"
+              label="Enter Certificate ID"
               onClick={() => { setMethod("certificate"); resetState(); }}
             />
           </div>
@@ -334,7 +334,7 @@ export default function VerifyCertificateDashboard() {
             {method === "certificate" && (
               <form onSubmit={verifyByCertificateNumber} className="border border-indigo-100 bg-indigo-50/70 p-4 dark:border-indigo-950 dark:bg-indigo-950/20">
                 <label htmlFor="certificate-number" className="block text-sm font-semibold text-slate-800 dark:text-slate-200">
-                  Certificate Number
+                  Certificate ID
                 </label>
                 <input
                   id="certificate-number"

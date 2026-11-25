@@ -385,37 +385,56 @@ export default function RegisterAdmin() {
               <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
                 <tr>
                   <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Administrator
+                    User
                   </th>
+
                   <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     Email
                   </th>
+
                     <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       Institution
                     </th>
+
                   <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     Status
                   </th>
+
                   <th className="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     Actions
                   </th>
                 </tr>
               </thead>
+              
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {adminAccounts.map((admin) => (
-                  <tr key={admin.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30">
-                    <td className="px-5 py-4 font-medium text-slate-900 dark:text-white">
+                  <tr
+                    key={admin.id}
+                    className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30"
+                  >
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-indigo-100 text-sm font-semibold text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
+                          {admin.username?.[0]?.toUpperCase() || "?"}
+                        </div>
+
+                        <span className="font-medium text-slate-900 dark:text-white">
                       {admin.username}
+                        </span>
+                      </div>
                     </td>
+
                     <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
                       <span className="inline-flex items-center gap-2">
                         <Mail size={14} className="shrink-0 text-slate-400" />
                         {admin.email}
                       </span>
                     </td>  
+
                       <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
                         {admin.institution_name || "—"}
                       </td>
+
                       <td className="px-5 py-4">
                         <div className="flex flex-wrap gap-1.5">
                           <span
@@ -429,6 +448,7 @@ export default function RegisterAdmin() {
                           </span>
                         </div>
                       </td>
+
                       <td className="px-5 py-4">
                         <div className="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
                           <button
@@ -439,6 +459,7 @@ export default function RegisterAdmin() {
                           >
                             <Edit2 size={14} /> Edit
                           </button>
+
                           <button
                             type="button"
                             onClick={() => void handleToggleActive(admin)}
@@ -449,9 +470,14 @@ export default function RegisterAdmin() {
                                 : "text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/40"
                             }`}
                           >
-                            {busyId === admin.id ? <Loader2 size={14} className="animate-spin" /> : <Power size={14} />}
+                          {busyId === admin.id ? (
+                            <Loader2 size={14} className="animate-spin" />
+                          ) : (
+                            <Power size={14} />
+                          )}
                             {admin.is_verified ? "Deactivate" : "Activate"}
                           </button>
+
                           <button
                             type="button"
                             onClick={() => setDeleteTarget(admin)}
@@ -497,7 +523,7 @@ export default function RegisterAdmin() {
                     value={editForm.username}
                     readOnly
                     onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
-                    className="w-full border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                    className="w-full border border-slate-200 bg-slate-50 px-3.5 py-2.5 rounded-md text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                   />
                 </div>
                 <div>
@@ -509,7 +535,7 @@ export default function RegisterAdmin() {
                     readOnly
                     value={editForm.email}
                     onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                    className="w-full border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                    className="w-full border border-slate-200 bg-slate-50 px-3.5 py-2.5 rounded-md text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                   />
                 </div>
                 <div>
@@ -518,7 +544,7 @@ export default function RegisterAdmin() {
                     id="edit-role"
                     value={editForm.role}
                     onChange={(e) => setEditForm({ ...editForm, role: e.target.value as UserRole })}
-                    className="w-full border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                    className="w-full border border-slate-200 bg-slate-50 px-3.5 rounded-md py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                   >
                     <option value="main_admin">Main Admin</option>
                     <option value="admin">Admin</option>
@@ -529,14 +555,14 @@ export default function RegisterAdmin() {
                     type="button"
                     onClick={() => setEditingAdmin(null)}
                     disabled={saving}
-                    className="border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                    className="border border-slate-200 px-4 py-2 text-sm rounded-md font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="inline-flex items-center gap-2 bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
+                    className="inline-flex items-center gap-2 bg-indigo-600 px-4 py-2 text-sm rounded-md font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
                   >
                     {saving && <Loader2 size={15} className="animate-spin" />}
                     {saving ? "Saving..." : "Save Changes"}

@@ -47,7 +47,6 @@ export default function ManageUsers() {
   const [editingUser, setEditingUser] = useState<IUser | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<IUser | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const main_admin = user?.role === "main_admin";
 
   const onUserAdded = async() => {
     toast.success('User added sucessfully')
@@ -59,10 +58,9 @@ export default function ManageUsers() {
 
   const filteredUsers = useMemo(() => {
     return users
-      .filter((user) => user.role === (main_admin ? "student" : "admin"))
-      .sort((a, b) => a.username.localeCompare(b.username))
-  }, [users, main_admin])
-
+      .filter((user) => user.role === "student")
+      .sort((a, b) => a.username.localeCompare(b.username));
+  }, [users]);
   const stats = useMemo(() => {
     return {
       total: users.length,

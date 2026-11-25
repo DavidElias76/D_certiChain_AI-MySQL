@@ -34,6 +34,9 @@ export interface Config {
 
     SEPOLIA_RPC_URL: string
     SEPOLIA_PRIVATE_KEY: string
+
+    OPENROUTER_API_KEY: string
+    OPENROUTER_MODEL: string
 }
 
 const config: Config = {
@@ -67,7 +70,10 @@ const config: Config = {
     GEMINI_MODEL: process.env.GEMINI_MODEL || "gemini model",
 
     SEPOLIA_RPC_URL: process.env.SEPOLIA_RPC_URL || 'you sepolia rpc url',
-    SEPOLIA_PRIVATE_KEY: process.env.SEPOLIA_PRIVATE_KEY || 'your sepolia private key'
+    SEPOLIA_PRIVATE_KEY: process.env.SEPOLIA_PRIVATE_KEY || 'your sepolia private key',
+
+    OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY || "your open router key",
+    OPENROUTER_MODEL: process.env.OPENROUTER_MODEL || "your open router model"
 }
 
 export default config

@@ -185,7 +185,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <p className="text-xl font-bold text-slate-900 dark:text-white">{loading ? "—" : stats.active}</p>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Active</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Issued</p>
           </div>
         </div>
 
