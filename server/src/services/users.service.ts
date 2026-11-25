@@ -24,6 +24,12 @@ const getShortCodeFromEmail = (email: string): string | null => {
   return match ? match[1] : null;
 };
 
+export const getRegistrationNumber = (email: string): string | null => {
+    const match = email.match(/^(\d+)@students\.ku\.ac\.ke$/i);
+
+    return match ? match[1] : null;
+};
+
 export const getUsersByRoleService = async ({
   role,
   institutionId,
@@ -78,6 +84,8 @@ export const addUsersService = async (
 
     // matches: 2612345@students.ku.ac.ke | john@admin.ku.ac.ke | john@ku.ac.ke
        const shortCode = getShortCodeFromEmail(email);
+       console.log(shortCode)
+
         if (!shortCode) {
           const error = new Error("Use your institution email address") as CustomError;
           error.statusCode = 400;
@@ -93,6 +101,7 @@ export const addUsersService = async (
         }
 
         const chosen = await UsersRepository.findByName(institution_name ?? "");
+
         if (!chosen || chosen.id !== institutionId) {
           const error = new Error("The email does not belong to this institution") as CustomError;
           error.statusCode = 400;
@@ -117,8 +126,9 @@ export const addUsersService = async (
           institution_name,
           registration_number: registrationNumber ?? null,
           institution_id: institutionId,
-          is_verified: false,
+          is_verified: true,
       });
+
 
       if (!newUser) {
           throw new Error("Failed to create user");

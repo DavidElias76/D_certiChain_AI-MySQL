@@ -171,7 +171,7 @@ export const UsersRepository = {
                 data.registration_number ?? null,
                 data.institution_id ?? null,
                 data.institution_name?.trim() ?? null,
-                data.is_verified ?? false
+                data.is_verified ?? true
         ]
         );
         const insertId = Number(result.insertId);
