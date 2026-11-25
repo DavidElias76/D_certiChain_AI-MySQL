@@ -10,6 +10,8 @@ import {
   type CareerProfile
 } from "../agent/generateRecommendations";
 
+import { OpenRouterGenerateCareerRecommendations } from "../agent/OpenRouterRecommendations";
+
 //   openAi 
 
 // import { generateCareerRecommendations, CareerProfile } from "../agent/OpenAI_carrerRecommendations";
@@ -75,7 +77,7 @@ const generate = async (
     skills: certificate.skills,
   };
 
-  const result = await generateCareerRecommendations(profile);
+  const result = await OpenRouterGenerateCareerRecommendations(profile);
 
   const saved = await RecommendationsRepository.create({
     certificate_id: certificateId,
